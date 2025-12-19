@@ -5,13 +5,20 @@ services:
     ports:
       - "80:80"
     depends_on:
+      - frontend
       - auth
       - backend
     networks:
       - campus-net
 
+  frontend:
+    build: ./frontend
+    container_name: campus-frontend
+    networks:
+      - campus-net
+
   auth:
-    image: nginx:alpine
+    build: ./auth
     container_name: campus-auth
     expose:
       - "8080"
@@ -19,7 +26,7 @@ services:
       - campus-net
 
   backend:
-    image: nginx:alpine
+    build: ./backend
     container_name: campus-backend
     expose:
       - "8080"

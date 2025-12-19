@@ -1,17 +1,14 @@
-# Java
-target/
-*.jar
-
 # Node
 node_modules/
+dist/
 
-# Env
-.env
-*.env
+# Java
+target/
+*.log
 
 # IDE
 .idea/
-.vscode/
+*.iml
 
 # OS
 .DS_Store
