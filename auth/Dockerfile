@@ -9,10 +9,14 @@ WORKDIR /build
 # Copy Maven wrapper and config first (for caching)
 COPY pom.xml .
 COPY .mvn .mvn
+
 COPY mvnw mvnw
 COPY mvnw.cmd mvnw.cmd
 
-# Download dependencies
+# Make Maven Wrapper executable (required for Linux CI environments)
+RUN chmod +x mvnw
+
+# Download Maven dependencies
 RUN ./mvnw dependency:go-offline
 
 # Copy source code
