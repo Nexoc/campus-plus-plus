@@ -11,21 +11,37 @@ jobs:
     name: Build & Docker Compose
     runs-on: ubuntu-latest
 
+    env:
+      # -------------------------
+      # Spring profile
+      # -------------------------
+      SPRING_PROFILES_ACTIVE: prod
+
+      # -------------------------
+      # Database (secrets)
+      # -------------------------
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+      # -------------------------
+      # JWT
+      # -------------------------
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_EXPIRATION: 15
+
     steps:
-      # ------------------------------------------------------
-      # Step 1: Checkout repository
-      # ------------------------------------------------------
+      # -------------------------
+      # Checkout
+      # -------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ------------------------------------------------------
-      # Step 2: Cache Maven dependencies (Auth + Backend)
-      # ------------------------------------------------------
-      # This cache stores downloaded Maven dependencies
-      # so they do not need to be re-downloaded on every run.
-      #
-      # The cache key changes when pom.xml files change.
-      # ------------------------------------------------------
+      # -------------------------
+      # Cache Maven
+      # -------------------------
       - name: Cache Maven repository
         uses: actions/cache@v4
         with:
@@ -34,14 +50,9 @@ jobs:
           restore-keys: |
             maven-${{ runner.os }}-
 
-      # ------------------------------------------------------
-      # Step 3: Cache npm dependencies (Frontend)
-      # ------------------------------------------------------
-      # This cache stores npm packages downloaded during
-      # frontend builds.
-      #
-      # The cache key changes when package-lock.json changes.
-      # ------------------------------------------------------
+      # -------------------------
+      # Cache npm
+      # -------------------------
       - name: Cache npm
         uses: actions/cache@v4
         with:
@@ -50,18 +61,32 @@ jobs:
           restore-keys: |
             npm-${{ runner.os }}-
 
-      # ------------------------------------------------------
-      # Step 4: Set up Docker Buildx
-      # ------------------------------------------------------
+      # -------------------------
+      # Docker Buildx
+      # -------------------------
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # ------------------------------------------------------
-      # Step 5: Build all services with Docker Compose
-      # ------------------------------------------------------
-      # Docker will:
-      # - reuse cached layers when possible
-      # - use cached Maven/npm dependencies inside builds
-      # ------------------------------------------------------
-      - name: Build Docker images
-        run: docker compose build
+      # -------------------------
+      # Build & start containers
+      # -------------------------
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      # -------------------------
+      # Wait a bit for Spring Boot
+      # -------------------------
+      - name: Wait for services to start
+        run: sleep 20
+
+      # -------------------------
+      # Show Auth service logs
+      # -------------------------
+      - name: Show auth service logs
+        run: docker compose logs auth
+
+      # -------------------------
+      # (Optional) Show all logs
+      # -------------------------
+      - name: Show all services logs
+        run: docker compose logs

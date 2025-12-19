@@ -1,0 +1,11 @@
+# =========================
+# Common application config
+# =========================
+spring:
+  application:
+    name: auth
+
+# Logging configuration (must NOT be under spring.logging)
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"

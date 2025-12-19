@@ -1,38 +1,147 @@
+# docker compose up -d --build
 services:
+  # =========================
+  # PostgreSQL Database
+  # =========================
+  postgres:
+
+    image: postgres:14.11
+    container_name: campus-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: auth_prod
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - campus-net
+
+
+
+  # =========================
+  # Auth Service (Spring Boot)
+  # =========================
+  auth:
+    build: ./auth
+    # Build image from auth/Dockerfile
+
+    container_name: campus-auth
+
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # Activate production Spring profile
+
+      DB_HOST: postgres
+      # Hostname of the database
+      # Uses Docker service name for internal DNS resolution
+
+      DB_PORT: 5432
+      # PostgreSQL default port
+
+      DB_NAME: auth_prod
+      # Database name
+
+      DB_USERNAME: ${DB_USERNAME}
+      # Database username
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Database password injected from environment
+
+      JWT_SECRET: ${JWT_SECRET}
+      # Secret key for signing JWT tokens
+      # MUST be provided via environment variable / CI secrets
+
+      JWT_EXPIRATION_MINUTES: 15
+      # JWT token lifetime (short TTL for production security)
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      # Ensures database container is started before auth service
+      # (does NOT wait for DB to be fully ready)
+
+    expose:
+      - "8080"
+      # Exposes port only inside Docker network
+      # Not accessible from outside directly
+
+    networks:
+      - campus-net
+
+
+  # =========================
+  # Backend Service
+  # =========================
+  backend:
+    build: ./backend
+    container_name: campus-backend
+
+    expose:
+      - "8080"
+      # Internal-only access (behind Nginx)
+
+    networks:
+      - campus-net
+
+
+  # =========================
+  # Frontend Service
+  # =========================
+  frontend:
+    build: ./frontend
+    container_name: campus-frontend
+
+    networks:
+      - campus-net
+
+
+  # =========================
+  # Nginx Reverse Proxy
+  # =========================
   nginx:
     build: ./nginx
     container_name: campus-nginx
+
     ports:
       - "80:80"
+      # Exposes HTTP port to host
+      # Single entry point to the system
+
     depends_on:
       - frontend
       - auth
       - backend
+      # Ensure all application services are started before Nginx
+
     networks:
       - campus-net
 
-  frontend:
-    build: ./frontend
-    container_name: campus-frontend
-    networks:
-      - campus-net
 
-  auth:
-    build: ./auth
-    container_name: campus-auth
-    expose:
-      - "8080"
-    networks:
-      - campus-net
-
-  backend:
-    build: ./backend
-    container_name: campus-backend
-    expose:
-      - "8080"
-    networks:
-      - campus-net
-
+# =========================
+# Docker Network
+# =========================
 networks:
   campus-net:
     driver: bridge
+    # Isolated internal network
+    # Services can communicate by service name
+    # Not directly accessible from outside
+
+
+# =========================
+# Persistent Volumes
+# =========================
+volumes:
+  postgres-data:
+  # Named volume for PostgreSQL data
+  # Managed by Docker

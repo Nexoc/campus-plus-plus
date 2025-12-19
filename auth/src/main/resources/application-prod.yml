@@ -1,0 +1,75 @@
+# =========================
+# PRODUCTION CONFIGURATION
+# =========================
+# This configuration is used in real production environments.
+# All sensitive values MUST be injected via environment variables.
+# This file must be safe to commit to version control.
+
+server:
+  port: 8080
+  # Internal application port
+  # External access is handled by a reverse proxy (Nginx / LB)
+
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  # =========================
+  # Database (PROD)
+  # =========================
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    # Database connection parameters are provided via ENV variables
+    # Example:
+    # DB_HOST=postgres
+    # DB_PORT=5432
+    # DB_NAME=auth_prod
+
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    # Database credentials are NEVER stored in the repository
+
+  # =========================
+  # JPA / Hibernate (PROD)
+  # =========================
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      # validate:
+      # - validates schema against entities
+      # - does NOT modify database
+      # - REQUIRED for production safety
+
+    show-sql: false
+    # Disable SQL logging in production
+
+    open-in-view: false
+    # Prevents lazy-loading outside transactional boundaries
+
+# =========================
+# Security (PROD)
+# =========================
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    # JWT signing secret
+    # MUST be injected via:
+    # - Docker secrets
+    # - GitHub Actions secrets
+    # - Kubernetes secrets
+    # NEVER hardcoded
+
+    expiration-minutes: ${JWT_EXPIRATION:15}
+    # Short token lifetime
+    # Default: 15 minutes if not explicitly provided
+
+# =========================
+# Logging (PROD)
+# =========================
+logging:
+  level:
+    root: INFO
+    at.campus.auth: INFO
+    org.springframework.security: WARN
+
