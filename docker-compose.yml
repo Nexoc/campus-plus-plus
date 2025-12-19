@@ -1,0 +1,31 @@
+services:
+  nginx:
+    build: ./nginx
+    container_name: campus-nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - auth
+      - backend
+    networks:
+      - campus-net
+
+  auth:
+    image: nginx:alpine
+    container_name: campus-auth
+    expose:
+      - "8080"
+    networks:
+      - campus-net
+
+  backend:
+    image: nginx:alpine
+    container_name: campus-backend
+    expose:
+      - "8080"
+    networks:
+      - campus-net
+
+networks:
+  campus-net:
+    driver: bridge
