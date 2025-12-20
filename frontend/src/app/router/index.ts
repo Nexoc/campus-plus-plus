@@ -1,37 +1,12 @@
 // src/app/router/index.ts
-//
-// Application router configuration.
-// Responsible for:
-// - defining application routes
-// - marking routes as public or protected
-// - enforcing authentication via a global navigation guard
-//
-// IMPORTANT:
-// - Router contains NO business logic
-// - Router decides ONLY navigation access
-// - Authentication state is read from the auth store
 
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
-// --------------------------------------------------
-// Route components (pages)
-// --------------------------------------------------
-//
-// Pages are imported directly.
-// In larger applications, lazy loading can be applied.
-//
 import LoginPage from '@/modules/auth/pages/LoginPage.vue'
 import RegisterPage from '@/modules/auth/pages/RegisterPage.vue'
 import HomePage from '@/modules/home/pages/HomePage.vue'
 
-// --------------------------------------------------
-// Route definitions
-// --------------------------------------------------
-//
-// meta.public       -> route accessible without authentication
-// meta.requiresAuth -> route requires authenticated user
-//
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -51,41 +26,48 @@ const routes: RouteRecordRaw[] = [
     component: HomePage,
     meta: { requiresAuth: true },
   },
+  {
+    path: '/account/change-password',
+    name: 'ChangePassword',
+    component: () =>
+      import('@/modules/account/pages/ChangePasswordPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/admin/users',
+    name: 'AdminUsers',
+    component: () =>
+      import('@/modules/admin/pages/AdminUsersPage.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
+  },
 ]
 
-// --------------------------------------------------
-// Router instance
-// --------------------------------------------------
 const router = createRouter({
   history: createWebHistory(),
   routes,
 })
 
 // --------------------------------------------------
-// Global authentication guard
+// GLOBAL AUTH / ADMIN GUARD
 // --------------------------------------------------
-//
-// This guard runs before every navigation.
-// It enforces authentication rules based on route metadata.
-//
-// Behavior:
-// - Public routes are always accessible
-// - Protected routes require a valid authentication state
-//
 router.beforeEach((to) => {
-  const authStore = useAuthStore()
+  const auth = useAuthStore()
 
-  // Allow access to public routes without checks
   if (to.meta.public) {
     return true
   }
 
-  // Redirect unauthenticated users away from protected routes
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { name: 'login' }
   }
 
-  // Allow navigation
+  if (to.meta.requiresAdmin && !auth.isAdmin) {
+    return { name: 'home' }
+  }
+
   return true
 })
 
