@@ -11,7 +11,7 @@ INSERT INTO users (
 ) VALUES (
   gen_random_uuid(),
   'admin@test.com',
-  '$2a$10$7QZ6v2kB5uXQKZCzP9G8We7Y2bZJz7z0q6Zl6gYvG9K9c1C9xQH9K',
+  '$2a$12$QzPOk6ym.QvmyHAlBQXRSO6i1y/3.vwGSTssrqlts/yBd.LmkwBgC',
   'ADMIN',
   true,
   true
