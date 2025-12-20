@@ -24,9 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 /**
  * AuthController
- *
  * REST controller responsible for authentication endpoints.
- *
  * Endpoints:
  * - POST /auth/register
  * - POST /auth/login

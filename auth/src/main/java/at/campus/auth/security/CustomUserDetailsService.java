@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * CustomUserDetailsService
- *
  * Loads user data for Spring Security authentication.
- *
  * Cached to reduce database hits for repeated JWT requests.
  */
 @Service

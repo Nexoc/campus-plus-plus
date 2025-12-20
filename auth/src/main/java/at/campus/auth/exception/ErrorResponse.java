@@ -6,7 +6,6 @@ import java.util.Map;
 
 /**
  * ErrorResponse
- *
  * Standard error response returned by the API.
  */
 @Schema(description = "Standard API error response")

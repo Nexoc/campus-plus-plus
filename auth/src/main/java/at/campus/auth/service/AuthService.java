@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * AuthService
- *
  * Authentication-related business logic.
  */
 @Service

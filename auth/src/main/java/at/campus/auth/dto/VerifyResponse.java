@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * VerifyResponse
- *
+
  * Returned when token is valid.
  * Used for frontend session checks.
  */

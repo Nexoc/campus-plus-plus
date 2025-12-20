@@ -17,9 +17,7 @@ import java.time.Instant;
 
 /**
  * RestAccessDeniedHandler
- *
  * Returns a JSON 403 response for forbidden requests.
- *
  * This is triggered when the user is authenticated but does not have sufficient permissions.
  */
 @Component

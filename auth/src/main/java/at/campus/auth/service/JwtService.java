@@ -18,16 +18,12 @@ import javax.crypto.SecretKey;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * JwtService
- *
  * Responsible for all JWT-related operations:
  * - generating tokens
  * - validating tokens
@@ -132,7 +128,7 @@ public class JwtService {
         Object raw = claims.get(CLAIM_AUTHORITIES);
         if (raw instanceof List<?> list) {
             return list.stream()
-                    .filter(v -> v != null)
+                    .filter(Objects::nonNull)
                     .map(Object::toString)
                     .collect(Collectors.toList());
         }

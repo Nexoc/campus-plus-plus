@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 /**
  * AdminUserController
- *
  * Admin endpoints for user management (requires ROLE_ADMIN).
  */
 @RestController

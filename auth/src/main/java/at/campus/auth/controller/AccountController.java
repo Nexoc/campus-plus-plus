@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 /**
  * AccountController
- *
  * Endpoints for authenticated users.
  */
 @RestController

@@ -23,7 +23,6 @@ import java.io.IOException;
 
 /**
  * JwtAuthenticationFilter
- *
  * JWT authentication filter:
  * - validates signature + expiration
  * - loads user to enforce enabled/locked

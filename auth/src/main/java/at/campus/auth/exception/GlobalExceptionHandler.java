@@ -28,9 +28,7 @@ import java.util.Map;
 
 /**
  * GlobalExceptionHandler
- *
  * Centralized REST exception handling.
- *
  * Goals:
  * - return consistent JSON errors
  * - map business/security exceptions to correct HTTP statuses

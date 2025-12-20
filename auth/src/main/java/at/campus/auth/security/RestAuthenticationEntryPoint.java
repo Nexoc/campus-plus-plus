@@ -17,9 +17,7 @@ import java.time.Instant;
 
 /**
  * RestAuthenticationEntryPoint
- *
  * Returns a JSON 401 response for unauthorized requests.
- *
  * This is triggered when Spring Security decides that authentication is required
  * (e.g., missing/invalid credentials) before reaching controllers.
  */
