@@ -137,4 +137,21 @@ public class AuthController {
                 .header("X-User-Roles", user.getRole().name())
                 .build();
     }
+
+    /**
+     * CSRF initialization endpoint.
+     *
+     * Purpose:
+     * - Forces Spring Security to generate CSRF token
+     * - CSRF token is automatically written into cookie (XSRF-TOKEN)
+     *
+     * Frontend MUST call this endpoint before:
+     * - POST /auth/login
+     * - POST /auth/register
+     */
+    @GetMapping("/csrf")
+    public void csrf() {
+        // Intentionally empty.
+        // Spring Security handles CSRF token creation automatically.
+    }
 }

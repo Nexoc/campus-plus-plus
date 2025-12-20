@@ -1,9 +1,6 @@
 package at.campus.auth.model;
 
 import jakarta.persistence.*;
-
-import org.hibernate.annotations.UuidGenerator;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,39 +11,34 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(
-        name = "users",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_users_email", columnNames = "email")
-        }
-)
+@Table(name = "users")
 public class User implements UserDetails {
 
     @Id
-    @UuidGenerator
-    @Column(name = "id", updatable = false, nullable = false)
+    @GeneratedValue
+    @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "email", nullable = false, unique = true, updatable = false)
+    @Column(nullable = false, unique = true, updatable = false)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(nullable = false)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private UserRole role;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
-    @Column(name = "token_version", nullable = false)
+    @Column(nullable = false)
     private int tokenVersion = 0;
 
-    @Column(name = "enabled", nullable = false)
+    @Column(nullable = false)
     private boolean enabled = true;
 
-    @Column(name = "account_non_locked", nullable = false)
+    @Column(nullable = false)
     private boolean accountNonLocked = true;
 
     protected User() {
@@ -57,16 +49,8 @@ public class User implements UserDetails {
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
-    }
-
-    @PrePersist
-    protected void onCreate() {
         this.createdAt = Instant.now();
     }
-
-    // =========================
-    // Spring Security
-    // =========================
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -102,10 +86,6 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return enabled;
     }
-
-    // =========================
-    // Domain logic
-    // =========================
 
     public UUID getId() {
         return id;
@@ -153,7 +133,7 @@ public class User implements UserDetails {
         bumpTokenVersion();
     }
 
-    private void bumpTokenVersion() {
+    public void bumpTokenVersion() {
         this.tokenVersion++;
     }
 }
