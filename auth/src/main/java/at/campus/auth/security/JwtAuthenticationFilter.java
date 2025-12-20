@@ -20,18 +20,44 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * JwtAuthenticationFilter
- * JWT authentication filter:
- * - validates signature + expiration
- * - loads user to enforce enabled/locked
- * - checks token version for revocation
+ *
+ * Responsibilities:
+ * - Intercepts every HTTP request exactly once
+ * - Skips JWT processing for public endpoints (login, register, csrf)
+ * - Validates JWT signature and expiration
+ * - Loads user details from database
+ * - Checks account status (enabled / locked)
+ * - Verifies token version (revocation support)
+ * - Populates Spring SecurityContext if authentication is successful
+ *
+ * IMPORTANT:
+ * - This filter does NOT create sessions (stateless)
+ * - This filter does NOT handle CSRF
+ * - This filter ONLY handles JWT-based authentication
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
+    /**
+     * List of public endpoints that MUST NOT be processed by JWT filter.
+     *
+     * Reason:
+     * - Login/register must work without Authorization header
+     * - CSRF bootstrap endpoint must be reachable anonymously
+     */
+    private static final List<String> PUBLIC_ENDPOINTS = List.of(
+            "/auth/login",
+            "/auth/register",
+            "/auth/csrf",
+            "/auth/validate"
+    );
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -44,6 +70,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * Decides whether this filter should be skipped for the current request.
+     *
+     * If request URI starts with one of PUBLIC_ENDPOINTS,
+     * JWT authentication is NOT applied.
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
+        String path = request.getRequestURI();
+        return PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith);
+    }
+
+
+    /**
+     * Core JWT authentication logic.
+     *
+     * This method runs ONLY if shouldNotFilter() returned false.
+     */
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -51,83 +99,124 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        log.debug(
+                "[JWT FILTER] Processing request: {} {}",
+                request.getMethod(),
+                request.getRequestURI()
+        );
+
+        // --------------------------------------------------
+        // 1. Read Authorization header
+        // --------------------------------------------------
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.debug("[JWT FILTER] No Bearer token found, continuing without authentication");
             filterChain.doFilter(request, response);
             return;
         }
 
+        // --------------------------------------------------
+        // 2. Skip if SecurityContext already has authentication
+        // --------------------------------------------------
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            log.debug("[JWT FILTER] Authentication already present, skipping");
             filterChain.doFilter(request, response);
             return;
         }
 
+        // --------------------------------------------------
+        // 3. Extract raw JWT token
+        // --------------------------------------------------
         String jwt = authHeader.substring(7);
+        log.debug("[JWT FILTER] JWT extracted");
 
-        // 1. Validate token (signature + expiration)
+        // --------------------------------------------------
+        // 4. Validate JWT signature & expiration
+        // --------------------------------------------------
         if (!jwtService.isTokenValid(jwt)) {
-            log.warn("Invalid JWT token for request {} {}", request.getMethod(), request.getRequestURI());
+            log.warn("[JWT FILTER] Invalid or expired JWT token");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
             return;
         }
 
-        // 2. Extract username
+        // --------------------------------------------------
+        // 5. Extract username (subject)
+        // --------------------------------------------------
         String username;
         try {
             username = jwtService.extractUsername(jwt);
+            log.debug("[JWT FILTER] JWT subject extracted: {}", username);
         } catch (Exception ex) {
-            log.warn("Failed to extract JWT subject");
+            log.warn("[JWT FILTER] Failed to extract username from JWT");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
             return;
         }
 
-        // 3. Load user
+        // --------------------------------------------------
+        // 6. Load user from database
+        // --------------------------------------------------
         UserDetails userDetails;
         try {
             userDetails = userDetailsService.loadUserByUsername(username);
         } catch (Exception ex) {
-            log.warn("User not found for JWT subject, username={}", username);
+            log.warn("[JWT FILTER] User not found for username={}", username);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
             return;
         }
 
-        // 4. Check account status
+        // --------------------------------------------------
+        // 7. Check account status
+        // --------------------------------------------------
         if (!userDetails.isEnabled() || !userDetails.isAccountNonLocked()) {
-            log.warn("User is disabled or locked, username={}", username);
+            log.warn("[JWT FILTER] User disabled or locked: {}", username);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User account disabled");
             return;
         }
 
-        // 5. Token version check (revocation)
-        int tokenVer = jwtService.extractTokenVersion(jwt);
-
+        // --------------------------------------------------
+        // 8. Token version check (revocation support)
+        // --------------------------------------------------
         if (!(userDetails instanceof User user)) {
-            log.error("UserDetails is not instance of User, cannot check tokenVersion");
+            log.error("[JWT FILTER] UserDetails is not instance of User");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
             return;
         }
 
-        if (tokenVer != user.getTokenVersion()) {
+        int tokenVersion = jwtService.extractTokenVersion(jwt);
+
+        if (tokenVersion != user.getTokenVersion()) {
             log.warn(
-                    "JWT revoked by version mismatch, username={}, tokenVer={}, userVer={}",
-                    username, tokenVer, user.getTokenVersion()
+                    "[JWT FILTER] Token revoked: username={}, tokenVer={}, userVer={}",
+                    username,
+                    tokenVersion,
+                    user.getTokenVersion()
             );
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT token revoked");
             return;
         }
 
-        // 6. Authenticate
-        UsernamePasswordAuthenticationToken authToken =
+        // --------------------------------------------------
+        // 9. Create Authentication and set SecurityContext
+        // --------------------------------------------------
+        UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
                         userDetails.getAuthorities()
                 );
 
-        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+        authentication.setDetails(
+                new WebAuthenticationDetailsSource().buildDetails(request)
+        );
 
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        log.debug("[JWT FILTER] Authentication successful for user={}", username);
+
+        // --------------------------------------------------
+        // 10. Continue filter chain
+        // --------------------------------------------------
         filterChain.doFilter(request, response);
     }
 }

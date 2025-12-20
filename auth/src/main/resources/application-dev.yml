@@ -20,7 +20,7 @@ spring:
       spec: maximumSize=10000,expireAfterWrite=2m
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/auth_dev
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
     # Local PostgreSQL instance
     # Database schema can be freely modified in dev
 
@@ -70,5 +70,8 @@ logging:
   level:
     root: INFO
     at.campus.auth: DEBUG
-    org.springframework.security: DEBUG
+    org.springframework.security: TRACE
+    org.springframework.security.web.csrf: TRACE
+    org.springframework.security.web.FilterChainProxy: TRACE
+
 

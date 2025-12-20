@@ -1,56 +1,69 @@
 // src/app/api/http.ts
 //
-// Central HTTP client for the application.
-// Responsibilities:
-// - configure axios
-// - attach JWT token to requests (if present)
-// - attach CSRF token to requests (if present)
-// - handle global auth errors (401)
-// - redirect user to login when session expires
+// Axios HTTP client
 //
-// Infrastructure only.
+// Design:
+// - Single axios instance
+// - JWT is ALWAYS sent via Authorization header
+// - Cookies + CSRF are OPT-IN per request
+// - /api/** works WITHOUT cookies -> NO CSRF
+// - Auth / Account / Admin explicitly enable cookies when needed
+//
+// This file is intentionally simple:
+// Axios interceptors already provide correct typings.
+// Adding manual types here causes version conflicts.
 
 import router from '@/app/router'
 import { useAuthStore } from '@/modules/auth/store/auth.store'
-import { logger } from '@/shared/utils/logger'
 import axios from 'axios'
 
 // --------------------------------------------------
-// Helper: read cookie value by name
-// --------------------------------------------------
-function getCookie(name: string): string | null {
-  const match = document.cookie.match(
-    new RegExp('(^| )' + name + '=([^;]+)')
-  )
-  return match ? decodeURIComponent(match[2]) : null
-}
-
-// --------------------------------------------------
-// Axios instance
+// AXIOS INSTANCE
 // --------------------------------------------------
 const http = axios.create({
   baseURL: '/',
-  withCredentials: true,
+
+  // IMPORTANT:
+  // Cookies are DISABLED globally.
+  // If a request needs cookies + CSRF,
+  // it MUST explicitly set withCredentials: true.
+  withCredentials: false,
+
+  // Native Axios CSRF support.
+  // These are only used when withCredentials=true.
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
 })
 
 // --------------------------------------------------
 // REQUEST INTERCEPTOR
 // --------------------------------------------------
+// Responsibilities:
+// - Attach JWT if present
+// - Log outgoing request data for debugging
+// - Make cookie usage visible
+// --------------------------------------------------
 http.interceptors.request.use((config) => {
   const authStore = useAuthStore()
 
-  // JWT
+  console.group('[HTTP REQUEST]')
+  console.log('Method:', config.method?.toUpperCase())
+  console.log('URL:', config.url)
+  console.log('withCredentials:', config.withCredentials)
+  console.log('Headers BEFORE:', { ...config.headers })
+
+  // Attach JWT for authenticated requests
   if (authStore.token) {
+    config.headers = config.headers || {}
     config.headers.Authorization = `Bearer ${authStore.token}`
-    logger.log('[http] JWT attached')
+    console.log('JWT attached')
+  } else {
+    console.log('No JWT token')
   }
 
-  // CSRF
-  const csrfToken = getCookie('XSRF-TOKEN')
-  if (csrfToken) {
-    config.headers['X-XSRF-TOKEN'] = csrfToken
-    logger.log('[http] CSRF attached')
-  }
+  console.log('Headers AFTER:', { ...config.headers })
+  console.log('Browser cookies:', document.cookie)
+  console.groupEnd()
 
   return config
 })
@@ -58,19 +71,41 @@ http.interceptors.request.use((config) => {
 // --------------------------------------------------
 // RESPONSE INTERCEPTOR
 // --------------------------------------------------
+// Responsibilities:
+// - Log responses
+// - Central handling of 401 Unauthorized
+// - Force logout on invalid / expired / revoked JWT
+// --------------------------------------------------
 http.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.group('[HTTP RESPONSE]')
+    console.log('URL:', response.config.url)
+    console.log('Status:', response.status)
+    console.log('Response headers:', response.headers)
+    console.log('Browser cookies after response:', document.cookie)
+    console.groupEnd()
+
+    return response
+  },
   (error) => {
+    console.group('[HTTP ERROR]')
+    console.log('URL:', error.config?.url)
+    console.log('Method:', error.config?.method?.toUpperCase())
+    console.log('Status:', error.response?.status)
+    console.log('Response headers:', error.response?.headers)
+    console.log('Browser cookies at error:', document.cookie)
+    console.groupEnd()
+
     const authStore = useAuthStore()
 
+    // Backend says "unauthorized":
+    // - JWT expired
+    // - JWT revoked
+    // - JWT invalid
     if (error.response?.status === 401) {
-      logger.warn('[http] 401 → logout')
-
+      console.warn('[AUTH] 401 received -> logging out')
       authStore.logout()
-
-      if (router.currentRoute.value.path !== '/login') {
-        router.push('/login')
-      }
+      router.push('/login')
     }
 
     return Promise.reject(error)

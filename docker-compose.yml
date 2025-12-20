@@ -39,7 +39,7 @@ services:
     container_name: campus-auth
 
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: dev
       # Activate production Spring profile
 
       DB_HOST: postgres

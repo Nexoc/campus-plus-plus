@@ -13,6 +13,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+
 
 /**
  * SecurityConfig
@@ -47,9 +49,12 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
             http
                     .csrf(csrf -> csrf
                             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                            .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                             .ignoringRequestMatchers(
-                                    "/auth/validate",
-                                    "/api/**"
+                                    "/api/**", // main endpoints
+                                    "/auth/login",
+                                    "/auth/register",
+                                    "/auth/validate"
                             )
                     )
 
@@ -63,6 +68,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
                             .requestMatchers(
                                     "/auth/login",
                                     "/auth/register",
+                                    "/auth/csrf",
                                     "/v3/api-docs/**",
                                     "/swagger-ui/**",
                                     "/swagger-ui.html",
