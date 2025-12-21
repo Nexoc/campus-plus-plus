@@ -20,10 +20,20 @@ import '@/app/styles/main.css'
 import { logger } from '@/shared/utils/logger'
 import App from './App.vue'
 
+import { initTheme } from '@/shared/theme/theme'
+
+
 // --------------------------------------------------
 // Create Vue application instance
 // --------------------------------------------------
 const app = createApp(App)
+
+// --------------------------------------------------
+// Initialize global theme
+// --------------------------------------------------
+// Must run BEFORE mount so correct theme is applied
+// before first render (no flash)
+initTheme()
 
 // --------------------------------------------------
 // Register global plugins

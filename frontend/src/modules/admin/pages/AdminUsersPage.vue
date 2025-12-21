@@ -60,8 +60,9 @@ function formatDate(value: unknown): string {
 </script>
 
 
+
 <template>
-  <section>
+  <section class="admin-page">
     <h1>Admin · Users</h1>
 
     <!-- Error -->
@@ -70,95 +71,81 @@ function formatDate(value: unknown): string {
     </div>
 
     <!-- Loading -->
-    <div v-if="adminUserStore.loading">
+    <div v-else-if="adminUserStore.loading" class="loading">
       Loading users...
     </div>
 
     <!-- Users table -->
-    <table v-else class="users-table">
-      <thead>
-        <tr>
-          <th>Email</th>
-          <th>Nickname</th>
-          <th>Role</th>
-          <th>Enabled</th>
-          <th>Locked</th>
-          <th>Created</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+    <div v-else class="table-wrapper">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Nickname</th>
+            <th>Role</th>
+            <th>Enabled</th>
+            <th>Locked</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
 
-      <tbody>
-        <tr v-for="user in adminUserStore.users" :key="user.id">
-          <!-- Email -->
-          <td>{{ user.email ?? '—' }}</td>
+        <tbody>
+          <tr
+            v-for="user in adminUserStore.users"
+            :key="user.id"
+          >
+            <!-- Email -->
+            <td>{{ user.email ?? '—' }}</td>
 
-          <!-- Nickname -->
-          <td>
-            {{ user.nickname ?? user.email ?? '—' }}
-          </td>
+            <!-- Nickname -->
+            <td>{{ user.nickname ?? user.email ?? '—' }}</td>
 
-          <!-- Role -->
-          <td>
-            <select
-              :value="user.role"
-              :disabled="adminUserStore.loading"
-              @change="onChangeRole(user.id, $event)"
-            >
-              <option value="VISITOR">VISITOR</option>
-              <option value="STUDENT">STUDENT</option>
-              <option value="ADMIN">ADMIN</option>
-            </select>
-          </td>
+            <!-- Role -->
+            <td>
+              <select
+                :value="user.role"
+                :disabled="adminUserStore.loading"
+                @change="onChangeRole(user.id, $event)"
+              >
+                <option value="VISITOR">VISITOR</option>
+                <option value="STUDENT">STUDENT</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </td>
 
-          <!-- Enabled -->
-          <td>{{ user.enabled ? 'yes' : 'no' }}</td>
+            <!-- Enabled -->
+            <td>{{ user.enabled ? 'yes' : 'no' }}</td>
 
-          <!-- Locked -->
-          <td>{{ user.accountNonLocked ? 'no' : 'yes' }}</td>
+            <!-- Locked -->
+            <td>{{ user.accountNonLocked ? 'no' : 'yes' }}</td>
 
-          <!-- Created -->
-          <td>{{ formatDate(user.createdAt) }}</td>
+            <!-- Created -->
+            <td>{{ formatDate(user.createdAt) }}</td>
 
-          <!-- Actions -->
-          <td>
-            <button
-              v-if="user.enabled"
-              :disabled="adminUserStore.loading"
-              @click="adminUserStore.disableUser(user.id)"
-            >
-              Disable
-            </button>
+            <!-- Actions -->
+            <td>
+              <div class="actions-cell">
+                <button
+                  v-if="user.enabled"
+                  :disabled="adminUserStore.loading"
+                  @click="adminUserStore.disableUser(user.id)"
+                >
+                  Disable
+                </button>
 
-            <button
-              v-else
-              :disabled="adminUserStore.loading"
-              @click="adminUserStore.enableUser(user.id)"
-            >
-              Enable
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+                <button
+                  v-else
+                  :disabled="adminUserStore.loading"
+                  @click="adminUserStore.enableUser(user.id)"
+                >
+                  Enable
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 </template>
-
-<style scoped>
-.users-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.users-table th,
-.users-table td {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  text-align: left;
-}
-
-.error {
-  margin-bottom: 1rem;
-  color: #b00020;
-}
-</style>

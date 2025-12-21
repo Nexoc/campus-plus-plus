@@ -22,18 +22,32 @@
 
         <button @click="logout">Logout</button>
       </template>
+
+      <!-- Theme toggle (ALWAYS visible) -->
+      <button class="theme-toggle" @click="onToggleTheme">
+        {{ theme === 'dark' ? 'Light' : 'Dark' }}
+      </button>
     </div>
   </nav>
 </template>
 
 
-
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { logger } from '@/shared/utils/logger'
+
+// ⬇️ ВАЖНО: импорт темы
+import {
+  getTheme,
+  toggleTheme,
+} from '@/shared/theme/theme'
+
+/* --------------------------------------------------
+   AUTH
+-------------------------------------------------- */
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -41,7 +55,6 @@ const router = useRouter()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const isAdmin = computed(() => authStore.isAdmin)
 
-// Prefer nickname, fallback to email
 const nickname = computed(() => {
   return authStore.user?.nickname || authStore.user?.email
 })
@@ -50,5 +63,15 @@ const logout = async (): Promise<void> => {
   logger.log('LOGOUT clicked')
   await authStore.logout()
   await router.push('/login')
+}
+
+/* --------------------------------------------------
+   THEME
+-------------------------------------------------- */
+
+const theme = ref(getTheme())
+
+function onToggleTheme(): void {
+  theme.value = toggleTheme()
 }
 </script>

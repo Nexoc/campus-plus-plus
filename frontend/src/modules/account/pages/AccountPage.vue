@@ -50,38 +50,3 @@ const user = computed(() => {
   return authStore.user
 })
 </script>
-
-<style scoped>
-.account-page {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.account-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.account-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-}
-
-.account-label {
-  font-weight: 600;
-  color: #374151;
-}
-
-.account-value {
-  color: #111827;
-}
-
-.account-actions {
-  display: flex;
-  gap: 1rem;
-}
-</style>
