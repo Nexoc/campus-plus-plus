@@ -4,6 +4,7 @@
 INSERT INTO users (
   id,
   email,
+  nickname,
   password_hash,
   role,
   enabled,
@@ -11,6 +12,7 @@ INSERT INTO users (
 ) VALUES (
   gen_random_uuid(),
   'admin@test.com',
+  'admin',
   '$2a$12$QzPOk6ym.QvmyHAlBQXRSO6i1y/3.vwGSTssrqlts/yBd.LmkwBgC',
   'ADMIN',
   true,

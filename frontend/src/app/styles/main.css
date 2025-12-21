@@ -76,3 +76,69 @@
   border-radius: 4px;
   font-size: 0.9rem;
 }
+
+/* ================================
+   Auth helper links
+   ================================ */
+
+.auth-link {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.auth-link a {
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+/* ================================
+   Navigation bar
+   ================================ */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.navbar__brand {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.navbar__links {
+  display: flex;
+  gap: 1rem;
+}
+
+.navbar__link {
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.navbar__link:hover {
+  text-decoration: underline;
+}
+
+.navbar__button {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.navbar__user {
+  font-size: 0.9rem;
+  color: #374151;
+  margin-right: 0.5rem;
+}

@@ -8,10 +8,12 @@
 // - CSRF protection
 //
 // IMPORTANT SECURITY MODEL:
-// - JWT is sent via Authorization header
-// - CSRF protection is required for all account mutations
+// --------------------------------------------------
+// - JWT is sent via Authorization header (Bearer token)
+// - CSRF protection is REQUIRED for all account mutations
 // - CSRF token MUST be fetched BEFORE the first protected request
 // - CSRF token is stored in a cookie and reused automatically by Axios
+//
 
 import http from '@/app/api/http'
 
@@ -40,6 +42,7 @@ let csrfReady = false
  * Ensures that a CSRF token cookie exists in the browser.
  *
  * How it works:
+ * --------------------------------------------------
  * 1. Sends GET /auth/csrf with cookies enabled
  * 2. Spring Security generates a CSRF token
  * 3. Token is sent back as a cookie: XSRF-TOKEN
@@ -48,18 +51,21 @@ let csrfReady = false
  *    the X-XSRF-TOKEN header automatically
  *
  * Why this must be called BEFORE protected requests:
+ * --------------------------------------------------
  * - CSRF header cannot be sent if the cookie does not exist yet
  * - The CSRF cookie is NOT created automatically by Spring
  *
  * Why it is safe to call multiple times:
+ * --------------------------------------------------
  * - The function short-circuits using csrfReady
  * - Cookie already exists after the first call
  */
-export async function ensureCsrf(): Promise<void> {
-  // If CSRF token is already present, do nothing
+async function ensureCsrf(): Promise<void> {
+  // If CSRF token is already initialized, do nothing
   if (csrfReady) return
 
   // Request CSRF token from backend
+  //
   // withCredentials is REQUIRED so the browser
   // is allowed to store the Set-Cookie header
   await http.get('/auth/csrf', {
@@ -71,12 +77,22 @@ export async function ensureCsrf(): Promise<void> {
 }
 
 // --------------------------------------------------
+// DTOs
+// --------------------------------------------------
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+}
+
+// --------------------------------------------------
 // CHANGE PASSWORD
 // --------------------------------------------------
 /**
  * Change password of the currently authenticated user.
  *
  * Security flow:
+ * --------------------------------------------------
  * 1. ensureCsrf() guarantees CSRF cookie exists
  * 2. Axios automatically attaches:
  *    - Authorization: Bearer <JWT>
@@ -85,16 +101,14 @@ export async function ensureCsrf(): Promise<void> {
  *    - JWT (authentication)
  *    - CSRF token (request integrity)
  *
- * Expected backend response:
+ * Expected backend responses:
+ * --------------------------------------------------
  * - 204 No Content on success
- * - 401 if JWT is missing/invalid
+ * - 401 if JWT is missing or invalid
  * - 403 if CSRF validation fails
  */
 export async function changePassword(
-  data: {
-    currentPassword: string
-    newPassword: string
-  }
+  data: ChangePasswordRequest
 ): Promise<void> {
   // Make sure CSRF token is available BEFORE POST
   await ensureCsrf()

@@ -46,27 +46,25 @@ const http = axios.create({
 http.interceptors.request.use((config) => {
   const authStore = useAuthStore()
 
-  console.group('[HTTP REQUEST]')
-  console.log('Method:', config.method?.toUpperCase())
-  console.log('URL:', config.url)
-  console.log('withCredentials:', config.withCredentials)
-  console.log('Headers BEFORE:', { ...config.headers })
+  // --------------------------------------------
+  // AUTO-ENABLE COOKIES FOR STATE-CHANGING CALLS
+  // --------------------------------------------
+  if (
+    config.method &&
+    !['get', 'head', 'options'].includes(config.method)
+  ) {
+    config.withCredentials = true
+  }
 
-  // Attach JWT for authenticated requests
+  // Attach JWT
   if (authStore.token) {
     config.headers = config.headers || {}
     config.headers.Authorization = `Bearer ${authStore.token}`
-    console.log('JWT attached')
-  } else {
-    console.log('No JWT token')
   }
-
-  console.log('Headers AFTER:', { ...config.headers })
-  console.log('Browser cookies:', document.cookie)
-  console.groupEnd()
 
   return config
 })
+
 
 // --------------------------------------------------
 // RESPONSE INTERCEPTOR

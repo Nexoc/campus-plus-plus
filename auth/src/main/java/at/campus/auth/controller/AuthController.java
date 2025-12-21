@@ -1,5 +1,6 @@
 package at.campus.auth.controller;
 
+import at.campus.auth.dto.AccountResponse;
 import at.campus.auth.dto.LoginRequest;
 import at.campus.auth.dto.RegisterRequest;
 import at.campus.auth.dto.AuthResponse;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.web.csrf.CsrfToken;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,19 +24,40 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
+import java.util.Map;
+
+
 /**
  * AuthController
- * REST controller responsible for authentication endpoints.
+ *
+ * REST controller responsible for authentication and identity-related endpoints.
+ *
+ * SECURITY MODEL OVERVIEW
+ * --------------------------------------------------
+ * Authentication:
+ * - Stateless JWT-based authentication
+ * - JWT is returned on successful login
+ * - JWT is sent via Authorization header
+ *
+ * CSRF:
+ * - CSRF is NOT required for login and registration
+ * - CSRF IS required for authenticated browser actions
+ *   (account, admin, sensitive state-changing endpoints)
+ *
  * Endpoints:
- * - POST /auth/register
- * - POST /auth/login
- * - GET  /auth/validate   (internal, for nginx auth_request)
+ * --------------------------------------------------
+ * POST /auth/register   - Create new user account (NO CSRF)
+ * POST /auth/login      - Authenticate user and issue JWT (NO CSRF)
+ * GET  /auth/validate   - Internal JWT validation (NGINX auth_request)
+ * GET  /auth/csrf       - CSRF bootstrap for browser clients
+ * GET  /auth/me         - Current authenticated user info
  */
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(AuthController.class);
 
     private final AuthService authService;
 
@@ -42,10 +65,18 @@ public class AuthController {
         this.authService = authService;
     }
 
-    /* =========================
-       Register
-       ========================= */
+    /* =====================================================
+       REGISTER
+       ===================================================== */
 
+    /**
+     * Registers a new user account.
+     *
+     * Security notes:
+     * - This endpoint is PUBLIC (permitAll)
+     * - CSRF protection is NOT required
+     * - Protected by credentials only
+     */
     @Operation(
             summary = "Register a new user",
             description = "Creates a new user account with email and password"
@@ -68,16 +99,25 @@ public class AuthController {
 
         authService.register(
                 request.getEmail(),
-                request.getPassword()
+                request.getPassword(),
+                request.getNickname()
         );
 
-        log.info("Registration request successfully processed for email={}", request.getEmail());
+        log.info("Registration completed for email={}", request.getEmail());
     }
 
-    /* =========================
-       Login
-       ========================= */
+    /* =====================================================
+       LOGIN
+       ===================================================== */
 
+    /**
+     * Authenticates user credentials and returns a JWT token.
+     *
+     * Security notes:
+     * - This endpoint is PUBLIC (permitAll)
+     * - CSRF protection is NOT required
+     * - Stateless authentication
+     */
     @Operation(
             summary = "Authenticate user",
             description = "Authenticates user credentials and returns a JWT token"
@@ -110,15 +150,25 @@ public class AuthController {
                 request.getPassword()
         );
 
-        log.info("Login request successfully processed for email={}", request.getEmail());
+        log.info("Login successful for email={}", request.getEmail());
 
         return ResponseEntity.ok(response);
     }
 
-    /* =========================
-       Validate (for NGINX)
-       ========================= */
+    /* =====================================================
+       VALIDATE (INTERNAL)
+       ===================================================== */
 
+    /**
+     * Internal JWT validation endpoint.
+     *
+     * Purpose:
+     * - Used by NGINX auth_request module
+     * - Validates JWT token
+     * - Exposes user metadata via headers
+     *
+     * This endpoint MUST NOT be exposed to public clients.
+     */
     @Operation(
             summary = "Validate JWT token (internal)",
             description = "Used by NGINX auth_request to validate JWT and extract user info"
@@ -138,20 +188,64 @@ public class AuthController {
                 .build();
     }
 
+    /* =====================================================
+       CSRF BOOTSTRAP
+       ===================================================== */
+
     /**
-     * CSRF initialization endpoint.
+     * CSRF bootstrap endpoint.
      *
      * Purpose:
-     * - Forces Spring Security to generate CSRF token
-     * - CSRF token is automatically written into cookie (XSRF-TOKEN)
+     * - Forces Spring Security to generate a CSRF token
+     * - CSRF token is stored in a cookie (XSRF-TOKEN)
      *
-     * Frontend MUST call this endpoint before:
-     * - POST /auth/login
-     * - POST /auth/register
+     * Usage:
+     * - Should be called once after authentication
+     * - Must be called before any state-changing browser requests
+     *   (POST, PUT, PATCH, DELETE)
+     *
+     * Notes:
+     * - Not required for login or registration
+     * - Required for account and admin operations
+     * - Endpoint has no response body
      */
-    @GetMapping("/csrf")
+    @PostMapping("/csrf")
     public void csrf() {
-        // Intentionally empty.
-        // Spring Security handles CSRF token creation automatically.
+        // Token is generated and written to cookie by Spring Security
+    }
+
+
+
+    /* =====================================================
+       CURRENT USER
+       ===================================================== */
+    /**
+     * Returns profile information of the currently authenticated user.
+     *
+     * Security notes:
+     * - Requires valid JWT
+     * - CSRF required for browser clients (GET is safe)
+     */
+    @Operation(
+            summary = "Get current user info",
+            description = "Returns profile data of the currently authenticated user"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Current user data returned"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<AccountResponse> me() {
+
+        User user = authService.getCurrentUser();
+
+        AccountResponse response = new AccountResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getNickname(),
+                user.getRole()
+        );
+
+        return ResponseEntity.ok(response);
     }
 }

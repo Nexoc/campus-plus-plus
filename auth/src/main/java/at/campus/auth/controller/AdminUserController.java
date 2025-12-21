@@ -1,6 +1,7 @@
 package at.campus.auth.controller;
 
 import at.campus.auth.dto.AdminChangeRoleRequest;
+import at.campus.auth.dto.AdminUserResponse;
 import at.campus.auth.dto.AdminUserStatusRequest;
 import at.campus.auth.service.AdminUserService;
 
@@ -20,10 +21,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
+import java.util.List;
+
 /**
  * AdminUserController
  * Admin endpoints for user management (requires ROLE_ADMIN).
  */
+
+
 @RestController
 @RequestMapping("/admin/users")
 @SecurityRequirement(name = "bearerAuth")
@@ -118,4 +123,23 @@ public class AdminUserController {
         adminUserService.enableUser(request.getUserId());
         return ResponseEntity.noContent().build();
     }
+
+
+    @Operation(
+            summary = "List all users",
+            description = "Returns a list of all users. Requires ROLE_ADMIN."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Users list returned"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden")
+    })
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(produces = "application/json")
+    public ResponseEntity<List<AdminUserResponse>> listUsers() {
+        log.info("Admin list users request");
+
+        return ResponseEntity.ok(adminUserService.listUsers());
+    }
+
 }

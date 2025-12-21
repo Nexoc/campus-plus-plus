@@ -25,11 +25,25 @@ public class RegisterRequest {
     @Size(min = 8)
     private String password;
 
+    @Schema(
+            description = "Public user nickname (optional)",
+            example = "johnny"
+    )
+    private String nickname; // 👈 NEW
+
+    // --------------------------------------------------
+    // Getters
+    // --------------------------------------------------
+
     public String getEmail() {
         return email;
     }
 
     public String getPassword() {
         return password;
+    }
+
+    public String getNickname() {
+        return nickname;
     }
 }

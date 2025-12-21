@@ -14,19 +14,33 @@ import java.util.UUID;
 @Table(name = "users")
 public class User implements UserDetails {
 
+    // --------------------------------------------------
+    // Identity
+    // --------------------------------------------------
+
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "uuid")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, unique = true, updatable = false)
     private String email;
 
+    // --------------------------------------------------
+    // Profile (NOT used for auth)
+    // --------------------------------------------------
+
+    @Column(length = 50)
+    private String nickname;
+
+    // --------------------------------------------------
+    // Security
+    // --------------------------------------------------
+
     @Column(nullable = false)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(nullable = false)
     private UserRole role;
 
     @Column(nullable = false, updatable = false)
@@ -52,6 +66,21 @@ public class User implements UserDetails {
         this.createdAt = Instant.now();
     }
 
+    // --------------------------------------------------
+    // Lifecycle
+    // --------------------------------------------------
+
+    @PrePersist
+    void onCreate() {
+        if (createdAt == null) {
+            createdAt = Instant.now();
+        }
+    }
+
+    // --------------------------------------------------
+    // Spring Security
+    // --------------------------------------------------
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -67,40 +96,28 @@ public class User implements UserDetails {
         return email;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    @Override public boolean isAccountNonExpired() { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isAccountNonLocked() { return accountNonLocked; }
+    @Override public boolean isEnabled() { return enabled; }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
+    // --------------------------------------------------
+    // Getters
+    // --------------------------------------------------
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public UUID getId() { return id; }
+    public String getEmail() { return email; }
+    public String getNickname() { return nickname; }
+    public UserRole getRole() { return role; }
+    public Instant getCreatedAt() { return createdAt; }
+    public int getTokenVersion() { return tokenVersion; }
 
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
+    // --------------------------------------------------
+    // Mutators (domain-safe)
+    // --------------------------------------------------
 
-    public UUID getId() {
-        return id;
-    }
-
-    public UserRole getRole() {
-        return role;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public int getTokenVersion() {
-        return tokenVersion;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public void changePasswordHash(String newPasswordHash) {
@@ -133,7 +150,7 @@ public class User implements UserDetails {
         bumpTokenVersion();
     }
 
-    public void bumpTokenVersion() {
+    private void bumpTokenVersion() {
         this.tokenVersion++;
     }
 }

@@ -1,71 +1,58 @@
 import http from '@/app/api/http'
 
 // --------------------------------------------------
-// CSRF bootstrap (shared with account)
-// --------------------------------------------------
-let csrfReady = false
-
-async function ensureCsrf(): Promise<void> {
-  if (csrfReady) return
-
-  await http.get('/auth/csrf', {
-    withCredentials: true,
-  })
-
-  csrfReady = true
-}
-
-// --------------------------------------------------
 // DTOs
 // --------------------------------------------------
+
+export type UserRole = 'VISITOR' | 'STUDENT' | 'ADMIN'
+
+export interface AdminUser {
+  id: string
+  email: string
+  nickname: string | null
+  role: UserRole
+  enabled: boolean
+  accountNonLocked: boolean
+  createdAt: string
+}
+
 export interface AdminChangeRoleRequest {
-  userId: number
-  role: string
+  userId: string
+  role: UserRole
 }
 
 export interface AdminUserStatusRequest {
-  userId: number
+  userId: string
 }
 
 // --------------------------------------------------
 // API calls
 // --------------------------------------------------
 
-/**
- * Change role of a user.
- * Requires ROLE_ADMIN.
- */
+export async function listUsers(): Promise<AdminUser[]> {
+  const response = await http.get<AdminUser[]>('/admin/users')
+  return response.data
+}
+
 export async function changeRole(
   data: AdminChangeRoleRequest
 ): Promise<void> {
-  await ensureCsrf()
-
   await http.post('/admin/users/change-role', data, {
     withCredentials: true,
   })
 }
 
-/**
- * Disable (ban) a user.
- */
 export async function disableUser(
   data: AdminUserStatusRequest
 ): Promise<void> {
-  await ensureCsrf()
-
   await http.post('/admin/users/disable', data, {
     withCredentials: true,
   })
 }
 
-/**
- * Enable (unban) a user.
- */
 export async function enableUser(
   data: AdminUserStatusRequest
 ): Promise<void> {
-  await ensureCsrf()
-
   await http.post('/admin/users/enable', data, {
     withCredentials: true,
   })

@@ -1,155 +1,155 @@
 <template>
   <div class="change-password-page">
-    <h1>Change Password (DEBUG)</h1>
+    <h1>Change Password</h1>
 
     <form @submit.prevent="onSubmit">
       <!-- Current password -->
-      <div class="password-field">
-        <input
-          v-model="currentPassword"
-          :type="showCurrent ? 'text' : 'password'"
-          placeholder="current password"
-        />
-        <button
-          type="button"
-          class="eye-btn"
-          @click="showCurrent = !showCurrent"
-        >
-          {{ showCurrent ? '🙈' : '👁️' }}
-        </button>
-      </div>
+      <BaseInput
+        v-model="currentPassword"
+        label="Current password"
+        :type="showCurrent ? 'text' : 'password'"
+      />
+
+      <BaseButton
+        type="button"
+        @click="showCurrent = !showCurrent"
+      >
+        {{ showCurrent ? 'Hide' : 'Show' }}
+      </BaseButton>
 
       <!-- New password -->
-      <div class="password-field">
-        <input
-          v-model="newPassword"
-          :type="showNew ? 'text' : 'password'"
-          placeholder="new password"
-        />
-        <button
-          type="button"
-          class="eye-btn"
-          @click="showNew = !showNew"
-        >
-          {{ showNew ? '🙈' : '👁️' }}
-        </button>
-      </div>
+      <BaseInput
+        v-model="newPassword"
+        label="New password"
+        :type="showNew ? 'text' : 'password'"
+      />
 
-      <!-- Confirm password -->
-      <div class="password-field">
-        <input
-          v-model="confirmPassword"
-          :type="showConfirm ? 'text' : 'password'"
-          placeholder="confirm new password"
-        />
-        <button
-          type="button"
-          class="eye-btn"
-          @click="showConfirm = !showConfirm"
-        >
-          {{ showConfirm ? '🙈' : '👁️' }}
-        </button>
-      </div>
+      <BaseButton
+        type="button"
+        @click="showNew = !showNew"
+      >
+        {{ showNew ? 'Hide' : 'Show' }}
+      </BaseButton>
 
+      <!-- Confirm new password -->
+      <BaseInput
+        v-model="confirmPassword"
+        label="Confirm new password"
+        :type="showConfirm ? 'text' : 'password'"
+      />
+
+      <BaseButton
+        type="button"
+        @click="showConfirm = !showConfirm"
+      >
+        {{ showConfirm ? 'Hide' : 'Show' }}
+      </BaseButton>
+
+      <!-- Form error -->
+      <FormError
+        v-if="formError"
+        :message="formError"
+      />
+
+      <!-- Actions -->
       <div class="actions">
-        <button type="submit">Change password</button>
+        <BaseButton type="submit">
+          Change password
+        </BaseButton>
 
-        <!-- Back to home -->
-        <button type="button" @click="goHome">
+        <BaseButton
+          type="button"
+          @click="goHome"
+        >
           Back to home
-        </button>
+        </BaseButton>
       </div>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAccountStore } from '@/modules/account/store/account.store'
+// --------------------------------------------------
+// Change Password Page
+//
+// Responsibilities:
+// - Allow authenticated user to change password
+// - Perform basic client-side validation
+// - Delegate business logic to account store
+// --------------------------------------------------
+
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { useAccountStore } from '@/modules/account/store/account.store'
+import { logger } from '@/shared/utils/logger'
+
+import BaseButton from '@/shared/components/BaseButton.vue'
+import BaseInput from '@/shared/components/BaseInput.vue'
+import FormError from '@/shared/components/FormError.vue'
 
 // --------------------------------------------------
 // FORM STATE
 // --------------------------------------------------
+
 const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
+const formError = ref<string | null>(null)
 
 // --------------------------------------------------
 // VISIBILITY STATE
 // --------------------------------------------------
+
 const showCurrent = ref(false)
 const showNew = ref(false)
 const showConfirm = ref(false)
 
 // --------------------------------------------------
-// STORE & ROUTER
+// DEPENDENCIES
 // --------------------------------------------------
+
 const accountStore = useAccountStore()
 const router = useRouter()
 
 // --------------------------------------------------
 // SUBMIT HANDLER
 // --------------------------------------------------
-const onSubmit = async () => {
-  console.group('[CHANGE PASSWORD]')
+
+const onSubmit = async (): Promise<void> => {
+  formError.value = null
 
   if (newPassword.value !== confirmPassword.value) {
-    console.error('Passwords do not match')
-    console.groupEnd()
+    formError.value = 'Passwords do not match'
+    logger.warn('CHANGE PASSWORD validation failed')
     return
   }
 
   try {
-    console.log('[CHANGE PASSWORD] sending POST /account/change-password')
+    logger.log('CHANGE PASSWORD request started')
 
     await accountStore.changePassword(
       currentPassword.value,
       newPassword.value
     )
 
-    console.log('[CHANGE PASSWORD] success')
+    logger.log('CHANGE PASSWORD successful')
 
     // UX cleanup
     currentPassword.value = ''
     newPassword.value = ''
     confirmPassword.value = ''
   } catch (error) {
-    console.error('[CHANGE PASSWORD ERROR]', error)
-  } finally {
-    console.groupEnd()
+    logger.error('CHANGE PASSWORD failed', error)
+    formError.value = 'Failed to change password'
   }
 }
 
 // --------------------------------------------------
 // NAVIGATION
 // --------------------------------------------------
-const goHome = async () => {
+
+const goHome = async (): Promise<void> => {
   await router.push({ name: 'home' })
 }
 </script>
-
-<style scoped>
-.password-field {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.password-field input {
-  flex: 1;
-}
-
-.eye-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.2rem;
-}
-
-.actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-</style>

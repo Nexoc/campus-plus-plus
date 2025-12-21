@@ -8,6 +8,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string
   password: string
+  nickname?: string
 }
 
 export interface AuthResponse {

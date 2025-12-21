@@ -20,12 +20,30 @@ import org.springframework.stereotype.Service;
 
 /**
  * AuthService
- * Authentication-related business logic.
+ *
+ * Business logic for authentication and account security.
+ *
+ * Design principles:
+ * --------------------------------------------------
+ * - Stateless authentication (JWT)
+ * - No HTTP/session awareness
+ * - No direct JWT parsing here
+ * - Database is the source of truth
+ * - Token revocation via tokenVersion
+ *
+ * Responsibilities:
+ * --------------------------------------------------
+ * - Register new users
+ * - Authenticate credentials
+ * - Issue JWT tokens
+ * - Change passwords
+ * - Provide access to current authenticated user
  */
 @Service
 public class AuthService {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
@@ -44,7 +62,15 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void register(String email, String rawPassword) {
+    /**
+     * Registers a new user account.
+     *
+     * Security notes:
+     * - Default role is assigned server-side
+     * - Password is hashed immediately
+     * - Email uniqueness is enforced
+     */
+    public void register(String email, String rawPassword, String nickname) {
 
         log.info("Registration attempt for email={}", email);
 
@@ -61,11 +87,29 @@ public class AuthService {
                 UserRole.STUDENT
         );
 
+        // Fallback nickname if none provided
+        if (nickname == null || nickname.isBlank()) {
+            nickname = email.split("@")[0];
+        }
+
+        user.setNickname(nickname);
+
         userRepository.save(user);
 
-        log.info("User successfully registered, email={}, role={}", email, UserRole.STUDENT);
+        log.info(
+                "User successfully registered, email={}, nickname={}, role={}",
+                email, nickname, UserRole.STUDENT
+        );
     }
 
+    /**
+     * Authenticates user credentials and issues a JWT token.
+     *
+     * Security notes:
+     * - Authentication is delegated to AuthenticationManager
+     * - No SecurityContext manipulation here
+     * - JWT is issued only after successful authentication
+     */
     public AuthResponse login(String email, String rawPassword) {
 
         log.info("Login attempt for email={}", email);
@@ -78,8 +122,6 @@ public class AuthService {
             log.warn("Login failed: invalid credentials, email={}", email);
             throw new InvalidCredentialsException();
         }
-
-        log.debug("AuthenticationManager successfully authenticated email={}", email);
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
@@ -96,11 +138,17 @@ public class AuthService {
 
     /**
      * Changes password for the currently authenticated user.
-     * - verifies current password
-     * - stores new password hash
-     * - bumps token version to revoke old JWTs
+     *
+     * Effects:
+     * - Verifies current password
+     * - Stores new password hash
+     * - Increments tokenVersion (revokes existing JWTs)
+     * - Evicts cached UserDetails
      */
-    @CacheEvict(cacheNames = "userDetails", key = "#root.target.getCurrentUserEmail()")
+    @CacheEvict(
+            cacheNames = "userDetails",
+            key = "#root.target.getCurrentUserEmail()"
+    )
     public void changePassword(String currentPassword, String newPassword) {
 
         String email = getCurrentUserEmail();
@@ -109,13 +157,11 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(InvalidCredentialsException::new);
 
-        // Verify current password against stored hash
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             log.warn("Password change failed: invalid current password, email={}", email);
             throw new InvalidCredentialsException();
         }
 
-        // Save new hash and revoke old tokens
         String newHash = passwordEncoder.encode(newPassword);
         user.changePasswordHash(newHash);
 
@@ -125,9 +171,26 @@ public class AuthService {
     }
 
     /**
-     * Helper for SpEL in @CacheEvict and for internal use.
+     * Returns email of the currently authenticated user.
+     *
+     * Used for:
+     * - cache eviction
+     * - internal service logic
      */
     public String getCurrentUserEmail() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+        return SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+    }
+
+    /**
+     * Loads the currently authenticated user entity.
+     */
+    public User getCurrentUser() {
+        String email = getCurrentUserEmail();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(InvalidCredentialsException::new);
     }
 }
