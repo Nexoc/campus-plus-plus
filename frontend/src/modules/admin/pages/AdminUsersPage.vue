@@ -4,26 +4,47 @@ import type { UserRole } from '@/modules/admin/api/admin-user.api'
 import { useAdminUserStore } from '@/modules/admin/store/admin-user.store'
 import { onMounted } from 'vue'
 
+
 const adminUserStore = useAdminUserStore()
 
 // --------------------------------------------------
 // LIFECYCLE
 // --------------------------------------------------
 onMounted(async () => {
-  // ЗАРАНЕЕ получаем CSRF токен
-  await ensureCsrf()
-
-  // Загружаем пользователей
-  await adminUserStore.fetchUsers()
+  try {
+    // Load users
+    await adminUserStore.fetchUsers()
+  } catch (e) {
+    console.error('AdminUsersPage onMounted error', e)
+  }
 })
+
 
 // --------------------------------------------------
 // HANDLERS
 // --------------------------------------------------
-function onChangeRole(userId: string, event: Event) {
-  const role = (event.target as HTMLSelectElement).value as UserRole
-  adminUserStore.changeRole(userId, role)
+async function onChangeRole(userId: string, event: Event) {
+  const select = event.target as HTMLSelectElement
+  const newRole = select.value as UserRole
+
+  const user = adminUserStore.users.find(u => u.id === userId)
+  const oldRole = user?.role
+
+  try {
+    // ALWAYS bootstrap CSRF before changing role
+    await ensureCsrf()
+
+    // Perform role change immediately
+    await adminUserStore.changeRole(userId, newRole)
+  } catch (e) {
+    // Revert UI on error
+    select.value = oldRole as string
+    console.error('Change role failed', e)
+  }
 }
+
+
+
 
 // --------------------------------------------------
 // HELPERS

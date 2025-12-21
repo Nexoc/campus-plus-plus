@@ -115,8 +115,8 @@ public class SecurityConfig {
                         .ignoringRequestMatchers(
                                 "/auth/login",
                                 "/auth/register",
-                                "/auth/validate",
-                                "/auth/csrf"
+                                "/auth/validate"
+
                         )
                 )
 
@@ -145,7 +145,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/register",
-                                "/auth/csrf",
+                                //"/auth/csrf",
                                 "/auth/validate",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",

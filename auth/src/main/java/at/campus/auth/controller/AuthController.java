@@ -7,6 +7,7 @@ import at.campus.auth.dto.AuthResponse;
 import at.campus.auth.model.User;
 import at.campus.auth.service.AuthService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
@@ -199,20 +200,14 @@ public class AuthController {
      * - Forces Spring Security to generate a CSRF token
      * - CSRF token is stored in a cookie (XSRF-TOKEN)
      *
-     * Usage:
-     * - Should be called once after authentication
-     * - Must be called before any state-changing browser requests
-     *   (POST, PUT, PATCH, DELETE)
-     *
-     * Notes:
-     * - Not required for login or registration
-     * - Required for account and admin operations
-     * - Endpoint has no response body
      */
     @PostMapping("/csrf")
-    public void csrf() {
-        // Token is generated and written to cookie by Spring Security
+    public ResponseEntity<Void> csrf() {
+        // CsrfFilter сработает ДО контроллера
+        // Токен будет создан автоматически
+        return ResponseEntity.noContent().build();
     }
+
 
 
 

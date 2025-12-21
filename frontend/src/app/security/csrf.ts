@@ -1,14 +1,13 @@
 import http from '@/app/api/http'
 
-let csrfReady = false
-
 export async function ensureCsrf(): Promise<void> {
-  if (csrfReady) return
-
-  console.log('ensureCsrf called, csrfReady =', csrfReady)
-
-  await http.post('/auth/csrf', {}, { withCredentials: true })
-
-
-  csrfReady = true
+  try {
+    await http.post('/auth/csrf', {}, { withCredentials: true })
+  } catch (e) {
+    // IMPORTANT:
+    // 403 is EXPECTED here.
+    // Spring Security creates the CSRF token
+    // and writes it to the XSRF-TOKEN cookie
+    // BEFORE rejecting the request.
+  }
 }

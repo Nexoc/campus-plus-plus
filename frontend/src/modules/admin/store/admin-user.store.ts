@@ -1,3 +1,4 @@
+import { ensureCsrf } from '@/app/security/csrf'
 import type { AdminUser, UserRole } from '@/modules/admin/api/admin-user.api'
 import * as adminApi from '@/modules/admin/api/admin-user.api'
 import { defineStore } from 'pinia'
@@ -33,28 +34,29 @@ export const useAdminUserStore = defineStore('adminUser', {
       }
     },
 
+
     /**
      * Change user role (OPTIMISTIC).
      */
     async changeRole(userId: string, role: UserRole): Promise<void> {
       this.error = null
 
-      // Snapshot for rollback
       const previousUsers = [...this.users]
 
-      // Optimistic update
-      this.users = this.users.map((u) =>
+      this.users = this.users.map(u =>
         u.id === userId ? { ...u, role } : u
       )
 
       try {
         await adminApi.changeRole({ userId, role })
       } catch (e) {
-        console.error('[ADMIN] change role failed', e)
         this.users = previousUsers
         this.error = 'Failed to change role'
       }
     },
+
+
+
 
     /**
      * Disable user (OPTIMISTIC).
@@ -68,7 +70,9 @@ export const useAdminUserStore = defineStore('adminUser', {
       )
 
       try {
+        await ensureCsrf()
         await adminApi.disableUser({ userId })
+
       } catch (e) {
         console.error('[ADMIN] disable user failed', e)
         this.users = previousUsers
@@ -88,6 +92,7 @@ export const useAdminUserStore = defineStore('adminUser', {
       )
 
       try {
+        await ensureCsrf()
         await adminApi.enableUser({ userId })
       } catch (e) {
         console.error('[ADMIN] enable user failed', e)

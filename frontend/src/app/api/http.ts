@@ -96,10 +96,20 @@ http.interceptors.response.use(
 
     const authStore = useAuthStore()
 
-    // Backend says "unauthorized":
-    // - JWT expired
-    // - JWT revoked
-    // - JWT invalid
+    // --------------------------------------------
+    // EXPECTED CSRF BOOTSTRAP FAILURE (DO NOT FAIL)
+    // --------------------------------------------
+    if (
+      error.config?.url === '/auth/csrf' &&
+      error.response?.status === 403
+    ) {
+      // CSRF token has already been generated and saved
+      return Promise.resolve(error.response)
+    }
+
+    // --------------------------------------------
+    // REAL AUTH ERROR
+    // --------------------------------------------
     if (error.response?.status === 401) {
       console.warn('[AUTH] 401 received -> logging out')
       authStore.logout()
@@ -109,5 +119,10 @@ http.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+
+
+
+
 
 export default http
