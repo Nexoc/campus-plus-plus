@@ -2,6 +2,11 @@
   src/modules/home/pages/HomePage.vue
 
   Home page for authenticated users.
+
+  Responsibilities:
+  - Entry point after login
+  - Navigation only
+  - Temporary debug action
 -->
 
 <template>
@@ -30,12 +35,36 @@
         Browse courses
       </button>
     </RouterLink>
+
+    <!-- TEMP DEBUG -->
+    <hr />
+
+    <button class="base-button" @click="debugMe">
+      Debug: /api/debug/me
+    </button>
+
+    <pre v-if="debugResult">{{ debugResult }}</pre>
+    <p v-if="debugError" class="error">{{ debugError }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
-/*
-  No logic.
-  Home page is navigation-only.
-*/
+import { getDebugMe } from '@/modules/home/api/debugApi'
+import { ref } from 'vue'
+
+const debugResult = ref<string | null>(null)
+const debugError = ref<string | null>(null)
+
+async function debugMe() {
+  debugResult.value = null
+  debugError.value = null
+
+  try {
+    const data = await getDebugMe()
+    debugResult.value = JSON.stringify(data, null, 2)
+  } catch (e: any) {
+    debugError.value =
+      e?.response?.status + ' ' + e?.response?.statusText
+  }
+}
 </script>
