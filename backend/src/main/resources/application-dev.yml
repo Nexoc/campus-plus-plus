@@ -1,0 +1,66 @@
+# =========================
+# DEVELOPMENT CONFIGURATION
+# =========================
+# This configuration is used ONLY for local development.
+# It prioritizes developer convenience over strict security.
+# NEVER use this profile in production.
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # --------------------------------------------------
+  # Cache (DEV)
+  # --------------------------------------------------
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=2m
+
+  # --------------------------------------------------
+  # Database (DEV)
+  # --------------------------------------------------
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:auth_dev}
+    username: ${DB_USERNAME:auth}
+    password: ${DB_PASSWORD:auth}
+    driver-class-name: org.postgresql.Driver
+
+  # --------------------------------------------------
+  # JPA / Hibernate (DEV)
+  # --------------------------------------------------
+  jpa:
+    hibernate:
+      ddl-auto: update
+      # FORBIDDEN in production
+
+    show-sql: true
+    open-in-view: false
+
+# =========================
+# Server (DEV)
+# =========================
+server:
+  port: 8080
+  # Local HTTP port for development
+  # In production, traffic comes through Nginx / Gateway
+
+# =========================
+# Security (DEV)
+# =========================
+security:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-change-me-please-32chars-min-123456}
+    expiration-minutes: 60
+
+# =========================
+# Logging (DEV)
+# =========================
+logging:
+  level:
+    root: INFO
+    at.campus.auth: DEBUG
+    org.springframework.security: TRACE
+    org.springframework.security.web.csrf: TRACE
+    org.springframework.security.web.FilterChainProxy: TRACE
