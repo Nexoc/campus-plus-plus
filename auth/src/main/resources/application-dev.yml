@@ -5,15 +5,23 @@
 # It prioritizes developer convenience over strict security.
 # NEVER use this profile in production.
 
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+# =========================
+# Server (DEV)
+# =========================
 server:
   port: 8080
   # Local HTTP port for development
-  # In production, traffic usually comes through Nginx / Load Balancer
+  # In production, traffic comes through Nginx / Gateway
 
+# =========================
+# Spring (DEV)
+# =========================
 spring:
-  # =========================
-  # Database (DEV)
-  # =========================
   cache:
     type: caffeine
     caffeine:
@@ -21,33 +29,17 @@ spring:
 
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-    # Local PostgreSQL instance
-    # Database schema can be freely modified in dev
-
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    # Hardcoded credentials are acceptable ONLY in development
-
     driver-class-name: org.postgresql.Driver
 
-  # =========================
-  # JPA / Hibernate (DEV)
-  # =========================
   jpa:
     hibernate:
       ddl-auto: update
-      # update:
-      # - Automatically updates database schema
-      # - Convenient for development
-      # - FORBIDDEN in production (must be validate / none)
+      # FORBIDDEN in production
 
     show-sql: true
-    # Prints SQL queries to console
-    # Useful for debugging ORM behavior
-
     open-in-view: false
-    # Disabled to avoid lazy-loading issues
-    # Encourages clean service-layer design
 
 # =========================
 # Security (DEV)
@@ -55,13 +47,7 @@ spring:
 security:
   jwt:
     secret: ${JWT_SECRET:dev-secret-change-me-please-32chars-min-123456}
-    # Hardcoded JWT secret is OK ONLY in dev
-    # Makes local testing easier
-    # MUST be replaced by ENV variable in production
-
     expiration-minutes: 60
-    # Long token lifetime for development
-    # Avoids frequent re-login during testing
 
 # =========================
 # Logging (DEV)
@@ -73,5 +59,3 @@ logging:
     org.springframework.security: TRACE
     org.springframework.security.web.csrf: TRACE
     org.springframework.security.web.FilterChainProxy: TRACE
-
-

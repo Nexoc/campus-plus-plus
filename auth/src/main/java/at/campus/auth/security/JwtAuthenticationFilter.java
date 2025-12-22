@@ -55,8 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
             "/auth/login",
             "/auth/register",
-            "/auth/csrf",
-            "/auth/validate"
+            "/auth/csrf"
     );
 
     private final JwtService jwtService;

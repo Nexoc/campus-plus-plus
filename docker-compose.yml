@@ -40,7 +40,7 @@ services:
 
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      # Activate production Spring profile
+      ######## >>>>>> TO production change to prod <<<<<<< #######
 
       DB_HOST: postgres
       # Hostname of the database

@@ -3,36 +3,36 @@
 # =========================
 # This configuration is used in real production environments.
 # All sensitive values MUST be injected via environment variables.
-# This file must be safe to commit to version control.
-
-server:
-  port: 8080
-  # Internal application port
-  # External access is handled by a reverse proxy (Nginx / LB)
+# This file is SAFE to commit to version control.
 
 spring:
+  # -------------------------------------------------
+  # Profile activation
+  # -------------------------------------------------
+  config:
+    activate:
+      on-profile: prod
+
+  # -------------------------------------------------
+  # Database migration (Flyway)
+  # -------------------------------------------------
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
-  # =========================
+
+  # -------------------------------------------------
   # Database (PROD)
-  # =========================
+  # -------------------------------------------------
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-    # Database connection parameters are provided via ENV variables
-    # Example:
-    # DB_HOST=postgres
-    # DB_PORT=5432
-    # DB_NAME=auth_prod
-
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    # Database credentials are NEVER stored in the repository
+    driver-class-name: org.postgresql.Driver
 
-  # =========================
+  # -------------------------------------------------
   # JPA / Hibernate (PROD)
-  # =========================
+  # -------------------------------------------------
   jpa:
     hibernate:
       ddl-auto: validate
@@ -42,10 +42,15 @@ spring:
       # - REQUIRED for production safety
 
     show-sql: false
-    # Disable SQL logging in production
-
     open-in-view: false
-    # Prevents lazy-loading outside transactional boundaries
+
+# =========================
+# Server
+# =========================
+server:
+  port: 8080
+  # Internal application port
+  # External access is handled by Nginx / Gateway
 
 # =========================
 # Security (PROD)
@@ -53,16 +58,11 @@ spring:
 security:
   jwt:
     secret: ${JWT_SECRET}
-    # JWT signing secret
-    # MUST be injected via:
-    # - Docker secrets
-    # - GitHub Actions secrets
-    # - Kubernetes secrets
-    # NEVER hardcoded
+    # MUST be injected via environment variable or secret manager
 
     expiration-minutes: ${JWT_EXPIRATION:15}
     # Short token lifetime
-    # Default: 15 minutes if not explicitly provided
+    # Default: 15 minutes
 
 # =========================
 # Logging (PROD)
@@ -72,4 +72,3 @@ logging:
     root: INFO
     at.campus.auth: INFO
     org.springframework.security: WARN
-

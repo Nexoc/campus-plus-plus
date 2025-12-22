@@ -114,9 +114,7 @@ public class SecurityConfig {
                         // These endpoints MUST NOT require CSRF tokens.
                         .ignoringRequestMatchers(
                                 "/auth/login",
-                                "/auth/register",
-                                "/auth/validate"
-
+                                "/auth/register"
                         )
                 )
 
@@ -145,8 +143,6 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/register",
-                                //"/auth/csrf",
-                                "/auth/validate",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
