@@ -1,22 +1,13 @@
 # =========================
 # DEVELOPMENT CONFIGURATION
 # =========================
-# This configuration is used ONLY for local development.
-# It prioritizes developer convenience over strict security.
-# NEVER use this profile in production.
+# Local development profile for backend service.
+# No authentication or security logic is present here.
 
 spring:
   config:
     activate:
       on-profile: dev
-
-  # --------------------------------------------------
-  # Cache (DEV)
-  # --------------------------------------------------
-  cache:
-    type: caffeine
-    caffeine:
-      spec: maximumSize=10000,expireAfterWrite=2m
 
   # --------------------------------------------------
   # Database (DEV)
@@ -28,12 +19,22 @@ spring:
     driver-class-name: org.postgresql.Driver
 
   # --------------------------------------------------
+  # Flyway (DEV)
+  # --------------------------------------------------
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    schemas: app
+    default-schema: app
+    create-schemas: true
+
+  # --------------------------------------------------
   # JPA / Hibernate (DEV)
   # --------------------------------------------------
   jpa:
     hibernate:
-      ddl-auto: update
-      # FORBIDDEN in production
+      ddl-auto: validate
+      # Flyway is the source of truth
 
     show-sql: true
     open-in-view: false
@@ -43,16 +44,6 @@ spring:
 # =========================
 server:
   port: 8080
-  # Local HTTP port for development
-  # In production, traffic comes through Nginx / Gateway
-
-# =========================
-# Security (DEV)
-# =========================
-security:
-  jwt:
-    secret: ${JWT_SECRET:dev-secret-change-me-please-32chars-min-123456}
-    expiration-minutes: 60
 
 # =========================
 # Logging (DEV)
@@ -60,7 +51,5 @@ security:
 logging:
   level:
     root: INFO
-    at.campus.auth: DEBUG
-    org.springframework.security: TRACE
-    org.springframework.security.web.csrf: TRACE
-    org.springframework.security.web.FilterChainProxy: TRACE
+    at.campus.backend: DEBUG
+    org.flywaydb: INFO

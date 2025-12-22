@@ -1,22 +1,13 @@
 # =========================
 # PRODUCTION CONFIGURATION
 # =========================
-# This configuration is used in real production environments.
-# All sensitive values MUST be injected via environment variables.
-# This file is SAFE to commit to version control.
+# Backend service production profile.
+# Authentication is handled externally (Nginx + Auth Service).
 
 spring:
   config:
     activate:
       on-profile: prod
-
-  # -------------------------------------------------
-  # Database migration (Flyway)
-  # -------------------------------------------------
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
 
   # -------------------------------------------------
   # Database (PROD)
@@ -28,16 +19,21 @@ spring:
     driver-class-name: org.postgresql.Driver
 
   # -------------------------------------------------
+  # Flyway (PROD)
+  # -------------------------------------------------
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    schemas: app
+    default-schema: app
+    create-schemas: true
+
+  # -------------------------------------------------
   # JPA / Hibernate (PROD)
   # -------------------------------------------------
   jpa:
     hibernate:
       ddl-auto: validate
-      # validate:
-      # - validates schema against entities
-      # - does NOT modify database
-      # - REQUIRED for production safety
-
     show-sql: false
     open-in-view: false
 
@@ -46,20 +42,6 @@ spring:
 # =========================
 server:
   port: 8080
-  # Internal application port
-  # External access is handled by Nginx / Gateway
-
-# =========================
-# Security (PROD)
-# =========================
-security:
-  jwt:
-    secret: ${JWT_SECRET}
-    # MUST be injected via environment variable or secret manager
-
-    expiration-minutes: ${JWT_EXPIRATION:15}
-    # Short token lifetime
-    # Default: 15 minutes
 
 # =========================
 # Logging (PROD)
@@ -67,5 +49,5 @@ security:
 logging:
   level:
     root: INFO
-    at.campus.auth: INFO
-    org.springframework.security: WARN
+    at.campus.backend: INFO
+    org.flywaydb: INFO
