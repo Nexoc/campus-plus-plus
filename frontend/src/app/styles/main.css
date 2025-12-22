@@ -410,6 +410,82 @@ button:disabled {
   background-color: rgba(0, 0, 0, 0.04);
 }
 
+
+/* =====================================================
+   COURSES PAGE
+   ===================================================== */
+
+.courses-page {
+  max-width: 1200px;
+  margin: 3rem auto;
+  padding: 2.5rem;
+
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.courses-table {
+  width: 100%;
+  margin-top: 1.5rem;
+  border-collapse: collapse;
+}
+
+.courses-table th,
+.courses-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.courses-table th {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.courses-row:hover {
+  background-color: rgba(37, 99, 235, 0.05);
+}
+
+.courses-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.base-button.danger {
+  background-color: var(--color-danger);
+}
+
+.base-button.danger:hover {
+  background-color: #b91c1c;
+}
+
+/* =====================================================
+   COURSE FORM
+   ===================================================== */
+
+.course-form {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.course-form__title {
+  margin: 0 0 0.5rem;
+}
+
+.course-form__input {
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-size: 0.95rem;
+}
+
+
 /* =====================================================
    DARK THEME
    ===================================================== */

@@ -1,29 +1,22 @@
-# Module: Courses
+# Module: courses
 
 ## Responsibility
-Manages courses offered by the campus. Courses are the central domain
-entity to which other modules are related.
+Read-only access to course data.
 
-## Core concepts
-- Course
-- Title
-- Description
-- ECTS
-- Language
-- Abbreviation
-- Lecturers
+## Exposed API
+- GET /api/courses
+- GET /api/courses/{id}
 
-## Ownership rules
-Courses are global entities.
-Only moderators can create, update or delete courses.
+## Security
+- Authentication enforced by Nginx
+- Identity provided via UserContext
+- No JWT handling inside module
 
-## Related modules
-- studyprograms
-- reviews
-- threads
-- favourites
-- reports
-- coursesuggestions
+## Data ownership
+- Owns course data
+- Does not modify users or reviews
 
-## Database tables
-- courses
+## Notes
+- SQL-first design
+- No JPA entities
+- Repository abstraction allows future persistence changes

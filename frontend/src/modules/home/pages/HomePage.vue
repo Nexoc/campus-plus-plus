@@ -4,12 +4,6 @@
   Home page for authenticated users.
 -->
 
-<!--
-  src/modules/home/pages/HomePage.vue
-
-  Home page for authenticated users.
--->
-
 <template>
   <div class="home-page">
     <h1>Welcome</h1>
@@ -29,8 +23,19 @@
         Your access level determines which features are available to you.
       </p>
     </div>
+
+    <!-- MAIN ENTRY POINT -->
+    <RouterLink to="/courses">
+      <button class="base-button">
+        Browse courses
+      </button>
+    </RouterLink>
   </div>
 </template>
 
 <script setup lang="ts">
+/*
+  No logic.
+  Home page is navigation-only.
+*/
 </script>
