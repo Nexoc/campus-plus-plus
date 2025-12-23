@@ -77,6 +77,22 @@ jobs:
         working-directory: auth
         run: mvn test
 
+      - name: Publish JaCoCo coverage summary
+        working-directory: auth
+        continue-on-error: true
+        run: |
+          if [ -f target/site/jacoco/index.html ]; then
+            echo "## Auth module – test coverage" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            grep -A 1 "<tfoot>" target/site/jacoco/index.html \
+              | sed -n 's/.*<td class="ctr2">\([0-9]*%\)<\/td>.*/Coverage: \1/p' \
+              >> $GITHUB_STEP_SUMMARY
+          else
+            echo "JaCoCo report not found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+
+
       - name: Build backend (no tests yet)
         working-directory: backend
         run: mvn -DskipTests package

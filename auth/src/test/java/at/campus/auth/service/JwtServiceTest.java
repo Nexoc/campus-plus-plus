@@ -2,9 +2,12 @@ package at.campus.auth.service;
 
 import at.campus.auth.model.User;
 import at.campus.auth.model.UserRole;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Base64;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -103,4 +106,41 @@ class JwtServiceTest {
         // THEN
         assertFalse(shortLivedJwtService.isTokenValid(token));
     }
+
+    @Test
+    void extractAuthorities_shouldReturnEmptyList_whenNoAuthoritiesClaim() {
+        // GIVEN: manually build token without authorities
+        String token = Jwts.builder()
+                .setSubject("test@test.com")
+                .signWith(Keys.hmacShaKeyFor(
+                        Base64.getDecoder().decode("dGVzdC1zZWNyZXQtdGVzdC1zZWNyZXQtdGVzdC1zZWNyZXQ=")
+                ))
+                .compact();
+
+        // WHEN
+        List<String> authorities = jwtService.extractAuthorities(token);
+
+        // THEN
+        assertNotNull(authorities);
+        assertTrue(authorities.isEmpty());
+    }
+
+    @Test
+    void extractTokenVersion_shouldReturnZero_whenClaimMissing() {
+        // GIVEN
+        String token = Jwts.builder()
+                .setSubject("test@test.com")
+                .signWith(Keys.hmacShaKeyFor(
+                        Base64.getDecoder().decode("dGVzdC1zZWNyZXQtdGVzdC1zZWNyZXQtdGVzdC1zZWNyZXQ=")
+                ))
+                .compact();
+
+        // WHEN
+        int version = jwtService.extractTokenVersion(token);
+
+        // THEN
+        assertEquals(0, version);
+    }
+
+
 }

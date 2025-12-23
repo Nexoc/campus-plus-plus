@@ -259,4 +259,53 @@ class AuthServiceTest {
                 () -> authService.getCurrentUser()
         );
     }
+
+    @Test
+    void getCurrentUserEmail_shouldThrowException_whenNotAuthenticated() {
+        // GIVEN
+        SecurityContextHolder.clearContext();
+
+        // WHEN / THEN
+        assertThrows(
+                NullPointerException.class,
+                () -> authService.getCurrentUserEmail()
+        );
+    }
+
+    @Test
+    void changePassword_shouldThrowException_whenUserNotFound() {
+        // GIVEN
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("test@test.com", null)
+        );
+
+        when(userRepository.findByEmail("test@test.com"))
+                .thenReturn(Optional.empty());
+
+        // WHEN / THEN
+        assertThrows(
+                InvalidCredentialsException.class,
+                () -> authService.changePassword("oldPassword", "newPassword")
+        );
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void register_shouldUseEmailPrefixAsNickname_whenNicknameIsBlank() {
+        // GIVEN
+        when(userRepository.existsByEmail("test@test.com")).thenReturn(false);
+        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
+
+        // WHEN
+        authService.register("test@test.com", "password123", "   ");
+
+        // THEN
+        verify(userRepository).save(argThat(user ->
+                user.getNickname().equals("test")
+        ));
+    }
+
+
+
 }
