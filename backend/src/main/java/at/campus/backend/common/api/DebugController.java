@@ -1,9 +1,10 @@
 package at.campus.backend.common.api;
 
 import at.campus.backend.security.UserContext;
-import at.campus.backend.security.UserContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 /**
  * Debug-only controller.
@@ -20,14 +21,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DebugController {
 
-    @GetMapping("/api/debug/me")
-    public Object me() {
-        UserContext context = UserContextHolder.get();
+    private final UserContext userContext;
 
-        if (context == null) {
-            return "NO USER CONTEXT (request is unauthenticated or internal)";
+    public DebugController(UserContext userContext) {
+        this.userContext = userContext;
+    }
+
+    @GetMapping("/api/debug/me")
+    public Map<String, Object> me() {
+
+        if (userContext.getUserId() == null) {
+            return Map.of(
+                    "authenticated", false,
+                    "message", "NO USER CONTEXT"
+            );
         }
 
-        return context;
+        return Map.of(
+                "authenticated", true,
+                "userId", userContext.getUserId(),
+                "roles", userContext.getRoles()
+        );
     }
 }
+
+

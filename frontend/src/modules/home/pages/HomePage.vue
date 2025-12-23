@@ -39,19 +39,28 @@
     <!-- TEMP DEBUG -->
     <hr />
 
-    <button class="base-button" @click="debugMe">
+    <button
+      class="base-button"
+      :disabled="!auth.isAuthenticated"
+      @click="debugMe"
+    >
       Debug: /api/debug/me
     </button>
 
+
     <pre v-if="debugResult">{{ debugResult }}</pre>
     <p v-if="debugError" class="error">{{ debugError }}</p>
+
+
   </div>
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { getDebugMe } from '@/modules/home/api/debugApi'
 import { ref } from 'vue'
 
+const auth = useAuthStore()
 const debugResult = ref<string | null>(null)
 const debugError = ref<string | null>(null)
 
