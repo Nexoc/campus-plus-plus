@@ -8,9 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * UserContextFilter
@@ -28,7 +26,7 @@ import java.util.stream.Collectors;
  * EXPECTED HEADERS
  * --------------------------------------------------
  *   X-User-Id     -> unique user identifier
- *   X-User-Roles  -> comma-separated list of roles
+ *   X-User-Roles  -> single role (one role per user)
  *
  * LIFECYCLE
  * --------------------------------------------------
@@ -36,12 +34,6 @@ import java.util.stream.Collectors;
  * - Executed BEFORE controllers and services
  * - Populates request-scoped UserContext
  * - Does NOT perform authorization
- *
- * IMPORTANT
- * --------------------------------------------------
- * - This filter does NOT create UserContext manually
- * - UserContext is a @RequestScope bean
- * - Spring manages its lifecycle automatically
  */
 @Component
 public class UserContextFilter extends OncePerRequestFilter {
@@ -72,26 +64,29 @@ public class UserContextFilter extends OncePerRequestFilter {
         // Extract identity headers injected by the gateway
         // --------------------------------------------------
         String userId = request.getHeader(USER_ID_HEADER);
-        String rolesHeader = request.getHeader(USER_ROLES_HEADER);
+        String roleHeader = request.getHeader(USER_ROLES_HEADER);
 
         // --------------------------------------------------
-        // Populate UserContext ONLY if identity is present
+        // Populate UserContext ONLY if userId is present
         // --------------------------------------------------
-        // If headers are missing, the request is either:
-        // - unauthenticated
-        // - blocked earlier by Nginx
-        //
-        // Backend does NOT reject here.
-        // Access decisions belong to business logic.
-        if (userId != null && rolesHeader != null) {
-
-            Set<String> roles = Arrays.stream(rolesHeader.split(","))
-                    .map(String::trim)
-                    .filter(r -> !r.isEmpty())
-                    .collect(Collectors.toSet());
+        // If X-User-Id is missing, the request is considered
+        // unauthenticated and UserContext remains empty.
+        if (userId != null) {
 
             userContext.setUserId(userId);
-            userContext.setRoles(roles);
+
+            // --------------------------------------------------
+            // Populate role ONLY if header is present and valid
+            // --------------------------------------------------
+            // System guarantees exactly ONE role per user.
+            if (roleHeader != null) {
+                String role = roleHeader.trim();
+
+                // Ignore empty or blank roles
+                if (!role.isBlank()) {
+                    userContext.setRoles(Set.of(role));
+                }
+            }
         }
 
         // --------------------------------------------------

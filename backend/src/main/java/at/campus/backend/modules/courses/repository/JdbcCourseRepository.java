@@ -28,7 +28,7 @@ public class JdbcCourseRepository implements CourseRepository {
 
     private static final RowMapper<Course> COURSE_ROW_MAPPER = (rs, rowNum) ->
             new Course(
-                    rs.getString("id"),          // <-- ВАЖНО
+                    rs.getObject("id", UUID.class),
                     rs.getString("title"),
                     rs.getString("description"),
                     rs.getInt("ects"),
@@ -57,7 +57,7 @@ public class JdbcCourseRepository implements CourseRepository {
     }
 
     @Override
-    public Optional<Course> findById(String courseId) {
+    public Optional<Course> findById(UUID courseId) {
         String sql = """
             SELECT
                 id,
@@ -72,13 +72,13 @@ public class JdbcCourseRepository implements CourseRepository {
 
         return jdbc.query(
                 sql,
-                Map.of("id", UUID.fromString(courseId)),
+                Map.of("id", courseId),
                 COURSE_ROW_MAPPER
         ).stream().findFirst();
     }
 
     @Override
-    public List<Course> findFiltered(String studyProgramId, Integer ects) {
+    public List<Course> findFiltered(UUID studyProgramId, Integer ects) {
 
         StringBuilder sql = new StringBuilder("""
             SELECT DISTINCT
@@ -97,8 +97,8 @@ public class JdbcCourseRepository implements CourseRepository {
         Map<String, Object> params = new HashMap<>();
 
         if (studyProgramId != null) {
-            sql.append(" AND spc.program_id = :programId");
-            params.put("programId", UUID.fromString(studyProgramId));
+            sql.append(" AND spc.study_program_id = :programId");
+            params.put("programId", studyProgramId);
         }
 
         if (ects != null) {
@@ -162,14 +162,15 @@ public class JdbcCourseRepository implements CourseRepository {
     }
 
     @Override
-    public void delete(String courseId) {
+    public boolean deleteById(UUID id) {
+        String sql = "DELETE FROM app.courses WHERE id = :id";
 
-        String sql = """
-            DELETE FROM app.courses
-            WHERE id = :id
-        """;
+        int rowsAffected = jdbc.update(
+                sql,
+                Map.of("id", id)
+        );
 
-        jdbc.update(sql, Map.of("id", UUID.fromString(courseId)));
+        return rowsAffected > 0;
     }
 
     // ==================================================
@@ -178,10 +179,7 @@ public class JdbcCourseRepository implements CourseRepository {
 
     private Map<String, Object> toParams(Course course) {
         Map<String, Object> params = new HashMap<>();
-        params.put("id", course.getCourseId() != null
-                ? UUID.fromString(course.getCourseId())
-                : null
-        );
+        params.put("id", course.getCourseId());
         params.put("title", course.getTitle());
         params.put("description", course.getDescription());
         params.put("ects", course.getEcts());

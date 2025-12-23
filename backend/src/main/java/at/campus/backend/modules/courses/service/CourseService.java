@@ -11,42 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
-/**
- * CourseService
- * ==================================================
- *
- * Business service for working with courses.
- *
- * RESPONSIBILITIES
- * --------------------------------------------------
- * - Implements business use-cases for courses
- * - Applies access rules based on UserContext
- * - Delegates persistence to CourseRepository
- *
- * IMPORTANT ARCHITECTURAL RULES
- * --------------------------------------------------
- * - This service does NOT know about JWT
- * - This service does NOT know about HTTP headers
- * - This service trusts UserContext provided by the gateway
- *
- * ACCESS MODEL
- * --------------------------------------------------
- * - READ operations: allowed for all authenticated users
- * - WRITE operations: ADMIN only
- *
- * CONTROLLERS MUST:
- * --------------------------------------------------
- * - NOT perform role checks
- * - NOT contain business logic
- * - Only translate HTTP <-> service calls
- *
- * LOGGING POLICY
- * --------------------------------------------------
- * - INFO  : business actions (create/update/delete)
- * - WARN  : forbidden access, not-found situations
- * - DEBUG : read operations / filters
- */
 @Service
 public class CourseService {
 
@@ -68,15 +34,7 @@ public class CourseService {
     // READ OPERATIONS
     // ==================================================
 
-    /**
-     * Returns list of courses.
-     *
-     * Filtering is optional and controlled via query parameters.
-     *
-     * Access:
-     * - Any authenticated user
-     */
-    public List<Course> getCourses(String studyProgramId, Integer ects) {
+    public List<Course> getCourses(UUID studyProgramId, Integer ects) {
 
         log.debug(
                 "Fetching courses (studyProgramId={}, ects={})",
@@ -91,15 +49,7 @@ public class CourseService {
         return repository.findFiltered(studyProgramId, ects);
     }
 
-    /**
-     * Returns a single course by ID.
-     *
-     * Access:
-     * - Any authenticated user
-     *
-     * @throws NotFoundException if course does not exist
-     */
-    public Course getCourseById(String courseId) {
+    public Course getCourseById(UUID courseId) {
 
         log.debug(
                 "Fetching course by id={} (user={})",
@@ -124,12 +74,6 @@ public class CourseService {
     // WRITE OPERATIONS (ADMIN ONLY)
     // ==================================================
 
-    /**
-     * Creates a new course.
-     *
-     * Access:
-     * - ADMIN only
-     */
     public void createCourse(Course course) {
         requireAdmin();
 
@@ -142,14 +86,6 @@ public class CourseService {
         repository.insert(course);
     }
 
-    /**
-     * Updates an existing course.
-     *
-     * Access:
-     * - ADMIN only
-     *
-     * @throws NotFoundException if course does not exist
-     */
     public void updateCourse(Course course) {
         requireAdmin();
 
@@ -175,18 +111,18 @@ public class CourseService {
         repository.update(course);
     }
 
-    /**
-     * Deletes a course.
-     *
-     * Access:
-     * - ADMIN only
-     *
-     * @throws NotFoundException if course does not exist
-     */
-    public void deleteCourse(String courseId) {
+    public void deleteCourse(UUID courseId) {
         requireAdmin();
 
-        if (repository.findById(courseId).isEmpty()) {
+        log.info(
+                "ADMIN {} deleting course {}",
+                userContext.getUserId(),
+                courseId
+        );
+
+        boolean deleted = repository.deleteById(courseId);
+
+        if (!deleted) {
 
             log.warn(
                     "Course {} not found for delete (user={})",
@@ -198,32 +134,12 @@ public class CourseService {
                     "Course not found: " + courseId
             );
         }
-
-        log.info(
-                "ADMIN {} deleting course {}",
-                userContext.getUserId(),
-                courseId
-        );
-
-        repository.delete(courseId);
     }
 
     // ==================================================
     // ACCESS POLICY
     // ==================================================
 
-    /**
-     * Enforces ADMIN-only access.
-     *
-     * Centralized role check for write operations.
-     *
-     * IMPORTANT:
-     * - Controllers MUST NOT check roles
-     * - Repository MUST NOT check roles
-     * - All access control lives here
-     *
-     * @throws ForbiddenException if user is not ADMIN
-     */
     private void requireAdmin() {
         if (!userContext.hasRole("ADMIN")) {
 

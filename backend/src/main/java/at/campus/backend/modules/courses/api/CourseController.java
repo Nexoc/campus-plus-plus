@@ -5,7 +5,7 @@ import at.campus.backend.modules.courses.service.CourseService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -21,7 +21,7 @@ public class CourseController {
 
     @GetMapping
     public List<CourseDto> getCourses(
-            @RequestParam(required = false) String studyProgramId,
+            @RequestParam(required = false) UUID studyProgramId,
             @RequestParam(required = false) Integer ects
     ) {
         return service.getCourses(studyProgramId, ects)
@@ -31,7 +31,7 @@ public class CourseController {
     }
 
     @GetMapping("/{id}")
-    public CourseDto getById(@PathVariable String id) {
+    public CourseDto getById(@PathVariable UUID id) {
         return CourseDto.fromDomain(service.getCourseById(id));
     }
 
@@ -44,14 +44,14 @@ public class CourseController {
 
     @PutMapping("/{id}")
     public void update(
-            @PathVariable String id,
+            @PathVariable UUID id,
             @RequestBody CourseDto dto
     ) {
         service.updateCourse(dto.toDomain(id));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable UUID id) {
         service.deleteCourse(id);
     }
 }

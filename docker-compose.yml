@@ -10,7 +10,7 @@ services:
     restart: unless-stopped
 
     environment:
-      POSTGRES_DB: auth_prod
+      POSTGRES_DB: campus
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
 
@@ -18,7 +18,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_prod"]
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d campus"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,7 +49,7 @@ services:
       DB_PORT: 5432
       # PostgreSQL default port
 
-      DB_NAME: auth_prod
+      DB_NAME: campus
       # Database name
 
       DB_USERNAME: ${DB_USERNAME}
@@ -91,7 +91,7 @@ services:
 
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: auth_prod
+      DB_NAME: campus
 
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}

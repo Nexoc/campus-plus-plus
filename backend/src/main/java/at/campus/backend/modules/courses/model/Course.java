@@ -1,5 +1,7 @@
 package at.campus.backend.modules.courses.model;
 
+import java.util.UUID;
+
 /**
  * Domain model for Course.
  *
@@ -8,7 +10,7 @@ package at.campus.backend.modules.courses.model;
  */
 public class Course {
 
-    private final String courseId;
+    private final UUID courseId;
     private final String title;
     private final String description;
     private final int ects;
@@ -16,7 +18,7 @@ public class Course {
     private final String language;
 
     public Course(
-            String courseId,
+            UUID courseId,
             String title,
             String description,
             int ects,
@@ -31,7 +33,7 @@ public class Course {
         this.language = language;
     }
 
-    public String getCourseId() {
+    public UUID getCourseId() {
         return courseId;
     }
 

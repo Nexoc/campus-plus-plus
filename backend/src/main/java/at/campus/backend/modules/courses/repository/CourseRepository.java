@@ -4,6 +4,7 @@ import at.campus.backend.modules.courses.model.Course;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository abstraction for Course persistence.
@@ -13,17 +14,23 @@ import java.util.Optional;
  */
 public interface CourseRepository {
 
+    // ==================================================
     // READ
+    // ==================================================
+
     List<Course> findAll();
 
-    Optional<Course> findById(String courseId);
+    Optional<Course> findById(UUID courseId);
 
-    List<Course> findFiltered(String studyProgramId, Integer ects);
+    List<Course> findFiltered(UUID studyProgramId, Integer ects);
 
+    // ==================================================
     // WRITE (ADMIN only – enforced in service)
+    // ==================================================
+
     void insert(Course course);
 
     void update(Course course);
 
-    void delete(String courseId);
+    boolean deleteById(UUID id);
 }
