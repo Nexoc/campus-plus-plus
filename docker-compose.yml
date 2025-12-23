@@ -86,9 +86,22 @@ services:
     build: ./backend
     container_name: campus-backend
 
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: auth_prod
+
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
     expose:
       - "8080"
-      # Internal-only access (behind Nginx)
 
     networks:
       - campus-net
