@@ -128,6 +128,24 @@
 	<build>
 		<plugins>
 
+			<!-- Spring Boot: executable JAR -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+
+				<configuration>
+					<mainClass>at.campus.auth.AuthApplication</mainClass>
+				</configuration>
+			</plugin>
+
 			<!-- JaCoCo: test coverage -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -135,7 +153,6 @@
 				<version>0.8.12</version>
 
 				<executions>
-					<!-- Attach JaCoCo agent to test JVM -->
 					<execution>
 						<id>prepare-agent</id>
 						<goals>
@@ -143,7 +160,6 @@
 						</goals>
 					</execution>
 
-					<!-- Generate HTML report after tests -->
 					<execution>
 						<id>report</id>
 						<phase>test</phase>
@@ -156,6 +172,4 @@
 
 		</plugins>
 	</build>
-
-
 </project>
