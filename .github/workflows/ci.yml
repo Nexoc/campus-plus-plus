@@ -128,7 +128,8 @@ jobs:
       # VALIDATE NGINX CONFIG
       # ----------------------------------------------
       - name: Validate nginx config
-        run: docker compose run --rm nginx nginx -t
+        run: docker exec campus-nginx nginx -t
+
 
       # ----------------------------------------------
       # LOGS ON FAILURE

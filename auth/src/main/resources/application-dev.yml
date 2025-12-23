@@ -58,6 +58,14 @@ security:
     secret: ${JWT_SECRET}
     expiration-minutes: 60
 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+
 # =========================
 # Logging (DEV)
 # =========================
