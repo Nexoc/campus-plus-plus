@@ -73,8 +73,11 @@ jobs:
       # - Same command is used locally and in CI
       # - Pipeline MUST fail here if tests are red
       # --------------------------------------------------
+
       - name: Run unit tests
+        working-directory: auth
         run: mvn test
+
 
       # --------------------------------------------------
       # Cache npm dependencies (frontend)
