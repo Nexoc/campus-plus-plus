@@ -1,4 +1,6 @@
-# docker compose up -d --build
+# for dynamic frontend binding: docker compose  -f docker-compose.dev.yml up -d --build
+# enter localhost:3000 to access frontend
+# and then after frontend change: docker compose -f docker-compose.dev.yml restart frontend
 services:
   # =========================
   # PostgreSQL Database
@@ -98,11 +100,20 @@ services:
   # Frontend Service
   # =========================
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     container_name: campus-frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:80"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 80"
 
     networks:
       - campus-net
+    restart: unless-stopped
 
 
   # =========================

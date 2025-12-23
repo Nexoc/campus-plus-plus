@@ -1,6 +1,14 @@
 <template>
   <nav class="navbar">
-    <div class="navbar__brand">Campus++</div>
+    <div class="navbar__brand">
+      <router-link to="/" class="navbar__logo">
+        <img
+          src="@/assets/logo.png"
+          alt="Campus++ Logo"
+          class="navbar__logo-image"
+        />
+      </router-link>
+    </div>
 
     <div class="navbar__links">
       <!-- Guest -->
