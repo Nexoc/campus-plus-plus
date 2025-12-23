@@ -51,3 +51,10 @@ logging:
     root: INFO
     at.campus.backend: INFO
     org.flywaydb: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
