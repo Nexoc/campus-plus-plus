@@ -73,10 +73,13 @@ jobs:
       # - Same command is used locally and in CI
       # - Pipeline MUST fail here if tests are red
       # --------------------------------------------------
-
-      - name: Run unit tests
+      - name: Run auth unit tests
         working-directory: auth
         run: mvn test
+
+      - name: Build backend (no tests yet)
+        working-directory: backend
+        run: mvn -DskipTests package
 
 
       # --------------------------------------------------
