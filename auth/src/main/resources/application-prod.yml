@@ -64,6 +64,13 @@ security:
     # Short token lifetime
     # Default: 15 minutes
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+
 # =========================
 # Logging (PROD)
 # =========================

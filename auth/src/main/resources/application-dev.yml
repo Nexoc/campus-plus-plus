@@ -35,7 +35,8 @@ spring:
   # --------------------------------------------------
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
+
       # FORBIDDEN in production
 
     show-sql: true
@@ -54,7 +55,7 @@ server:
 # =========================
 security:
   jwt:
-    secret: ${JWT_SECRET:dev-secret-change-me-please-32chars-min-123456}
+    secret: ${JWT_SECRET}
     expiration-minutes: 60
 
 # =========================

@@ -1,106 +1,209 @@
 # Campus++
 
-Campus++ is a containerized web application platform for Hochschule Campus Wien.
-It is designed as a modular, secure microservice-based system with a central gateway
-and JWT-based authentication.
+[![CI Pipeline](https://github.com/Nexoc/campus-plus-plus/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Nexoc/campus-plus-plus/actions/workflows/ci.yml)
 
-The project demonstrates modern full-stack architecture using Docker, Spring Boot,
-Vue, NGINX, and PostgreSQL.
+
+Campus++ is a **containerized web application platform** developed for **Hochschule Campus Wien**.
+The project demonstrates a **modern, production-oriented full-stack architecture** based on **microservices**, **JWT authentication**, and a **central NGINX gateway**.
+
+The system is designed with **security, modularity, and clear responsibility separation** in mind and serves as an educational showcase for real-world DevOps and backend/frontend integration.
+
+---
+
+## Key Goals of the Project
+
+* Demonstrate **secure stateless authentication** using JWT
+* Centralize security logic at the **gateway level**
+* Keep backend services **authentication-agnostic**
+* Apply **clean architecture principles**
+* Use **Docker Compose** as orchestration layer
+* Apply **CI with automated unit tests and coverage**
 
 ---
 
 ## Architecture Overview
 
-Campus++ consists of several isolated services orchestrated via Docker Compose:
+Campus++ consists of several **isolated services**, orchestrated via **Docker Compose**.
 
-- **Frontend**  
-  Vue.js Single Page Application (SPA), served as static files via NGINX.
+Each service has a **single responsibility** and communicates via HTTP.
 
-- **NGINX Gateway**  
-  Acts as a single entry point:
-    - Serves the frontend
-    - Routes requests to backend services
-    - Performs authentication using `auth_request`
-    - Blocks unauthorized access before requests reach backend services
+### High-Level Architecture
 
-- **Auth Service**  
-  Spring Boot authentication service:
-    - User registration
-    - User login
-    - JWT issuance
-    - JWT validation endpoint for NGINX
-    - Role-based authorities
-    - Flyway database migrations
+```
+Client (Browser)
+   ↓
+NGINX Gateway
+   ├── Frontend (static files)
+   ├── Auth Service
+   └── Backend API
+        ↓
+     PostgreSQL
+```
 
-- **Backend API**  
-  Main application backend (Spring Boot):
-    - Protected behind NGINX
-    - Receives authenticated user info via headers
-    - Does not handle authentication directly
+---
 
-- **PostgreSQL**  
-  Central relational database used by services (auth, backend).
+## Services
+
+### Frontend
+
+* Vue 3 Single Page Application (SPA)
+* Built once and served as **static files**
+* No authentication logic inside frontend
+* Sends JWT in `Authorization` header
+
+---
+
+### NGINX Gateway
+
+Acts as a **single entry point** and **security gate**.
+
+Responsibilities:
+
+* Serves frontend static files
+* Routes requests to backend services
+* Performs authentication via `auth_request`
+* Blocks unauthenticated or unauthorized requests
+* Forwards user information via headers
+
+NGINX ensures that **no request reaches backend services without validation**.
+
+---
+
+### Auth Service
+
+Spring Boot authentication service responsible for:
+
+* User registration
+* User login
+* Password hashing
+* JWT issuance
+* JWT validation endpoint for NGINX
+* Role-based authorities
+* Token versioning (server-side token revocation)
+* Flyway database migrations
+
+This service is the **only component that understands JWT structure**.
+
+---
+
+### Backend API
+
+Main application backend (Spring Boot).
+
+Key principles:
+
+* Fully protected behind NGINX
+* Never parses JWT directly
+* Trusts headers provided by NGINX
+* Focuses exclusively on business logic
+
+Authentication is treated as an **external concern**.
+
+---
+
+### PostgreSQL
+
+* Central relational database
+* Used by auth and backend services
+* Schema managed via Flyway migrations
+* No manual schema manipulation
 
 ---
 
 ## Tech Stack
 
 ### Frontend
-- Vue 3
-- Vue Router
-- Axios
+
+* Vue 3
+* Vue Router
+* Axios
 
 ### Backend
-- Java 21
-- Spring Boot 3
-- Spring Security (JWT, stateless)
-- Spring Data JPA
-- Hibernate
-- Flyway (database migrations)
+
+* Java 21
+* Spring Boot 3
+* Spring Security (stateless, JWT)
+* Spring Data JPA
+* Hibernate
+* Flyway
 
 ### Infrastructure
-- Docker
-- Docker Compose
-- NGINX (reverse proxy + API gateway)
-- PostgreSQL
+
+* Docker
+* Docker Compose
+* NGINX (reverse proxy + API gateway)
+* PostgreSQL
 
 ---
 
-## Authentication Flow (High Level)
+## Authentication Flow (Detailed)
 
 1. Client sends login request to `/auth/login`
 2. Auth service validates credentials
-3. Auth service returns JWT
-4. Client sends requests with `Authorization: Bearer <token>`
-5. NGINX:
-    - Calls `/auth/validate`
-    - Blocks request if token is invalid
-    - Forwards request to backend if token is valid
-6. Backend receives:
-    - `X-User-Id`
-    - `X-User-Roles`
+3. Auth service issues JWT
+4. Client stores JWT (e.g. memory / local storage)
+5. Client sends requests with
+   `Authorization: Bearer <token>`
+6. NGINX:
+
+    * Calls `/auth/validate`
+    * Rejects request if token is invalid
+    * Extracts user info from response
+    * Forwards request to backend
+7. Backend receives trusted headers:
+
+    * `X-User-Id`
+    * `X-User-Roles`
 
 ---
 
 ## Project Structure
+
+```
 campus-plus-plus/
-- auth/ # Auth service (Spring Boot)
-- backend/ # Main backend service
-- frontend/ # Vue frontend
-- nginx/ # NGINX configuration
-- docker-compose.yml
-- README.md
+├── auth/            # Auth service (Spring Boot)
+├── backend/         # Main backend service
+├── frontend/        # Vue frontend
+├── nginx/           # NGINX configuration
+├── docker-compose.yml
+└── README.md
+```
 
 ---
 
 ## Environment Profiles
 
-The application is designed to run with profiles:
+The application uses Spring profiles:
 
-- `dev` – local development
-- `prod` – Docker / production setup
+* `dev` – local development
+* `test` – CI / unit tests
+* `prod` – Docker / production setup
 
-Docker uses the `prod` profile by default.
+Docker uses the **prod profile by default**.
+
+---
+
+## Continuous Integration (CI)
+
+The project uses **GitHub Actions** with a multi-stage pipeline:
+
+* Auth module:
+
+    * Unit tests
+    * JaCoCo test coverage
+* Backend:
+
+    * Build only (tests planned)
+* Docker:
+
+    * Full docker-compose build
+    * NGINX config validation
+
+CI ensures:
+
+* Tests must pass before Docker build
+* Broken authentication logic blocks deployment
+* Configuration errors are detected early
 
 ---
 
@@ -108,9 +211,9 @@ Docker uses the `prod` profile by default.
 
 ### Prerequisites
 
-- Docker
-- Docker Compose (v2)
-- Ports `80`, `5432` must be free
+* Docker
+* Docker Compose v2
+* Free ports: `80`, `5432`
 
 ---
 
@@ -122,52 +225,79 @@ docker compose up -d --build
 
 This will:
 
-Build all services
-Start containers
-Run Flyway migrations automatically
-Expose the application via NGINX on port 80
+* Build all services
+* Start containers
+* Run Flyway migrations automatically
+* Expose the application via NGINX on port 80
+
+---
 
 ### Verify Running Services
+
 ```bash
 docker compose ps
 ```
 
 Check logs (example for auth service):
+
 ```bash
 docker compose logs -f auth
 ```
 
-Full Cleanup
+---
+
+### Full Cleanup
+
 ```bash
 docker compose down -v
 ```
-this will:
-- Stop all containers
-- Remove volumes
-- Delete all database data
-- Use only if you want a fresh start.
 
-API Access
+This will:
 
-- Frontend:
+* Stop all containers
+* Remove volumes
+* Delete all database data
+
+⚠ Use only if you want a **fresh start**.
+
+---
+
+## API Access
+
+### Frontend
+
+```
 http://localhost
+```
 
-- Auth endpoints:
+### Auth Endpoints
 
-POST /auth/register
+* `POST /auth/register`
+* `POST /auth/login`
+* `GET /auth/validate` (internal)
 
-POST /auth/login
+### Protected Backend
 
-GET /auth/validate (internal)
-
-- Protected backend:
-
+```
 /api/**
+```
 
+---
 
+## Design Notes
 
-### Notes
-- Authentication is stateless (JWT)
-- Backend services do not perform authentication themselves
-- NGINX is the single security gate
-- Database schema is versioned via Flyway
+* Authentication is fully stateless
+* Backend services never handle JWT directly
+* NGINX is the single security gate
+* Token revocation is handled server-side
+* Database schema is versioned and reproducible
+
+## Required GitHub Secrets
+
+- DB_HOST
+- DB_PORT
+- DB_NAME
+- DB_USERNAME
+- DB_PASSWORD
+- JWT_SECRET
+- JWT_EXPIRATION

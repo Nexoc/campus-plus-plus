@@ -1,10 +1,18 @@
 # =========================
 # TEST CONFIGURATION
 # =========================
-# Used ONLY for unit and slice tests (CI & local)
-# No external dependencies allowed here
+# Used ONLY for unit and slice tests
+# No external services (DB, Docker, network)
+# Safe for CI
 
 spring:
+  # -------------------------------------------------
+  # Activate profile
+  # -------------------------------------------------
+  config:
+    activate:
+      on-profile: test
+
   # -------------------------------------------------
   # Application
   # -------------------------------------------------
@@ -25,12 +33,13 @@ spring:
   # -------------------------------------------------
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop   # create schema for each test run
+    database-platform: org.hibernate.dialect.H2Dialect
     show-sql: false
     open-in-view: false
 
   # -------------------------------------------------
-  # Flyway DISABLED
+  # Flyway (DISABLED for unit tests)
   # -------------------------------------------------
   flyway:
     enabled: false
@@ -40,9 +49,15 @@ spring:
 # =========================
 security:
   jwt:
-    # Fake but valid-length secret for tests
-    secret: test-secret-32-characters-minimum!!
+    # Base64-encoded test secret (valid length for HMAC)
+    secret: dGVzdC1zZWNyZXQtdGVzdC1zZWNyZXQtdGVzdC1zZWNyZXQ=
     expiration-minutes: 60
+
+# =========================
+# Server (TEST)
+# =========================
+server:
+  port: 0   # random port, avoids conflicts in CI
 
 # =========================
 # Logging (TEST)
@@ -51,4 +66,4 @@ logging:
   level:
     root: WARN
     at.campus.auth: WARN
-    org.springframework.security: OFF
+    org.springframework.security: WARN

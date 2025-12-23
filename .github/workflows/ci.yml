@@ -8,9 +8,9 @@ on:
 
 jobs:
 
-  # --------------------------------------------------
+  # ==================================================
   # AUTH – UNIT TESTS + COVERAGE
-  # --------------------------------------------------
+  # ==================================================
   auth-tests:
     name: Auth – Unit Tests & Coverage
     runs-on: ubuntu-latest
@@ -53,9 +53,9 @@ jobs:
             echo "JaCoCo report not found" >> $GITHUB_STEP_SUMMARY
           fi
 
-  # --------------------------------------------------
-  # BACKEND – BUILD ONLY (NO TESTS YET)
-  # --------------------------------------------------
+  # ==================================================
+  # BACKEND – BUILD ONLY
+  # ==================================================
   backend-build:
     name: Backend – Build
     runs-on: ubuntu-latest
@@ -76,9 +76,9 @@ jobs:
         working-directory: backend
         run: mvn -DskipTests package
 
-  # --------------------------------------------------
+  # ==================================================
   # DOCKER COMPOSE – DEV (SMOKE TEST)
-  # --------------------------------------------------
+  # ==================================================
   docker-compose:
     name: Docker Compose (DEV)
     runs-on: ubuntu-latest
@@ -95,21 +95,40 @@ jobs:
         run: docker compose up -d --build
 
       # ----------------------------------------------
-      # HEALTH CHECK (instead of blind sleep)
+      # WAIT FOR AUTH CONTAINER (DOCKER HEALTHCHECK)
       # ----------------------------------------------
-      - name: Wait for auth service to be healthy
+      - name: Wait for auth service (docker health)
         run: |
-          echo "Waiting for auth service..."
+          echo "Waiting for auth container to be healthy..."
           for i in {1..20}; do
-            if curl -fs http://localhost:8080/actuator/health; then
-              echo "Auth service is UP"
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' campus-auth || echo "starting")
+            echo "Current status: $STATUS"
+            if [ "$STATUS" = "healthy" ]; then
+              echo "Auth container is healthy"
               exit 0
             fi
             sleep 3
           done
-          echo "Auth service did not become healthy"
+          echo "Auth container did not become healthy"
           docker compose logs auth
           exit 1
 
-      - name: Show auth service logs
-        run: docker compose logs auth
+      # ----------------------------------------------
+      # VALIDATE NGINX CONFIG
+      # ----------------------------------------------
+      - name: Validate nginx config
+        run: docker compose run --rm nginx nginx -t
+
+      # ----------------------------------------------
+      # LOGS ON FAILURE
+      # ----------------------------------------------
+      - name: Show all service logs (on failure)
+        if: failure()
+        run: docker compose logs
+
+      # ----------------------------------------------
+      # CLEANUP
+      # ----------------------------------------------
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v
