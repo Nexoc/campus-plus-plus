@@ -1,5 +1,12 @@
 name: CI Pipeline
 
+# --------------------------------------------------
+# Triggers
+# --------------------------------------------------
+# Run pipeline on:
+# - push to main
+# - pull requests targeting main
+# --------------------------------------------------
 on:
   push:
     branches: [ "main" ]
@@ -8,17 +15,25 @@ on:
 
 jobs:
   build:
-    name: Build & Docker Compose
+    name: Build, Test & Docker Compose (DEV)
     runs-on: ubuntu-latest
 
+    # --------------------------------------------------
+    # Global environment variables for this job
+    #
+    # IMPORTANT:
+    # - We are in DEVELOPMENT stage
+    # - Configuration is provided via GitHub Actions secrets
+    # - NO .env file is used or required
+    # --------------------------------------------------
     env:
       # -------------------------
       # Spring profile
       # -------------------------
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: test
 
       # -------------------------
-      # Database (secrets)
+      # Database configuration (from GitHub Secrets)
       # -------------------------
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_PORT: ${{ secrets.DB_PORT }}
@@ -27,32 +42,43 @@ jobs:
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
       # -------------------------
-      # JWT
+      # JWT configuration
       # -------------------------
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       JWT_EXPIRATION: 15
 
     steps:
-      # -------------------------
-      # Checkout
-      # -------------------------
+      # --------------------------------------------------
+      # Checkout repository
+      # --------------------------------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # -------------------------
-      # Cache Maven
-      # -------------------------
-      - name: Cache Maven repository
-        uses: actions/cache@v4
+      # --------------------------------------------------
+      # Set up Java 21
+      # Required for Maven build and tests
+      # --------------------------------------------------
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          path: ~/.m2/repository
-          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            maven-${{ runner.os }}-
+          distribution: temurin
+          java-version: 21
+          cache: maven
 
-      # -------------------------
-      # Cache npm
-      # -------------------------
+      # --------------------------------------------------
+      # Run unit tests
+      #
+      # Notes:
+      # - Pure unit tests (no DB, no Docker, no Spring context)
+      # - Same command is used locally and in CI
+      # - Pipeline MUST fail here if tests are red
+      # --------------------------------------------------
+      - name: Run unit tests
+        run: mvn test
+
+      # --------------------------------------------------
+      # Cache npm dependencies (frontend)
+      # --------------------------------------------------
       - name: Cache npm
         uses: actions/cache@v4
         with:
@@ -61,32 +87,40 @@ jobs:
           restore-keys: |
             npm-${{ runner.os }}-
 
-      # -------------------------
-      # Docker Buildx
-      # -------------------------
+      # --------------------------------------------------
+      # Set up Docker Buildx
+      # Required for docker compose build
+      # --------------------------------------------------
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # -------------------------
-      # Build & start containers
-      # -------------------------
+      # --------------------------------------------------
+      # Build and start Docker containers
+      #
+      # Notes:
+      # - Uses DEV profile
+      # - Uses GitHub Secrets as environment variables
+      # - Happens ONLY after unit tests pass
+      # --------------------------------------------------
       - name: Build and start containers
         run: docker compose up -d --build
 
-      # -------------------------
-      # Wait a bit for Spring Boot
-      # -------------------------
+      # --------------------------------------------------
+      # Wait for services to start
+      # (simple and sufficient for development CI)
+      # --------------------------------------------------
       - name: Wait for services to start
         run: sleep 20
 
-      # -------------------------
-      # Show Auth service logs
-      # -------------------------
+      # --------------------------------------------------
+      # Show logs of auth service
+      # Useful for debugging CI failures
+      # --------------------------------------------------
       - name: Show auth service logs
         run: docker compose logs auth
 
-      # -------------------------
-      # (Optional) Show all logs
-      # -------------------------
+      # --------------------------------------------------
+      # (Optional) Show logs of all services
+      # --------------------------------------------------
       - name: Show all services logs
         run: docker compose logs

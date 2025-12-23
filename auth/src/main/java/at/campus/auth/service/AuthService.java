@@ -79,6 +79,7 @@ public class AuthService {
             throw new EmailAlreadyExistsException(email);
         }
 
+
         String passwordHash = passwordEncoder.encode(rawPassword);
 
         User user = new User(
@@ -110,29 +111,23 @@ public class AuthService {
      * - No SecurityContext manipulation here
      * - JWT is issued only after successful authentication
      */
-    public AuthResponse login(String email, String rawPassword) {
+    public AuthResponse login(String email, String password) {
 
         log.info("Login attempt for email={}", email);
 
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, rawPassword)
+                    new UsernamePasswordAuthenticationToken(email, password)
             );
-        } catch (AuthenticationException ex) {
-            log.warn("Login failed: invalid credentials, email={}", email);
+        } catch (Exception ex) {
+            // ВАЖНО: маппим ВСЁ в доменное исключение
             throw new InvalidCredentialsException();
         }
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    log.error("Authenticated user not found in database, email={}", email);
-                    return new InvalidCredentialsException();
-                });
+                .orElseThrow(InvalidCredentialsException::new);
 
         String token = jwtService.generateToken(user);
-
-        log.info("JWT token successfully generated for email={}", email);
-
         return new AuthResponse(token);
     }
 
