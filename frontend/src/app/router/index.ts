@@ -61,6 +61,12 @@ const routes: RouteRecordRaw[] = [
   component: () => import('@/modules/courses/pages/CoursesPage.vue'),
   meta: { public: true },
 },
+  {
+  path: '/programs',
+  name: 'StudyPrograms',
+  component: () => import('@/modules/studyprograms/pages/StudyProgramsPage.vue'),
+  meta: { public: true },
+},
 
 
 ]

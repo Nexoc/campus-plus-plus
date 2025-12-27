@@ -8,27 +8,65 @@ import type { Course } from '../model/Course'
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.isAdmin)
 
-const courses = ref<Course[]>([])
+const allCourses = ref<Course[]>([])
 const editing = ref<Course | null>(null)
+const searchQuery = ref('')
+const sortBy = ref<'title' | 'ects' | 'language'>('title')
+const sortOrder = ref<'asc' | 'desc'>('asc')
 
-// -----------------------------
-// LOAD COURSES
-// -----------------------------
-async function load() {
-  courses.value = (await coursesApi.getAll()).data
+// Filtered and sorted courses
+const courses = computed(() => {
+  let filtered = allCourses.value.filter(c =>
+    c.title?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    c.language?.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+
+  filtered.sort((a, b) => {
+    let aVal: any = a[sortBy.value]
+    let bVal: any = b[sortBy.value]
+
+    if (aVal === undefined || aVal === null) aVal = ''
+    if (bVal === undefined || bVal === null) bVal = ''
+
+    if (typeof aVal === 'string') {
+      aVal = aVal.toLowerCase()
+      bVal = bVal.toLowerCase()
+    }
+
+    const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0
+    return sortOrder.value === 'asc' ? comparison : -comparison
+  })
+
+  return filtered
+})
+
+// Toggle sort
+function toggleSort(field: 'title' | 'ects' | 'language') {
+  if (sortBy.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = field
+    sortOrder.value = 'asc'
+  }
 }
 
-// -----------------------------
-// EDIT COURSE (IMPORTANT FIX)
-// -----------------------------
+// Get sort indicator
+function getSortIndicator(field: string) {
+  if (sortBy.value !== field) return ''
+  return sortOrder.value === 'asc' ? ' ↑' : ' ↓'
+}
+
+// Load courses
+async function load() {
+  allCourses.value = (await coursesApi.getAll()).data
+}
+
+// Edit course
 function editCourse(course: Course) {
-  // ❗ create a copy to avoid reactive loop
   editing.value = { ...course }
 }
 
-// -----------------------------
-// DELETE COURSE
-// -----------------------------
+// Delete course
 async function remove(courseId: string) {
   if (!confirm('Delete course?')) return
   await coursesApi.remove(courseId)
@@ -42,12 +80,43 @@ onMounted(load)
   <div class="courses-page">
     <h1>Courses</h1>
 
+    <!-- Search and Filter Bar -->
+    <div class="search-bar">
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Search courses..."
+        class="search-input"
+      />
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info">
+      Showing {{ courses.length }} of {{ allCourses.length }} courses
+    </div>
+
+    <!-- Table -->
     <table class="courses-table">
       <thead>
         <tr>
-          <th>Title</th>
-          <th>ECTS</th>
-          <th>Language</th>
+          <th
+            class="sortable"
+            @click="toggleSort('title')"
+          >
+            Title{{ getSortIndicator('title') }}
+          </th>
+          <th
+            class="sortable"
+            @click="toggleSort('ects')"
+          >
+            ECTS{{ getSortIndicator('ects') }}
+          </th>
+          <th
+            class="sortable"
+            @click="toggleSort('language')"
+          >
+            Language{{ getSortIndicator('language') }}
+          </th>
           <th v-if="isAdmin">Actions</th>
         </tr>
       </thead>
@@ -78,6 +147,12 @@ onMounted(load)
       </tbody>
     </table>
 
+    <!-- Empty state -->
+    <div v-if="courses.length === 0" class="empty-state">
+      No courses found
+    </div>
+
+    <!-- Course Form -->
     <CourseForm
       v-if="isAdmin"
       :course="editing"

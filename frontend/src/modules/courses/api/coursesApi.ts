@@ -3,11 +3,11 @@ import type { Course } from '../model/Course';
 
 export const coursesApi = {
   getAll(params?: { studyProgramId?: string; ects?: number }) {
-    return http.get<Course[]>('/api/courses', { params })
+    return http.get<Course[]>('/api/public/courses', { params })
   },
 
   getById(id: string) {
-    return http.get<Course>(`/api/courses/${id}`)
+    return http.get<Course>(`/api/public/courses/${id}`)
   },
 
   create(course: Course) {

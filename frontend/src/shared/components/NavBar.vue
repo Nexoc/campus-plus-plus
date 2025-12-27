@@ -1,16 +1,24 @@
 <template>
   <nav class="navbar">
-    <div class="navbar__brand">
-      <router-link to="/" class="navbar__logo">
-        <img
-          src="@/assets/logo.png"
-          alt="Campus++ Logo"
-          class="navbar__logo-image"
-        />
-      </router-link>
+    <div class="navbar__left">
+      <div class="navbar__brand">
+        <router-link to="/" class="navbar__logo">
+          <img
+            src="@/assets/logo.png"
+            alt="Campus++ Logo"
+            class="navbar__logo-image"
+          />
+        </router-link>
+      </div>
+
+      <div class="navbar__main-links">
+        <router-link to="/">Home</router-link>
+        <router-link to="/programs">Study Programs</router-link>
+        <router-link to="/courses">Courses</router-link>
+      </div>
     </div>
 
-    <div class="navbar__links">
+    <div class="navbar__right">
       <!-- Guest -->
       <template v-if="!isAuthenticated">
         <router-link to="/login">Login</router-link>
@@ -21,7 +29,6 @@
       <template v-else>
         <span class="navbar__user">{{ nickname }}</span>
 
-        <router-link to="/">Home</router-link>
         <router-link to="/account">Account</router-link>
 
         <router-link v-if="isAdmin" to="/admin/users">
