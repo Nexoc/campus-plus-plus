@@ -147,7 +147,11 @@ onMounted(load)
           :key="p.studyProgramId"
           class="programs-row"
         >
-          <td>{{ p.name }}</td>
+          <td>
+            <router-link :to="{ name: 'StudyProgramDetail', params: { id: p.studyProgramId, slug: (p.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') } }">
+              {{ p.name }}
+            </router-link>
+          </td>
           <td>{{ p.degree }}</td>
           <td>{{ p.semesters }}</td>
           <td>{{ p.totalEcts }}</td>

@@ -32,6 +32,11 @@ public class StudyProgramController {
         return StudyProgramDto.fromDomain(service.getProgramById(id));
     }
 
+    @GetMapping("/{id}/details")
+    public at.campus.backend.modules.studyprograms.model.StudyProgramDetailDto getDetails(@PathVariable UUID id) {
+        return service.getProgramDetails(id);
+    }
+
     // ---------- WRITE (ADMIN) ----------
 
     @PostMapping

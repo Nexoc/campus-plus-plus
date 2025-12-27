@@ -68,6 +68,20 @@ const routes: RouteRecordRaw[] = [
   meta: { public: true },
 },
 
+  {
+    path: '/programs/:id/:slug?',
+    name: 'StudyProgramDetail',
+    component: () => import('@/modules/studyprograms/pages/StudyProgramDetailPage.vue'),
+    meta: { public: true },
+  },
+
+  {
+    path: '/courses/:id/:slug?',
+    name: 'CourseDetail',
+    component: () => import('@/modules/courses/pages/CourseDetailPage.vue'),
+    meta: { public: true },
+  },
+
 
 ]
 

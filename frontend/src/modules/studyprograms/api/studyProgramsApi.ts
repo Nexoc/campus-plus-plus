@@ -10,6 +10,10 @@ export const studyProgramsApi = {
     return http.get<StudyProgram>(`/api/public/study-programs/${id}`)
   },
 
+  getDetails(id: string) {
+    return http.get(`/api/public/study-programs/${id}/details`)
+  },
+
   create(program: StudyProgram) {
     return http.post('/api/study-programs', program)
   },

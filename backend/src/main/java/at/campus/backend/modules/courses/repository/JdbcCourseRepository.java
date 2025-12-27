@@ -1,10 +1,15 @@
 package at.campus.backend.modules.courses.repository;
 
 import at.campus.backend.modules.courses.model.Course;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -17,6 +22,8 @@ import java.util.*;
 public class JdbcCourseRepository implements CourseRepository {
 
     private final NamedParameterJdbcTemplate jdbc;
+
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     public JdbcCourseRepository(NamedParameterJdbcTemplate jdbc) {
         this.jdbc = jdbc;
@@ -33,8 +40,29 @@ public class JdbcCourseRepository implements CourseRepository {
                     rs.getString("description"),
                     rs.getInt("ects"),
                     rs.getString("abbreviation"),
-                    rs.getString("language")
+                rs.getString("language"),
+                rs.getBigDecimal("sws"),
+                (Integer) rs.getObject("semester"),
+                rs.getString("kind"),
+                rs.getString("details_html"),
+                        readJson(rs, "content"),
+                        readJson(rs, "learning_outcomes"),
+                        readJson(rs, "teaching_method"),
+                        readJson(rs, "exam_method"),
+                        readJson(rs, "literature"),
+                        readJson(rs, "teaching_language"),
+                rs.getString("source_url")
             );
+
+    private static Object readJson(ResultSet rs, String column) throws SQLException {
+        String raw = rs.getString(column);
+        if (raw == null) return null;
+        try {
+            return JSON.readValue(raw, Object.class);
+        } catch (JsonProcessingException e) {
+            throw new SQLException("Failed to parse json column '" + column + "'", e);
+        }
+    }
 
     // ==================================================
     // READ
@@ -49,7 +77,18 @@ public class JdbcCourseRepository implements CourseRepository {
                 description,
                 ects,
                 abbreviation,
-                language
+                language,
+                sws,
+                semester,
+                kind,
+                details_html,
+                content,
+                learning_outcomes,
+                teaching_method,
+                exam_method,
+                literature,
+                teaching_language,
+                source_url
             FROM app.courses
         """;
 
@@ -65,7 +104,18 @@ public class JdbcCourseRepository implements CourseRepository {
                 description,
                 ects,
                 abbreviation,
-                language
+                language,
+                sws,
+                semester,
+                kind,
+                details_html,
+                content,
+                learning_outcomes,
+                teaching_method,
+                exam_method,
+                literature,
+                teaching_language,
+                source_url
             FROM app.courses
             WHERE id = :id
         """;
@@ -77,6 +127,7 @@ public class JdbcCourseRepository implements CourseRepository {
         ).stream().findFirst();
     }
 
+
     @Override
     public List<Course> findFiltered(UUID studyProgramId, Integer ects) {
 
@@ -86,8 +137,19 @@ public class JdbcCourseRepository implements CourseRepository {
                 c.title,
                 c.description,
                 c.ects,
-                c.abbreviation,
-                c.language
+                                c.abbreviation,
+                c.language,
+                c.sws,
+                c.semester,
+                c.kind,
+                c.details_html,
+                c.content,
+                c.learning_outcomes,
+                c.teaching_method,
+                c.exam_method,
+                c.literature,
+                c.teaching_language,
+                c.source_url
             FROM app.courses c
             JOIN app.study_program_courses spc
               ON c.id = spc.course_id
@@ -123,14 +185,36 @@ public class JdbcCourseRepository implements CourseRepository {
                 description,
                 ects,
                 abbreviation,
-                language
+                language,
+                sws,
+                semester,
+                kind,
+                details_html,
+                content,
+                learning_outcomes,
+                teaching_method,
+                exam_method,
+                literature,
+                teaching_language,
+                source_url
             ) VALUES (
                 :id,
                 :title,
                 :description,
                 :ects,
                 :abbreviation,
-                :language
+                :language,
+                :sws,
+                :semester,
+                :kind,
+                :detailsHtml,
+                :content,
+                :learningOutcomes,
+                :teachingMethod,
+                :examMethod,
+                :literature,
+                :teachingLanguage,
+                :sourceUrl
             )
         """;
 
@@ -154,6 +238,17 @@ public class JdbcCourseRepository implements CourseRepository {
                 ects = :ects,
                 abbreviation = :abbreviation,
                 language = :language,
+                sws = :sws,
+                semester = :semester,
+                kind = :kind,
+                details_html = :detailsHtml,
+                content = :content,
+                learning_outcomes = :learningOutcomes,
+                teaching_method = :teachingMethod,
+                exam_method = :examMethod,
+                literature = :literature,
+                teaching_language = :teachingLanguage,
+                source_url = :sourceUrl,
                 updated_at = NOW()
             WHERE id = :id
         """;
@@ -185,6 +280,17 @@ public class JdbcCourseRepository implements CourseRepository {
         params.put("ects", course.getEcts());
         params.put("abbreviation", course.getAbbreviation());
         params.put("language", course.getLanguage());
+        params.put("sws", course.getSws());
+        params.put("semester", course.getSemester());
+        params.put("kind", course.getKind());
+        params.put("detailsHtml", course.getDetailsHtml());
+        params.put("content", course.getContent());
+        params.put("learningOutcomes", course.getLearningOutcomes());
+        params.put("teachingMethod", course.getTeachingMethod());
+        params.put("examMethod", course.getExamMethod());
+        params.put("literature", course.getLiterature());
+        params.put("teachingLanguage", course.getTeachingLanguage());
+        params.put("sourceUrl", course.getSourceUrl());
         return params;
     }
 }

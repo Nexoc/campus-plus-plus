@@ -19,7 +19,18 @@ public record CourseDto(
         String description,
         int ects,
         String abbreviation,
-        String language
+        String language,
+        java.math.BigDecimal sws,
+        Integer semester,
+        String kind,
+        String detailsHtml,
+        Object content,
+        Object learningOutcomes,
+        Object teachingMethod,
+        Object examMethod,
+        Object literature,
+        Object teachingLanguage,
+        String sourceUrl
 ) {
 
     // -------------------------
@@ -32,7 +43,18 @@ public record CourseDto(
                 course.getDescription(),
                 course.getEcts(),
                 course.getAbbreviation(),
-                course.getLanguage()
+                course.getLanguage(),
+                course.getSws(),
+                course.getSemester(),
+                course.getKind(),
+                course.getDetailsHtml(),
+                course.getContent(),
+                course.getLearningOutcomes(),
+                course.getTeachingMethod(),
+                course.getExamMethod(),
+                course.getLiterature(),
+                course.getTeachingLanguage(),
+                course.getSourceUrl()
         );
     }
 
@@ -48,7 +70,18 @@ public record CourseDto(
                 description,
                 ects,
                 abbreviation,
-                language
+                language,
+                sws,
+                semester,
+                kind,
+                detailsHtml,
+                content,
+                learningOutcomes,
+                teachingMethod,
+                examMethod,
+                literature,
+                teachingLanguage,
+                sourceUrl
         );
     }
 
@@ -64,7 +97,18 @@ public record CourseDto(
                 description,
                 ects,
                 abbreviation,
-                language
+                language,
+                sws,
+                semester,
+                kind,
+                detailsHtml,
+                content,
+                learningOutcomes,
+                teachingMethod,
+                examMethod,
+                literature,
+                teachingLanguage,
+                sourceUrl
         );
     }
 }

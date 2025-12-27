@@ -54,7 +54,7 @@ public class JdbcStudyProgramRepository implements StudyProgramRepository {
     @Override
     public Optional<StudyProgram> findById(UUID id) {
         String sql = "SELECT * FROM app.study_programs WHERE id = ?";
-        List<StudyProgram> result = jdbc.query(sql, mapper, id.toString());
+        List<StudyProgram> result = jdbc.query(sql, mapper, id);
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 
@@ -74,7 +74,7 @@ public class JdbcStudyProgramRepository implements StudyProgramRepository {
 
         LocalDateTime now = LocalDateTime.now();
         jdbc.update(sql,
-                program.getId().toString(),
+            program.getId(),
                 program.getName(),
                 program.getDescription(),
                 program.getDegree(),
@@ -110,14 +110,14 @@ public class JdbcStudyProgramRepository implements StudyProgramRepository {
                 program.getStartDates(),
                 program.getSourceUrl(),
                 LocalDateTime.now(),
-                program.getId().toString()
+            program.getId()
         );
     }
 
     @Override
     public void delete(UUID id) {
         String sql = "DELETE FROM app.study_programs WHERE id = ?";
-        jdbc.update(sql, id.toString());
+        jdbc.update(sql, id);
     }
 
     private UUID toUUID(String value) {
