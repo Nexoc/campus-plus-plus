@@ -29,7 +29,7 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'home',
     component: HomePage,
-    meta: { requiresAuth: true },
+    meta: { public: true },
   },
   {
     path: '/account/change-password',
@@ -59,7 +59,7 @@ const routes: RouteRecordRaw[] = [
   path: '/courses',
   name: 'Courses',
   component: () => import('@/modules/courses/pages/CoursesPage.vue'),
-  meta: { requiresAuth: true },
+  meta: { public: true },
 },
 
 

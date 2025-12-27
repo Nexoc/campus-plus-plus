@@ -14,7 +14,7 @@
     <h1>Welcome</h1>
 
     <p class="home-subtitle">
-      You are logged in to <strong>Campus++</strong>.
+      You are on <strong>Campus++</strong>.
     </p>
 
     <div class="home-content">
