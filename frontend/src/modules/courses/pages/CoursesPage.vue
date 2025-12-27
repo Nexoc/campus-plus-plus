@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { coursesApi } from '../api/coursesApi'
-import CourseForm from '../components/CourseForm.vue'
 import type { Course } from '../model/Course'
 
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.isAdmin)
 
+const router = useRouter()
+
 const allCourses = ref<Course[]>([])
-const editing = ref<Course | null>(null)
 const searchQuery = ref('')
 const sortBy = ref<'title' | 'ects' | 'language'>('title')
 const sortOrder = ref<'asc' | 'desc'>('asc')
@@ -61,9 +62,9 @@ async function load() {
   allCourses.value = (await coursesApi.getAll()).data
 }
 
-// Edit course
+// Edit course (navigate to edit page)
 function editCourse(course: Course) {
-  editing.value = { ...course }
+  router.push({ name: 'CourseEdit', params: { id: course.courseId } })
 }
 
 // Delete course
@@ -73,12 +74,22 @@ async function remove(courseId: string) {
   await load()
 }
 
+// Create course (navigate to dedicated page)
+function goCreate() {
+  router.push({ name: 'CourseCreate' })
+}
+
 onMounted(load)
 </script>
 
 <template>
   <div class="courses-page">
-    <h1>Courses</h1>
+    <div class="header-row">
+      <h1>Courses</h1>
+      <button v-if="isAdmin" class="base-button small" @click="goCreate">
+        + Add Course
+      </button>
+    </div>
 
     <!-- Search and Filter Bar -->
     <div class="search-bar">
@@ -117,7 +128,7 @@ onMounted(load)
           >
             Language{{ getSortIndicator('language') }}
           </th>
-          <th v-if="isAdmin">Actions</th>
+          <th v-if="isAdmin" class="actions-col">Actions</th>
         </tr>
       </thead>
 
@@ -127,7 +138,7 @@ onMounted(load)
           :key="c.courseId"
           class="courses-row"
         >
-          <td>
+          <td class="title-cell">
             <router-link :to="{ name: 'CourseDetail', params: { id: c.courseId, slug: (c.title || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') } }">
               {{ c.title }}
             </router-link>
@@ -135,7 +146,7 @@ onMounted(load)
           <td>{{ c.ects }}</td>
           <td>{{ c.language }}</td>
 
-          <td v-if="isAdmin" class="courses-actions">
+          <td v-if="isAdmin" class="courses-actions actions-col">
             <button class="base-button" @click="editCourse(c)">
               Edit
             </button>
@@ -155,12 +166,5 @@ onMounted(load)
     <div v-if="courses.length === 0" class="empty-state">
       No courses found
     </div>
-
-    <!-- Course Form -->
-    <CourseForm
-      v-if="isAdmin"
-      :course="editing"
-      @saved="() => { editing = null; load() }"
-    />
   </div>
 </template>

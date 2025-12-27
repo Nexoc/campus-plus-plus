@@ -208,12 +208,12 @@ public class JdbcCourseRepository implements CourseRepository {
                 :semester,
                 :kind,
                 :detailsHtml,
-                :content,
-                :learningOutcomes,
-                :teachingMethod,
-                :examMethod,
-                :literature,
-                :teachingLanguage,
+                CAST(:content AS jsonb),
+                CAST(:learningOutcomes AS jsonb),
+                CAST(:teachingMethod AS jsonb),
+                CAST(:examMethod AS jsonb),
+                CAST(:literature AS jsonb),
+                CAST(:teachingLanguage AS jsonb),
                 :sourceUrl
             )
         """;
@@ -242,12 +242,12 @@ public class JdbcCourseRepository implements CourseRepository {
                 semester = :semester,
                 kind = :kind,
                 details_html = :detailsHtml,
-                content = :content,
-                learning_outcomes = :learningOutcomes,
-                teaching_method = :teachingMethod,
-                exam_method = :examMethod,
-                literature = :literature,
-                teaching_language = :teachingLanguage,
+                content = CAST(:content AS jsonb),
+                learning_outcomes = CAST(:learningOutcomes AS jsonb),
+                teaching_method = CAST(:teachingMethod AS jsonb),
+                exam_method = CAST(:examMethod AS jsonb),
+                literature = CAST(:literature AS jsonb),
+                teaching_language = CAST(:teachingLanguage AS jsonb),
                 source_url = :sourceUrl,
                 updated_at = NOW()
             WHERE id = :id
@@ -284,13 +284,23 @@ public class JdbcCourseRepository implements CourseRepository {
         params.put("semester", course.getSemester());
         params.put("kind", course.getKind());
         params.put("detailsHtml", course.getDetailsHtml());
-        params.put("content", course.getContent());
-        params.put("learningOutcomes", course.getLearningOutcomes());
-        params.put("teachingMethod", course.getTeachingMethod());
-        params.put("examMethod", course.getExamMethod());
-        params.put("literature", course.getLiterature());
-        params.put("teachingLanguage", course.getTeachingLanguage());
+        params.put("content", writeJson(course.getContent()));
+        params.put("learningOutcomes", writeJson(course.getLearningOutcomes()));
+        params.put("teachingMethod", writeJson(course.getTeachingMethod()));
+        params.put("examMethod", writeJson(course.getExamMethod()));
+        params.put("literature", writeJson(course.getLiterature()));
+        params.put("teachingLanguage", writeJson(course.getTeachingLanguage()));
         params.put("sourceUrl", course.getSourceUrl());
         return params;
+    }
+
+    private static String writeJson(Object value) {
+        if (value == null) return null;
+        if (value instanceof String s) return s;
+        try {
+            return JSON.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Failed to serialize course field to JSON", e);
+        }
     }
 }

@@ -229,6 +229,13 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.base-button.small {
+  width: auto;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 /* =====================================================
    FORM / PAGE ERRORS
    ===================================================== */
@@ -440,7 +447,7 @@ button:disabled {
    ===================================================== */
 
 .courses-page {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 3rem auto;
   padding: 2.5rem;
 
@@ -453,6 +460,20 @@ button:disabled {
   margin-top: 0;
   margin-bottom: 1.5rem;
   color: var(--color-text);
+}
+
+/* Header Row */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.header-row h1 {
+  margin: 0;
+  flex: 1;
+  text-align: left;
 }
 
 /* Search Bar */
@@ -498,42 +519,135 @@ button:disabled {
   font-size: 1rem;
 }
 
-.courses-table {
+.courses-table,
+.programs-table {
   width: 100%;
   margin-top: 1.5rem;
   border-collapse: collapse;
+  table-layout: fixed;
+  border-spacing: 0;
 }
 
 .courses-table th,
-.courses-table td {
+.courses-table td,
+.programs-table th,
+.programs-table td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-border);
   text-align: left;
+  vertical-align: middle;
 }
 
-.courses-table th {
+.courses-table tbody tr,
+.programs-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.courses-table tbody tr:last-child,
+.programs-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.courses-table th,
+.programs-table th {
   font-size: 0.85rem;
   color: var(--color-text-muted);
   font-weight: 600;
+  border-bottom: 2px solid var(--color-border);
 }
 
-.courses-table th.sortable {
+.courses-table th.sortable,
+.programs-table th.sortable {
   cursor: pointer;
   user-select: none;
 }
 
-.courses-table th.sortable:hover {
+.courses-table th.sortable:hover,
+.programs-table th.sortable:hover {
   background-color: rgba(59, 130, 246, 0.05);
   color: var(--color-primary);
 }
 
-.courses-row:hover {
+.courses-row:hover,
+.programs-row:hover {
   background-color: rgba(37, 99, 235, 0.05);
 }
 
-.courses-actions {
+.courses-actions,
+.programs-actions {
   display: flex;
   gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.actions-col {
+  width: 13%;
+  text-align: center;
+  border: none !important;
+}
+
+.actions-col .base-button {
+  width: auto;
+  min-width: 70px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.courses-table td:first-child,
+.courses-table th:first-child,
+.programs-table td:first-child,
+.programs-table th:first-child {
+  width: 35%;
+}
+
+.courses-table td:nth-child(2),
+.courses-table th:nth-child(2) {
+  width: 17%;
+}
+
+.courses-table td:nth-child(3),
+.courses-table th:nth-child(3) {
+  width: 17%;
+}
+
+.programs-table td:nth-child(2),
+.programs-table th:nth-child(2) {
+  width: 13%;
+}
+
+.programs-table td:nth-child(3),
+.programs-table th:nth-child(3) {
+  width: 11%;
+}
+
+.programs-table td:nth-child(4),
+.programs-table th:nth-child(4) {
+  width: 11%;
+}
+
+.programs-table td:nth-child(5),
+.programs-table th:nth-child(5) {
+  width: 12%;
+}
+
+
+.programs-table td:nth-child(6),
+.programs-table th:nth-child(6) {
+  width: 12%;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.title-cell {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.title-cell a {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .base-button.danger {
@@ -549,7 +663,7 @@ button:disabled {
    ===================================================== */
 
 .programs-page {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 3rem auto;
   padding: 2.5rem;
 
@@ -564,17 +678,29 @@ button:disabled {
   color: var(--color-text);
 }
 
+.programs-page .header-row h1 {
+  margin: 0;
+  flex: 1;
+  text-align: left;
+}
+
 .programs-table {
   width: 100%;
   margin-top: 1.5rem;
   border-collapse: collapse;
 }
 
-.programs-table th,
-.programs-table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-border);
-  text-align: left;
+
+.programs-table th {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.programs-table {
+  border-bottom: 2px solid var(--color-border);
+}
 }
 
 .programs-table th {
@@ -627,6 +753,40 @@ button:disabled {
   font-size: 0.95rem;
 }
 
+/* =====================================================
+   CREATE/EDIT FORM PAGES
+   ===================================================== */
+
+.create-page,
+.edit-page {
+  max-width: 100%;
+  margin: 3rem auto;
+  padding: 2.5rem;
+
+  background: var(--color-background);
+}
+
+.form-card {
+  background: white;
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.form-card h1 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  color: var(--color-text);
+}
+
+.form-container h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: var(--color-text);
+}
 
 /* =====================================================
    DARK THEME

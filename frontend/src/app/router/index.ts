@@ -82,6 +82,34 @@ const routes: RouteRecordRaw[] = [
     meta: { public: true },
   },
 
+  {
+    path: '/courses/new',
+    name: 'CourseCreate',
+    component: () => import('@/modules/courses/pages/CourseCreatePage.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+
+  {
+    path: '/courses/:id/edit',
+    name: 'CourseEdit',
+    component: () => import('@/modules/courses/pages/CourseEditPage.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+
+  {
+    path: '/programs/new',
+    name: 'StudyProgramCreate',
+    component: () => import('@/modules/studyprograms/pages/StudyProgramCreatePage.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+
+  {
+    path: '/programs/:id/edit',
+    name: 'StudyProgramEdit',
+    component: () => import('@/modules/studyprograms/pages/StudyProgramEditPage.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+
 
 ]
 

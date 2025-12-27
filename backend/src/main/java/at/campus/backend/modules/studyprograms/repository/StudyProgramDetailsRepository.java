@@ -2,7 +2,7 @@ package at.campus.backend.modules.studyprograms.repository;
 
 import at.campus.backend.modules.studyprograms.model.Module;
 import at.campus.backend.modules.studyprograms.model.ModuleDto;
-import at.campus.backend.modules.studyprograms.model.CourseSummaryDto;
+import at.campus.backend.modules.courses.model.CourseSummaryDto;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;

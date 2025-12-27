@@ -35,23 +35,4 @@ public class CourseController {
         return CourseDto.fromDomain(service.getCourseById(id));
     }
 
-    // ---------- WRITE (ADMIN) ----------
-
-    @PostMapping
-    public void create(@RequestBody CourseDto dto) {
-        service.createCourse(dto.toDomain());
-    }
-
-    @PutMapping("/{id}")
-    public void update(
-            @PathVariable UUID id,
-            @RequestBody CourseDto dto
-    ) {
-        service.updateCourse(dto.toDomain(id));
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable UUID id) {
-        service.deleteCourse(id);
-    }
 }

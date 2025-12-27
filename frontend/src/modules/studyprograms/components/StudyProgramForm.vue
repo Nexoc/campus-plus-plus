@@ -37,7 +37,8 @@ watch(
     } else {
       resetForm()
     }
-  }
+  },
+  { immediate: true }
 )
 
 function resetForm() {
@@ -94,8 +95,8 @@ function handleCancel() {
 </script>
 
 <template>
-  <div v-if="program || form.name" class="form-container">
-    <h2>{{ program?.studyProgramId ? 'Edit' : 'Create' }} Study Program</h2>
+  <div class="form-container">
+    <h2>{{ form.studyProgramId ? 'Edit' : 'Create' }} Study Program</h2>
 
     <form @submit.prevent="handleSubmit" class="study-program-form">
       <!-- Error Message -->

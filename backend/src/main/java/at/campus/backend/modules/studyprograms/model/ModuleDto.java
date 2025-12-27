@@ -1,5 +1,6 @@
 package at.campus.backend.modules.studyprograms.model;
 
+import at.campus.backend.modules.courses.model.CourseSummaryDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;

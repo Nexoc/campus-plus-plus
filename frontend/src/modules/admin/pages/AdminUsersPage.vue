@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ensureCsrf } from '@/app/security/csrf'
+import { useAuthStore } from '@/modules/auth/store/auth.store'
 import type { UserRole } from '@/modules/admin/api/admin-user.api'
 import { useAdminUserStore } from '@/modules/admin/store/admin-user.store'
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 
 
 const adminUserStore = useAdminUserStore()
+const auth = useAuthStore()
+const currentUserId = computed(() => auth.user?.id)
 
 // --------------------------------------------------
 // LIFECYCLE
@@ -29,6 +32,12 @@ async function onChangeRole(userId: string, event: Event) {
 
   const user = adminUserStore.users.find(u => u.id === userId)
   const oldRole = user?.role
+
+  // Prevent self-demotion to avoid locking the only admin account
+  if (currentUserId.value && userId === currentUserId.value && newRole !== 'ADMIN') {
+    select.value = oldRole as string
+    return
+  }
 
   try {
     // ALWAYS bootstrap CSRF before changing role
@@ -105,7 +114,7 @@ function formatDate(value: unknown): string {
             <td>
               <select
                 :value="user.role"
-                :disabled="adminUserStore.loading"
+                :disabled="adminUserStore.loading || (currentUserId && user.id === currentUserId)"
                 @change="onChangeRole(user.id, $event)"
               >
                 <option value="VISITOR">VISITOR</option>

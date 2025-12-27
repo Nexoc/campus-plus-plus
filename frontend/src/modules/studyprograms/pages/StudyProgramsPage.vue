@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { studyProgramsApi } from '../api/studyProgramsApi'
-import StudyProgramForm from '../components/StudyProgramForm.vue'
 import type { StudyProgram } from '../model/StudyProgram'
 
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.isAdmin)
 
+const router = useRouter()
+
 const allPrograms = ref<StudyProgram[]>([])
-const editing = ref<StudyProgram | null>(null)
 const searchQuery = ref('')
 const sortBy = ref<'name' | 'degree' | 'semesters' | 'totalEcts' | 'mode' | 'language'>('name')
 const sortOrder = ref<'asc' | 'desc'>('asc')
@@ -63,9 +64,9 @@ async function load() {
   allPrograms.value = (await studyProgramsApi.getAll()).data
 }
 
-// Edit program
+// Edit program (navigate to edit page)
 function editProgram(program: StudyProgram) {
-  editing.value = { ...program }
+  router.push({ name: 'StudyProgramEdit', params: { id: program.studyProgramId } })
 }
 
 // Delete program
@@ -75,12 +76,22 @@ async function remove(programId: string) {
   await load()
 }
 
+// Create program (navigate to create page)
+function goCreate() {
+  router.push({ name: 'StudyProgramCreate' })
+}
+
 onMounted(load)
 </script>
 
 <template>
   <div class="programs-page">
-    <h1>Study Programs</h1>
+    <div class="header-row">
+      <h1>Study Programs</h1>
+      <button v-if="isAdmin" class="base-button small" @click="goCreate">
+        + Add Program
+      </button>
+    </div>
 
     <!-- Search and Filter Bar -->
     <div class="search-bar">
@@ -137,7 +148,7 @@ onMounted(load)
           >
             Language{{ getSortIndicator('language') }}
           </th>
-          <th v-if="isAdmin">Actions</th>
+          <th v-if="isAdmin" class="actions-col">Actions</th>
         </tr>
       </thead>
 
@@ -147,7 +158,7 @@ onMounted(load)
           :key="p.studyProgramId"
           class="programs-row"
         >
-          <td>
+          <td class="title-cell">
             <router-link :to="{ name: 'StudyProgramDetail', params: { id: p.studyProgramId, slug: (p.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') } }">
               {{ p.name }}
             </router-link>
@@ -158,7 +169,7 @@ onMounted(load)
           <td>{{ p.mode }}</td>
           <td>{{ p.language }}</td>
 
-          <td v-if="isAdmin" class="programs-actions">
+          <td v-if="isAdmin" class="programs-actions actions-col">
             <button class="base-button" @click="editProgram(p)">
               Edit
             </button>
@@ -178,12 +189,5 @@ onMounted(load)
     <div v-if="programs.length === 0" class="empty-state">
       No programs found
     </div>
-
-    <!-- Study Program Form -->
-    <StudyProgramForm
-      v-if="isAdmin"
-      :program="editing"
-      @saved="() => { editing = null; load() }"
-    />
   </div>
 </template>
