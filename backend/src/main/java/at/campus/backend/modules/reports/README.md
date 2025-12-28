@@ -1,21 +1,37 @@
-# Module: Reports
+
+# Module: reports
 
 ## Responsibility
-Manages reports submitted by users to flag inappropriate content.
+Manages user reports for inappropriate content. Allows users to submit reports and moderators to resolve or reject them.
 
 ## Core concepts
-- Report
-- Reason
-- Status (PENDING, RESOLVED, REJECTED)
+- Report: A user-submitted flag for inappropriate content.
+- Reason: The reason for the report.
+- Status: PENDING, RESOLVED, or REJECTED.
+
+
+## API Endpoints (ReportPrivateController)
+- `GET /api/reports` — List all reports (moderator only)
+- `POST /api/reports` — Submit a report (authenticated users)
+- `PUT /api/reports/{id}` — Resolve or reject a report (moderator only)
 
 ## Ownership rules
-Reports can be created by authenticated users.
-Only moderators can resolve or reject reports.
+- Reports can be created by any authenticated user.
+- Only moderators can resolve or reject reports.
 
 ## Related modules
-- posts
-- reviews
-- threads
+- posts: Reports can be filed against posts.
+- reviews: Reports can be filed against reviews.
+- threads: Reports can be filed against threads.
 
-## Database tables
-- reports
+## Table description
+**reports**
+| Column         | Type    | Description                       |
+| -------------- | ------- | --------------------------------- |
+| id             | UUID    | Primary key                       |
+| target_type    | String  | Type of reported entity (post, review, thread) |
+| target_id      | UUID    | ID of the reported entity         |
+| user_id        | UUID    | User who submitted the report     |
+| reason         | String  | Reason for the report             |
+| status         | String  | PENDING, RESOLVED, or REJECTED    |
+| created_at     | Date    | Creation timestamp                |
