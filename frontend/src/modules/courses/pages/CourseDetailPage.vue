@@ -73,7 +73,7 @@ onMounted(load)
       <template v-if="course">
         <h1>{{ course.title }}</h1>
         <p class="entity-meta">
-          <span v-if="course.ects"> · ECTS: {{ course.ects }}</span>
+          <span v-if="course.ects">ECTS: {{ course.ects }}</span>
           <span v-if="course.language"> · Language: {{ course.language }}</span>
           <span v-if="course.sws"> · SWS: {{ course.sws }}</span>
           <span v-if="course.semester"> · Semester: {{ course.semester }}</span>

@@ -23,7 +23,8 @@ CREATE TABLE study_programs (
     updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- Add unique constraint for (name, mode) to allow multiple programs with same name but different modes
 ALTER TABLE study_programs
-    ADD CONSTRAINT uq_study_programs_name UNIQUE (name);
+ADD CONSTRAINT study_programs_name_mode_unique UNIQUE (name, mode);
 
 -- End of V2
