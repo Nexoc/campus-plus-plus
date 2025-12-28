@@ -27,7 +27,6 @@ const form = reactive<Course>({
   title: '',
   description: '',
   ects: 0,
-  abbreviation: '',
   language: '',
   sws: 0,
   semester: 0,
@@ -66,7 +65,6 @@ function resetForm() {
     title: '',
     description: '',
     ects: 0,
-    abbreviation: '',
     language: '',
     sws: 0,
     semester: 0,
@@ -174,14 +172,6 @@ function handleCancel() {
       </div>
 
       <div class="form-row">
-        <div class="form-group">
-          <label for="abbreviation">Abbreviation</label>
-          <input
-            id="abbreviation"
-            v-model="form.abbreviation"
-            type="text"
-          />
-        </div>
 
         <div class="form-group">
           <label for="language">Language</label>

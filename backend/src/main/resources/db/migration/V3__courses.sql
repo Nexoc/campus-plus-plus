@@ -53,7 +53,6 @@ CREATE TABLE courses (
     title           VARCHAR(255) NOT NULL,
     description     TEXT,
     ects            INTEGER NOT NULL,
-    abbreviation    VARCHAR(50),
     language        VARCHAR(50) NOT NULL,
     
     -- Additional fields from scraped data

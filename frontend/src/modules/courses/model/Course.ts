@@ -14,7 +14,6 @@ export interface Course {
   title: string
   description: string
   ects: number
-  abbreviation: string
   language: string
   sws?: number
   semester?: number

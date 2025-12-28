@@ -39,7 +39,6 @@ public class JdbcCourseRepository implements CourseRepository {
                     rs.getString("title"),
                     rs.getString("description"),
                     rs.getInt("ects"),
-                    rs.getString("abbreviation"),
                 rs.getString("language"),
                 rs.getBigDecimal("sws"),
                 (Integer) rs.getObject("semester"),
@@ -76,7 +75,6 @@ public class JdbcCourseRepository implements CourseRepository {
                 title,
                 description,
                 ects,
-                abbreviation,
                 language,
                 sws,
                 semester,
@@ -103,7 +101,6 @@ public class JdbcCourseRepository implements CourseRepository {
                 title,
                 description,
                 ects,
-                abbreviation,
                 language,
                 sws,
                 semester,
@@ -137,7 +134,6 @@ public class JdbcCourseRepository implements CourseRepository {
                 c.title,
                 c.description,
                 c.ects,
-                                c.abbreviation,
                 c.language,
                 c.sws,
                 c.semester,
@@ -184,7 +180,6 @@ public class JdbcCourseRepository implements CourseRepository {
                 title,
                 description,
                 ects,
-                abbreviation,
                 language,
                 sws,
                 semester,
@@ -202,7 +197,6 @@ public class JdbcCourseRepository implements CourseRepository {
                 :title,
                 :description,
                 :ects,
-                :abbreviation,
                 :language,
                 :sws,
                 :semester,
@@ -236,7 +230,6 @@ public class JdbcCourseRepository implements CourseRepository {
                 title = :title,
                 description = :description,
                 ects = :ects,
-                abbreviation = :abbreviation,
                 language = :language,
                 sws = :sws,
                 semester = :semester,
@@ -278,7 +271,6 @@ public class JdbcCourseRepository implements CourseRepository {
         params.put("title", course.getTitle());
         params.put("description", course.getDescription());
         params.put("ects", course.getEcts());
-        params.put("abbreviation", course.getAbbreviation());
         params.put("language", course.getLanguage());
         params.put("sws", course.getSws());
         params.put("semester", course.getSemester());

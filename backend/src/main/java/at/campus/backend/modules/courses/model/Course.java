@@ -14,7 +14,6 @@ public class Course {
     private final String title;
     private final String description;
     private final int ects;
-    private final String abbreviation;
     private final String language;
     private final java.math.BigDecimal sws;
     private final Integer semester;
@@ -33,7 +32,6 @@ public class Course {
             String title,
             String description,
             int ects,
-            String abbreviation,
             String language,
             java.math.BigDecimal sws,
             Integer semester,
@@ -51,7 +49,6 @@ public class Course {
         this.title = title;
         this.description = description;
         this.ects = ects;
-        this.abbreviation = abbreviation;
         this.language = language;
         this.sws = sws;
         this.semester = semester;
@@ -80,10 +77,6 @@ public class Course {
 
     public int getEcts() {
         return ects;
-    }
-
-    public String getAbbreviation() {
-        return abbreviation;
     }
 
     public String getLanguage() {
