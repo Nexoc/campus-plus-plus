@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EntityForm from '@/shared/components/EntityForm.vue'
 import { ref, watch } from 'vue'
 import { studyProgramsApi } from '../api/studyProgramsApi'
 import type { StudyProgram } from '../model/StudyProgram'
@@ -95,20 +96,17 @@ function handleCancel() {
 </script>
 
 <template>
-  <div class="form-container">
-    <h2>{{ form.studyProgramId ? 'Edit' : 'Create' }} Study Program</h2>
-
-    <form @submit.prevent="handleSubmit" class="study-program-form">
-      <!-- Error Message -->
-      <div v-if="error" class="error-message">
-        {{ error }}
-      </div>
-
-      <!-- Success Message -->
-      <div v-if="success" class="success-message">
-        {{ success }}
-      </div>
-
+  <EntityForm
+    :title="form.studyProgramId ? 'Edit Study Program' : 'Create Study Program'"
+    :submitLabel="loading ? 'Saving...' : 'Save'"
+    :modelValue="form"
+    :errors="error ? { general: error } : {}"
+    :success="success"
+    :showCancel="true"
+    @submit="handleSubmit"
+    @cancel="handleCancel"
+  >
+    <template #fields="{ form }">
       <div class="form-group">
         <label for="name">Program Name *</label>
         <input
@@ -205,132 +203,7 @@ function handleCancel() {
           type="url"
         />
       </div>
-
-      <div class="form-actions">
-        <button
-          type="submit"
-          class="base-button"
-          :disabled="loading"
-        >
-          {{ loading ? 'Saving...' : 'Save' }}
-        </button>
-
-        <button
-          type="button"
-          class="base-button secondary"
-          @click="handleCancel"
-          :disabled="loading"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-  </div>
+    </template>
+  </EntityForm>
 </template>
 
-<style scoped>
-.form-container {
-  margin-top: 2rem;
-  padding: 2rem;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background-color: var(--color-background-alt);
-}
-
-.form-container h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-}
-
-.study-program-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.form-group input,
-.form-group textarea {
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  font-family: inherit;
-  font-size: 0.95rem;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.form-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.base-button {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  background-color: var(--color-primary);
-  color: white;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.base-button:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
-}
-
-.base-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.base-button.secondary {
-  background-color: var(--color-border);
-  color: var(--color-text);
-}
-
-.base-button.secondary:hover:not(:disabled) {
-  background-color: var(--color-text-muted);
-}
-
-.error-message {
-  padding: 0.75rem;
-  background-color: var(--color-error-bg);
-  color: var(--color-error);
-  border-radius: 4px;
-  margin-bottom: 1rem;
-}
-
-.success-message {
-  padding: 0.75rem;
-  background-color: var(--color-success-bg);
-  color: var(--color-success);
-  border-radius: 4px;
-  margin-bottom: 1rem;
-}
-</style>

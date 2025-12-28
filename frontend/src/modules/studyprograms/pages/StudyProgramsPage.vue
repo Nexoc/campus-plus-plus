@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { studyProgramsApi } from '../api/studyProgramsApi'
 import type { StudyProgram } from '../model/StudyProgram'
+import EntityTable from '@/shared/components/EntityTable.vue'
 
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.isAdmin)
@@ -85,109 +86,61 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="programs-page">
-    <div class="header-row">
-      <h1>Study Programs</h1>
-      <button v-if="isAdmin" class="base-button small" @click="goCreate">
-        + Add Program
-      </button>
-    </div>
+  <div class="list-page">
+    <div class="page-card">
+      <div class="header-row">
+        <h1>Study Programs</h1>
+        <button v-if="isAdmin" class="base-button small" @click="goCreate">
+          + Add Program
+        </button>
+      </div>
 
-    <!-- Search and Filter Bar -->
-    <div class="search-bar">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search programs..."
-        class="search-input"
-      />
-    </div>
+      <!-- Search and Filter Bar -->
+      <div class="search-bar">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search programs..."
+          class="search-input"
+        />
+      </div>
 
-    <!-- Results Count -->
-    <div class="results-info">
-      Showing {{ programs.length }} of {{ allPrograms.length }} programs
-    </div>
+      <!-- Results Count -->
+      <div class="results-info">
+        Showing {{ programs.length }} of {{ allPrograms.length }} programs
+      </div>
 
-    <!-- Table -->
-    <table class="programs-table">
-      <thead>
-        <tr>
-          <th
-            class="sortable"
-            @click="toggleSort('name')"
-          >
-            Name{{ getSortIndicator('name') }}
-          </th>
-          <th
-            class="sortable"
-            @click="toggleSort('degree')"
-          >
-            Degree{{ getSortIndicator('degree') }}
-          </th>
-          <th
-            class="sortable"
-            @click="toggleSort('semesters')"
-          >
-            Semesters{{ getSortIndicator('semesters') }}
-          </th>
-          <th
-            class="sortable"
-            @click="toggleSort('totalEcts')"
-          >
-            Total ECTS{{ getSortIndicator('totalEcts') }}
-          </th>
-          <th
-            class="sortable"
-            @click="toggleSort('mode')"
-          >
-            Mode{{ getSortIndicator('mode') }}
-          </th>
-          <th
-            class="sortable"
-            @click="toggleSort('language')"
-          >
-            Language{{ getSortIndicator('language') }}
-          </th>
-          <th v-if="isAdmin" class="actions-col">Actions</th>
-        </tr>
-      </thead>
+      <EntityTable
+        :columns="[
+          { key: 'name', label: 'Name', sortable: true },
+          { key: 'degree', label: 'Degree', sortable: true },
+          { key: 'semesters', label: 'Semesters', sortable: true },
+          { key: 'totalEcts', label: 'Total ECTS', sortable: true },
+          { key: 'mode', label: 'Mode', sortable: true },
+          { key: 'language', label: 'Language', sortable: true }
+        ]"
+        :rows="programs"
+        rowKey="studyProgramId"
+        :hasActions="isAdmin"
+        :sortBy="sortBy"
+        :sortOrder="sortOrder"
+        @sort="toggleSort"
+      >
+        <template #name="{ row }">
+          <router-link :to="{ name: 'StudyProgramDetail', params: { id: row.studyProgramId, slug: (row.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') } }">
+            {{ row.name }}
+          </router-link>
+        </template>
+        <template #actions="{ row }">
+          <button class="base-button" @click="editProgram(row)">Edit</button>
+          <button class="base-button danger" @click="remove(row.studyProgramId)">Delete</button>
+        </template>
+      </EntityTable>
 
-      <tbody>
-        <tr
-          v-for="p in programs"
-          :key="p.studyProgramId"
-          class="programs-row"
-        >
-          <td class="title-cell">
-            <router-link :to="{ name: 'StudyProgramDetail', params: { id: p.studyProgramId, slug: (p.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') } }">
-              {{ p.name }}
-            </router-link>
-          </td>
-          <td>{{ p.degree }}</td>
-          <td>{{ p.semesters }}</td>
-          <td>{{ p.totalEcts }}</td>
-          <td>{{ p.mode }}</td>
-          <td>{{ p.language }}</td>
-
-          <td v-if="isAdmin" class="programs-actions actions-col">
-            <button class="base-button" @click="editProgram(p)">
-              Edit
-            </button>
-
-            <button
-              class="base-button danger"
-              @click="remove(p.studyProgramId!)"
-            >
-              Delete
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Empty state -->
-    <div v-if="programs.length === 0" class="empty-state">
-      No programs found
+      <!-- Empty state -->
+      <div v-if="programs.length === 0" class="empty-state">
+        No programs found
+      </div>
     </div>
   </div>
 </template>

@@ -2,44 +2,28 @@
    THEME VARIABLES — LIGHT (DEFAULT)
    ===================================================== */
 
+
 :root {
-  --color-bg: linear-gradient(
-    180deg,
-    #83888d 0%,
-    #e5e9f0 100%
-  );
-
+  --color-bg: linear-gradient(180deg, #83888d 0%, #e5e9f0 100%);
   --color-surface: #f8fafc;
-
   --color-text: #0b1220;
   --color-text-muted: #5b6475;
-
   --color-border: #d1d9e6;
-
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
   --color-danger: #dc2626;
-
   --radius-sm: 6px;
   --radius-md: 12px;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 12px 32px rgba(0,0,0,0.12);
 }
 
 
-/* =====================================================
-   GLOBAL BASE
-   ===================================================== */
 
-* {
-  box-sizing: border-box;
-}
-
+* { box-sizing: border-box; }
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-
   background: var(--color-bg);
   color: var(--color-text);
 }
@@ -49,85 +33,41 @@ body {
    NAVBAR
    ===================================================== */
 
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  height: 64px;
 
+.navbar, .navbar__left, .navbar__main-links, .navbar__right {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-
+}
+.navbar {
+  position: sticky; top: 0; z-index: 100; height: 64px;
+  justify-content: space-between;
   padding: 0 1.5rem;
-  background-color: var(--color-surface);
+  background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
-
 }
-
-.navbar__left {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
+.navbar__left { gap: 2rem; }
+.navbar__main-links, .navbar__right { gap: 1.25rem; }
+.navbar__brand { display: flex; justify-content: flex-start; }
+.navbar__logo { height: 60px; }
+.navbar__logo-image { height: 100%; }
+.navbar__links a, .navbar__main-links a, .navbar__right a {
+  color: var(--color-primary); text-decoration: none; font-size: 0.95rem;
 }
-
-.navbar__brand {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.navbar__logo {
-  height: 60px;
-}
-
-.navbar__logo-image {
-  height: 100%;
-}
-
-.navbar__main-links {
-  display: flex;
-  gap: 1.25rem;
-}
-
-.navbar__right {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.navbar__links a,
-.navbar__main-links a,
-.navbar__right a {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.navbar__links a:hover,
-.navbar__main-links a:hover,
-.navbar__right a:hover {
+.navbar__links a:hover, .navbar__main-links a:hover, .navbar__right a:hover {
   text-decoration: underline;
 }
-
-.navbar__user {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
-}
+.navbar__user { font-size: 0.9rem; color: var(--color-text-muted); }
 
 /* =====================================================
    PAGE CARDS (AUTH / ACCOUNT / HOME)
    ===================================================== */
 
-.login-page,
-.register-page,
-.account-page,
-.change-password-page,
-.home-page {
+
+.login-page, .register-page, .account-page, .change-password-page, .home-page {
   max-width: 420px;
   margin: 4rem auto;
   padding: 2.5rem;
-
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
@@ -137,381 +77,266 @@ body {
    HEADINGS
    ===================================================== */
 
-h1 {
-  margin: 0 0 1.5rem;
-  text-align: center;
-  font-size: 1.8rem;
-}
+
+h1 { margin: 0 0 1.5rem; text-align: center; font-size: 1.8rem; }
 
 /* =====================================================
    FORMS
    ===================================================== */
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
+
+form { display: flex; flex-direction: column; gap: 1.25rem; }
 
 /* =====================================================
    BASE INPUT
    ===================================================== */
 
-.base-input {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
 
-.base-input__label {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
+.base-input { display: flex; flex-direction: column; gap: 0.35rem; }
+.base-input__label { font-size: 0.85rem; color: var(--color-text-muted); }
 .base-input__field {
-  width: 100%;
-  padding: 0.65rem 0.75rem;
-  font-size: 0.95rem;
-
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-
-  background: #ffffff;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%; padding: 0.65rem 0.75rem; font-size: 0.95rem;
+  border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+/* Unified actions style for entity tables */
+.entity-actions {
+  display: flex;
+  gap: 0.5rem;
 }
-
+}
 .base-input__field:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  outline: none; border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
 }
-
-.base-input__error {
-  font-size: 0.8rem;
-  color: var(--color-danger);
+/* Remove old .programs-actions, use .entity-actions everywhere */
+.programs-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 /* =====================================================
    BUTTONS
    ===================================================== */
 
-.base-button,
-button {
-  width: 100%;
-  padding: 0.7rem 1.2rem;
 
-  font-size: 1rem;
-  font-weight: 500;
-
-  border: none;
-  border-radius: var(--radius-sm);
-
-  background-color: var(--color-primary);
-  color: #ffffff;
-
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.05s;
+.base-button, button {
+  width: 100%; padding: 0.7rem 1.2rem;
+  font-size: 1rem; font-weight: 500;
+  border: none; border-radius: var(--radius-sm);
+  background: var(--color-primary); color: #fff;
+  cursor: pointer; transition: background-color 0.2s, transform 0.05s;
 }
-
-.base-button:hover,
-button:hover {
-  background-color: var(--color-primary-hover);
+.base-button:hover, button:hover { background: var(--color-primary-hover); }
+.base-button:active, button:active { transform: translateY(1px); }
+.base-button:disabled, button:disabled { opacity: 0.6; cursor: not-allowed; }
+.base-button.small { width: auto; padding: 0.5rem 1rem; font-size: 0.85rem; white-space: nowrap; }
+.base-button.danger {
+  background-color: var(--color-danger);
+  color: #fff;
 }
-
-.base-button:active,
-button:active {
-  transform: translateY(1px);
-}
-
-.base-button:disabled,
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.base-button.small {
-  width: auto;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
 /* =====================================================
    FORM / PAGE ERRORS
    ===================================================== */
 
-.form-error,
-.error {
+
+.form-error, .error {
   padding: 0.75rem 1rem;
-  background-color: #fee2e2;
-  color: #991b1b;
+  background: #fee2e2; color: #991b1b;
   border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  text-align: center;
-  margin-bottom: 1rem;
+  font-size: 0.9rem; text-align: center; margin-bottom: 1rem;
 }
 
 /* =====================================================
    ACCOUNT PAGE
    ===================================================== */
 
-.account-page {
-  text-align: center;
-}
 
-.account-card {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.account-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.account-row:last-child {
-  border-bottom: none;
-}
-
-.account-label {
-  color: var(--color-text-muted);
-}
-
-.account-value {
-  font-weight: 500;
-}
+.account-page { text-align: center; }
+.account-card { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+.account-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--color-border); }
+.account-row:last-child { border-bottom: none; }
+.account-label { color: var(--color-text-muted); }
+.account-value { font-weight: 500; }
 
 /* =====================================================
    ADMIN PAGE
    ===================================================== */
 
+
 .admin-page {
   max-width: 1200px;
   margin: 3rem auto;
   padding: 2.5rem;
-
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
-.table-wrapper {
-  margin-top: 1.5rem;
-}
+
+.table-wrapper { margin-top: 1.5rem; }
 
 /* =====================================================
    ADMIN USERS TABLE
    ===================================================== */
 
+
 .users-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
-
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.08),
-    0 10px 28px rgba(0, 0, 0, 0.12);
-
-  overflow: hidden;
-  font-size: 0.95rem;
+  width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed;
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 10px 28px rgba(0,0,0,0.12);
+  overflow: hidden; font-size: 0.95rem;
 }
 
 /* Header */
+
 .users-table thead th {
   padding: 0.85rem 1rem;
   background: linear-gradient(180deg, #eef2f7 0%, #e5e9f0 100%);
   border-bottom: 1px solid var(--color-border);
-
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-align: left;
+  font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); text-align: left;
 }
 
 /* Cells */
+
 .users-table td {
-  padding: 0.9rem 1rem;
-  vertical-align: middle;
-  border-bottom: 1px solid var(--color-border);
+  padding: 0.9rem 1rem; vertical-align: middle; border-bottom: 1px solid var(--color-border);
 }
 
-.users-table tbody tr:last-child td {
-  border-bottom: none;
-}
+
+.users-table tbody tr:last-child td { border-bottom: none; }
 
 /* Typography */
-.users-table td:nth-child(1),
-.users-table td:nth-child(2) {
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.35;
-}
 
-.users-table td:nth-child(1) {
-  font-size: 0.9rem;
+.users-table td:nth-child(1), .users-table td:nth-child(2) {
+  white-space: normal; word-break: break-word; line-height: 1.35;
 }
+.users-table td:nth-child(1) { font-size: 0.9rem; }
 
-.users-table td:nth-child(3),
-.users-table td:nth-child(4),
-.users-table td:nth-child(5),
-.users-table td:nth-child(6),
-.users-table td:nth-child(7) {
-  white-space: nowrap;
-}
 
-.users-table td:nth-child(4),
-.users-table td:nth-child(5),
-.users-table td:nth-child(6),
-.users-table td:last-child {
-  text-align: center;
-}
+.users-table td:nth-child(n+3):nth-child(-n+7) { white-space: nowrap; }
+.users-table td:nth-child(4), .users-table td:nth-child(5), .users-table td:nth-child(6), .users-table td:last-child { text-align: center; }
 
 /* Row hover */
-.users-table tbody tr {
-  transition: background-color 0.2s, transform 0.15s, box-shadow 0.15s;
-}
 
+.users-table tbody tr { transition: background-color 0.2s, transform 0.15s, box-shadow 0.15s; }
 .users-table tbody tr:hover {
-  background-color: rgba(37, 99, 235, 0.06);
-  transform: translateY(-1px);
-  box-shadow: inset 0 -1px 0 var(--color-border);
+  background: rgba(37,99,235,0.06); transform: translateY(-1px); box-shadow: inset 0 -1px 0 var(--color-border);
 }
 
 /* Select */
+
 .users-table select {
-  height: 36px;
-  padding: 0 0.6rem;
-  font-size: 0.9rem;
-  border-radius: 8px;
-  border: 1px solid var(--color-border);
-  background: #ffffff;
-  color: var(--color-text);
+  height: 36px; padding: 0 0.6rem; font-size: 0.9rem; border-radius: 8px;
+  border: 1px solid var(--color-border); background: #fff; color: var(--color-text);
 }
 
 /* Actions */
-.actions-cell {
-  display: flex;
-  justify-content: center;
-}
+
+.actions-cell { display: flex; justify-content: center; }
+
 
 .users-table button {
-  width: auto;
-  min-width: 100px;
-  padding: 0.55rem 1.1rem;
-  border-radius: 10px;
+  width: auto; min-width: 100px; padding: 0.55rem 1.1rem; border-radius: 10px;
 }
 
 /* =====================================================
    HOME PAGE
    ===================================================== */
 
-.home-content {
-  margin-top: 1.5rem;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--color-text-muted);
-}
+
+.home-content { margin-top: 1.5rem; font-size: 0.95rem; line-height: 1.6; color: var(--color-text-muted); }
 
 /* =====================================================
    THEME TOGGLE
    ===================================================== */
 
-.theme-toggle {
-  background: none;
-  border: 1px solid var(--color-border);
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  color: var(--color-text);
-  cursor: pointer;
-}
 
-.theme-toggle:hover {
-  background-color: rgba(0, 0, 0, 0.04);
+.theme-toggle {
+  background: none; border: 1px solid var(--color-border); padding: 0.35rem 0.75rem;
+  border-radius: 999px; font-size: 0.85rem; color: var(--color-text); cursor: pointer;
 }
+.theme-toggle:hover { background: rgba(0,0,0,0.04); }
+
 
 
 /* =====================================================
-   COURSES PAGE
+   PAGE LAYOUTS & CARDS (UNIFIED)
    ===================================================== */
 
-.courses-page {
-  max-width: 1400px;
-  margin: 3rem auto;
-  padding: 2.5rem;
-
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+.create-page,
+.edit-page,
+.detail-page,
+.list-page {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: var(--color-background);
 }
 
-.courses-page h1 {
+.page-card, .form-container, .EntityForm {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+  width: 100%;
+  min-width: 600px;
+  margin: 3rem auto;
+  opacity: 1;
+}
+
+.page-card h1 {
   margin-top: 0;
-  margin-bottom: 1.5rem;
+  margin-bottom: 24px;
   color: var(--color-text);
 }
 
-/* Header Row */
+/* Header Row (shared) */
 .header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
-
 .header-row h1 {
   margin: 0;
   flex: 1;
   text-align: left;
 }
 
-/* Search Bar */
+/* Search Bar (shared) */
 .search-bar {
   display: flex;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
-
 .search-input {
   flex: 1;
   max-width: 400px;
   padding: 0.75rem 1rem;
   border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background-color: var(--color-background);
-  color: var(--color-text);
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
   font-size: 0.95rem;
 }
-
 .search-input::placeholder {
   color: var(--color-text-muted);
 }
-
 .search-input:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Results Info */
+/* Results Info & Empty State (shared) */
 .results-info {
   font-size: 0.85rem;
   color: var(--color-text-muted);
   margin-bottom: 1rem;
 }
-
-/* Empty State */
 .empty-state {
   text-align: center;
   padding: 2rem;
@@ -519,211 +344,52 @@ button:disabled {
   font-size: 1rem;
 }
 
-.courses-table,
-.programs-table {
+/* Unified entity table for all entities */
+.entity-table {
   width: 100%;
   margin-top: 1.5rem;
   border-collapse: collapse;
   table-layout: fixed;
   border-spacing: 0;
 }
-
-.courses-table th,
-.courses-table td,
-.programs-table th,
-.programs-table td {
+.entity-table th,
+.entity-table td {
   padding: 0.75rem 1rem;
   text-align: left;
   vertical-align: middle;
 }
-
-.courses-table tbody tr,
-.programs-table tbody tr {
+.entity-table tbody tr {
   border-bottom: 1px solid var(--color-border);
 }
-
-.courses-table tbody tr:last-child,
-.programs-table tbody tr:last-child {
+.entity-table tbody tr:last-child {
   border-bottom: none;
 }
-
-.courses-table th,
-.programs-table th {
-  font-size: 0.85rem;
+.entity-table th {
+  font-size: 0.95rem;
   color: var(--color-text-muted);
   font-weight: 600;
   border-bottom: 2px solid var(--color-border);
 }
-
-.courses-table th.sortable,
-.programs-table th.sortable {
+.entity-table th.sortable {
   cursor: pointer;
   user-select: none;
 }
-
-.courses-table th.sortable:hover,
-.programs-table th.sortable:hover {
+.entity-table th.sortable:hover {
   background-color: rgba(59, 130, 246, 0.05);
   color: var(--color-primary);
 }
-
-.courses-row:hover,
-.programs-row:hover {
+.entity-row:hover {
   background-color: rgba(37, 99, 235, 0.05);
 }
-
-.courses-actions,
-.programs-actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  align-items: center;
-}
-
-.actions-col {
-  width: 13%;
-  text-align: center;
-  border: none !important;
-}
-
 .actions-col .base-button {
-  width: auto;
-  min-width: 70px;
   padding: 0.55rem 0.75rem;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
-
-.courses-table td:first-child,
-.courses-table th:first-child,
-.programs-table td:first-child,
-.programs-table th:first-child {
-  width: 35%;
-}
-
-.courses-table td:nth-child(2),
-.courses-table th:nth-child(2) {
-  width: 17%;
-}
-
-.courses-table td:nth-child(3),
-.courses-table th:nth-child(3) {
-  width: 17%;
-}
-
-.programs-table td:nth-child(2),
-.programs-table th:nth-child(2) {
-  width: 13%;
-}
-
-.programs-table td:nth-child(3),
-.programs-table th:nth-child(3) {
-  width: 11%;
-}
-
-.programs-table td:nth-child(4),
-.programs-table th:nth-child(4) {
-  width: 11%;
-}
-
-.programs-table td:nth-child(5),
-.programs-table th:nth-child(5) {
-  width: 12%;
-}
-
-
-.programs-table td:nth-child(6),
-.programs-table th:nth-child(6) {
-  width: 12%;
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-.title-cell {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.title-cell a {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.base-button.danger {
-  background-color: var(--color-danger);
-}
-
 .base-button.danger:hover {
   background-color: #b91c1c;
 }
-
-/* =====================================================
-   STUDY PROGRAMS PAGE
-   ===================================================== */
-
-.programs-page {
-  max-width: 1400px;
-  margin: 3rem auto;
-  padding: 2.5rem;
-
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-}
-
-.programs-page h1 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: var(--color-text);
-}
-
-.programs-page .header-row h1 {
-  margin: 0;
-  flex: 1;
-  text-align: left;
-}
-
-.programs-table {
-  width: 100%;
-  margin-top: 1.5rem;
-  border-collapse: collapse;
-}
-
-
-.programs-table th {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  font-weight: 600;
-  border-bottom: 2px solid var(--color-border);
-}
-
-.programs-table {
-  border-bottom: 2px solid var(--color-border);
-}
-}
-
-.programs-table th {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  font-weight: 600;
-}
-
-.programs-table th.sortable {
-  cursor: pointer;
-  user-select: none;
-}
-
-.programs-table th.sortable:hover {
-  background-color: rgba(59, 130, 246, 0.05);
-  color: var(--color-primary);
-}
-
-.programs-row:hover {
-  background-color: rgba(37, 99, 235, 0.05);
-}
-
-.programs-actions {
+.entity-actions {
   display: flex;
   gap: 0.5rem;
 }
@@ -732,54 +398,17 @@ button:disabled {
    COURSE FORM
    ===================================================== */
 
-.course-form {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--color-border);
 
+/* --- CourseForm.vue & StudyProgramForm.vue --- */
+.form-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-}
-
-.course-form__title {
-  margin: 0 0 0.5rem;
-}
-
-.course-form__input {
-  padding: 0.6rem 0.75rem;
-  border-radius: var(--radius-sm);
+  gap: 0;
+  margin-top: 2rem;
+  padding: 2rem;
   border: 1px solid var(--color-border);
-  font-size: 0.95rem;
-}
-
-/* =====================================================
-   CREATE/EDIT FORM PAGES
-   ===================================================== */
-
-.create-page,
-.edit-page {
-  max-width: 100%;
-  margin: 3rem auto;
-  padding: 2.5rem;
-
-  background: var(--color-background);
-}
-
-.form-card {
-  background: white;
   border-radius: 8px;
-  padding: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.form-card h1 {
-  margin-top: 0;
-  margin-bottom: 24px;
-  color: var(--color-text);
+  background-color: var(--color-background-alt, var(--color-background));
 }
 
 .form-container h2 {
@@ -788,27 +417,229 @@ button:disabled {
   color: var(--color-text);
 }
 
-/* =====================================================
-   DARK THEME
-   ===================================================== */
-html[data-theme="dark"] {
-  --color-bg: linear-gradient(
-    180deg,
-    #131c44 0%,
-    #020617 100%
-  );
-
-  --color-surface: #020617;
-
-  --color-text: #e5e7eb;
-  --color-text-muted: #94a3b8;
-
-  --color-border: #1e293b;
-
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 14px 36px rgba(0, 0, 0, 0.6);
+.course-form, .study-program-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.base-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.base-button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.base-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.base-button.secondary {
+  background-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.base-button.secondary:hover:not(:disabled) {
+  background-color: var(--color-text-muted);
+}
+
+.error-message {
+  padding: 0.75rem;
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.success-message {
+  padding: 0.75rem;
+  background-color: #dcfce7;
+  color: #166534;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+/* =====================================================
+   CREATE/EDIT FORM PAGES
+   ===================================================== */
+
+
+.create-page,
+.edit-page,
+.detail-page,
+.list-page {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+
+.page-card, .form-container, .EntityForm {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+  width: 100%;
+  min-width: 600px;
+  margin: 3rem auto;
+  opacity: 1;
+}
+
+
+.page-card h1 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  color: var(--color-text);
+}
+/* =====================================================
+   PROGRAM/COURSE DETAIL & MODULES
+   ===================================================== */
+
+
+
+.program-meta, .course-meta {
+  color: var(--color-text-muted);
+  margin: 0.5rem 0 1.5rem;
+}
+
+.program-description, .course-description {
+  margin-bottom: 2rem;
+  white-space: pre-wrap;
+}
+
+.modules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.module-card {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  background: var(--color-background);
+}
+
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.module-semester {
+  color: var(--color-text-muted);
+}
+
+.module-courses {
+  width: 100%;
+  margin-top: 0.75rem;
+  border-collapse: collapse;
+}
+
+.module-courses th,
+.module-courses td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.empty-row {
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.html-content :global(h4) {
+  margin: 0.5rem 0 0.25rem;
+}
+
+.html-content :global(p) {
+  margin: 0.35rem 0;
+}
+
+.rich-block {
+  margin-top: 0.5rem;
+}
+
+.rich-block ul,
+.rich-block ol {
+  padding-left: 1.1rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.rich-block li + li {
+  margin-top: 0.2rem;
+}
+
+.form-container h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: var(--color-text);
+}
+
+
+/* DARK THEME */
+html[data-theme="dark"] {
+  --color-bg: linear-gradient(180deg, #131c44 0%, #020617 100%);
+  --color-surface: #020617;
+  --color-text: #e5e7eb;
+  --color-text-muted: #94a3b8;
+  --color-border: #1e293b;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md: 0 14px 36px rgba(0,0,0,0.6);
+}

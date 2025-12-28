@@ -60,125 +60,61 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="program-detail-page" v-if="program">
-    <h1>{{ program.name }}</h1>
-    <p class="program-meta">
-      <span v-if="program.degree">Degree: {{ program.degree }}</span>
-      <span v-if="program.semesters"> · Semesters: {{ program.semesters }}</span>
-      <span v-if="program.totalEcts"> · ECTS: {{ program.totalEcts }}</span>
-      <span v-if="program.mode"> · Mode: {{ program.mode }}</span>
-      <span v-if="program.language"> · Language: {{ program.language }}</span>
-    </p>
-
-    <div v-if="program.description" class="program-description">
-      {{ program.description }}
-    </div>
-
-    <div class="modules-list">
-      <div
-        v-for="m in program.modules"
-        :key="m.moduleId"
-        class="module-card"
-      >
-        <div class="module-header">
-          <h2>{{ m.title }}</h2>
-          <span v-if="m.semester" class="module-semester">Semester {{ m.semester }}</span>
+  <div class="detail-page">
+    <div class="page-card">
+      <template v-if="program">
+        <h1>{{ program.name }}</h1>
+        <p class="entity-meta">
+          <span v-if="program.degree">Degree: {{ program.degree }}</span>
+          <span v-if="program.semesters"> · Semesters: {{ program.semesters }}</span>
+          <span v-if="program.totalEcts"> · ECTS: {{ program.totalEcts }}</span>
+          <span v-if="program.mode"> · Mode: {{ program.mode }}</span>
+          <span v-if="program.language"> · Language: {{ program.language }}</span>
+        </p>
+        <div v-if="program.description" class="entity-description">
+          {{ program.description }}
         </div>
-
-        <table class="module-courses">
-          <thead>
-            <tr>
-              <th>Course</th>
-              <th>ECTS</th>
-              <th>Language</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="c in m.courses" :key="c.courseId">
-              <td>
-                <router-link :to="{ name: 'CourseDetail', params: { id: c.courseId, slug: slugify(c.title) } }">
-                  {{ c.title }}
-                </router-link>
-              </td>
-              <td>{{ c.ects ?? '' }}</td>
-              <td>{{ c.language ?? '' }}</td>
-            </tr>
-            <tr v-if="m.courses.length === 0">
-              <td colspan="3" class="empty-row">No courses in this module</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <div class="modules-list">
+          <div
+            v-for="m in program.modules"
+            :key="m.moduleId"
+            class="module-card"
+          >
+            <div class="module-header">
+              <h2>{{ m.title }}</h2>
+              <span v-if="m.semester" class="module-semester">Semester {{ m.semester }}</span>
+            </div>
+            <table class="module-courses">
+              <thead>
+                <tr>
+                  <th>Course</th>
+                  <th>ECTS</th>
+                  <th>Language</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="c in m.courses" :key="c.courseId">
+                  <td>
+                    <router-link :to="{ name: 'CourseDetail', params: { id: c.courseId, slug: slugify(c.title) } }">
+                      {{ c.title }}
+                    </router-link>
+                  </td>
+                  <td>{{ c.ects ?? '' }}</td>
+                  <td>{{ c.language ?? '' }}</td>
+                </tr>
+                <tr v-if="m.courses.length === 0">
+                  <td colspan="3" class="empty-row">No courses in this module</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </template>
+      <template v-else>
+        <div v-if="loading">Loading...</div>
+        <div v-if="error" class="error-message">{{ error }}</div>
+      </template>
     </div>
-  </div>
-
-  <div v-else class="program-detail-page">
-    <div v-if="loading">Loading...</div>
-    <div v-if="error" class="error-message">{{ error }}</div>
   </div>
 </template>
 
-<style scoped>
-.program-detail-page {
-  max-width: 1100px;
-  margin: 3rem auto;
-  padding: 2rem;
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-}
-
-.program-meta {
-  color: var(--color-text-muted);
-  margin: 0.5rem 0 1.5rem;
-}
-
-.program-description {
-  margin-bottom: 2rem;
-}
-
-.modules-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.module-card {
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 1rem;
-  background: var(--color-background);
-}
-
-.module-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-
-.module-semester {
-  color: var(--color-text-muted);
-}
-
-.module-courses {
-  width: 100%;
-  margin-top: 0.75rem;
-  border-collapse: collapse;
-}
-
-.module-courses th,
-.module-courses td {
-  padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--color-border);
-  text-align: left;
-}
-
-.empty-row {
-  color: var(--color-text-muted);
-  text-align: center;
-}
-
-.error-message {
-  color: var(--color-error);
-}
-</style>

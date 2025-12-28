@@ -1,6 +1,6 @@
 <template>
   <div class="edit-page">
-    <div class="form-card">
+    <div class="page-card">
       <div v-if="loading" class="loading">Loading...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
       <CourseForm v-else :course="course" @saved="onSaved" />
@@ -39,38 +39,3 @@ function onSaved(updated: Course) {
 }
 </script>
 
-<style scoped>
-.edit-page {
-  padding: 24px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  background: var(--color-background);
-}
-
-.form-card {
-  background: white;
-  border-radius: 8px;
-  padding: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 100%;
-}
-
-.form-card h1 {
-  margin-top: 0;
-  margin-bottom: 24px;
-  color: var(--color-text);
-}
-
-.loading,
-.error {
-  padding: 16px;
-  text-align: center;
-}
-
-.error {
-  color: #b00;
-}
-</style>
