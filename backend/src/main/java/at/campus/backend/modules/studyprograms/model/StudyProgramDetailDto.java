@@ -15,8 +15,15 @@ public class StudyProgramDetailDto {
     public String mode;
     public Integer totalEcts;
     public String language;
+    public String buildingName;
+    public Double buildingLat;
+    public Double buildingLon;
+
+
 
     public List<ModuleDto> modules = new ArrayList<>();
+    public List<CampusBuildingDto> campusBuildings = new ArrayList<>();
+
 
     public StudyProgramDetailDto() {}
 }

@@ -19,11 +19,14 @@ public class StudyProgramService {
 
     private final StudyProgramRepository repository;
     private final StudyProgramDetailsRepository detailsRepository;
+    private final StudyProgramCampusMapRegistry campusMapRegistry;
 
     public StudyProgramService(StudyProgramRepository repository,
-                               StudyProgramDetailsRepository detailsRepository) {
+                               StudyProgramDetailsRepository detailsRepository, 
+                               StudyProgramCampusMapRegistry campusMapRegistry) {
         this.repository = repository;
         this.detailsRepository = detailsRepository;
+        this.campusMapRegistry = campusMapRegistry;
     }
 
     public List<StudyProgram> getAllPrograms() {
@@ -51,6 +54,7 @@ public class StudyProgramService {
 
         // Attach modules with nested courses
         dto.modules = detailsRepository.findModulesWithCourses(id);
+        dto.campusBuildings = campusMapRegistry.resolveBuildingsForProgramName(sp.getName());
         return dto;
     }
 
