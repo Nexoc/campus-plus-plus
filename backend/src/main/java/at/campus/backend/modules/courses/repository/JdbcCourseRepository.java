@@ -1,6 +1,7 @@
 package at.campus.backend.modules.courses.repository;
 
 import at.campus.backend.modules.courses.model.Course;
+import at.campus.backend.modules.courses.model.StudyProgramRef;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,8 +51,17 @@ public class JdbcCourseRepository implements CourseRepository {
                         readJson(rs, "exam_method"),
                         readJson(rs, "literature"),
                         readJson(rs, "teaching_language"),
-                rs.getString("source_url")
+                rs.getString("source_url"),
+                readStudyProgram(rs)
             );
+
+    private static StudyProgramRef readStudyProgram(ResultSet rs) throws SQLException {
+        UUID programId = rs.getObject("study_program_id", UUID.class);
+        String programName = rs.getString("study_program_name");
+        String programMode = rs.getString("study_program_mode");
+        if (programId == null) return null;
+        return new StudyProgramRef(programId, programName, programMode);
+    }
 
     private static Object readJson(ResultSet rs, String column) throws SQLException {
         String raw = rs.getString(column);
@@ -71,65 +81,6 @@ public class JdbcCourseRepository implements CourseRepository {
     public List<Course> findAll() {
         String sql = """
             SELECT
-                id,
-                title,
-                description,
-                ects,
-                language,
-                sws,
-                semester,
-                kind,
-                details_html,
-                content,
-                learning_outcomes,
-                teaching_method,
-                exam_method,
-                literature,
-                teaching_language,
-                source_url
-            FROM app.courses
-        """;
-
-        return jdbc.query(sql, COURSE_ROW_MAPPER);
-    }
-
-    @Override
-    public Optional<Course> findById(UUID courseId) {
-        String sql = """
-            SELECT
-                id,
-                title,
-                description,
-                ects,
-                language,
-                sws,
-                semester,
-                kind,
-                details_html,
-                content,
-                learning_outcomes,
-                teaching_method,
-                exam_method,
-                literature,
-                teaching_language,
-                source_url
-            FROM app.courses
-            WHERE id = :id
-        """;
-
-        return jdbc.query(
-                sql,
-                Map.of("id", courseId),
-                COURSE_ROW_MAPPER
-        ).stream().findFirst();
-    }
-
-
-    @Override
-    public List<Course> findFiltered(UUID studyProgramId, Integer ects) {
-
-        StringBuilder sql = new StringBuilder("""
-            SELECT DISTINCT
                 c.id,
                 c.title,
                 c.description,
@@ -145,17 +96,86 @@ public class JdbcCourseRepository implements CourseRepository {
                 c.exam_method,
                 c.literature,
                 c.teaching_language,
-                c.source_url
+                c.source_url,
+                c.study_program_id,
+                sp.name AS study_program_name,
+                sp.mode AS study_program_mode
             FROM app.courses c
-            JOIN app.study_program_courses spc
-              ON c.id = spc.course_id
+            LEFT JOIN app.study_programs sp ON c.study_program_id = sp.id
+        """;
+
+        return jdbc.query(sql, COURSE_ROW_MAPPER);
+    }
+
+    @Override
+    public Optional<Course> findById(UUID courseId) {
+        String sql = """
+            SELECT
+                c.id,
+                c.title,
+                c.description,
+                c.ects,
+                c.language,
+                c.sws,
+                c.semester,
+                c.kind,
+                c.details_html,
+                c.content,
+                c.learning_outcomes,
+                c.teaching_method,
+                c.exam_method,
+                c.literature,
+                c.teaching_language,
+                c.source_url,
+                c.study_program_id,
+                sp.name AS study_program_name,
+                sp.mode AS study_program_mode
+            FROM app.courses c
+            LEFT JOIN app.study_programs sp ON c.study_program_id = sp.id
+            WHERE c.id = :id
+        """;
+
+        return jdbc.query(
+                sql,
+                Map.of("id", courseId),
+                COURSE_ROW_MAPPER
+        ).stream().findFirst();
+    }
+
+
+    @Override
+    public List<Course> findFiltered(UUID studyProgramId, Integer ects) {
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                c.id,
+                c.title,
+                c.description,
+                c.ects,
+                c.language,
+                c.sws,
+                c.semester,
+                c.kind,
+                c.details_html,
+                c.content,
+                c.learning_outcomes,
+                c.teaching_method,
+                c.exam_method,
+                c.literature,
+                c.teaching_language,
+                c.source_url,
+                c.study_program_id,
+                sp.name AS study_program_name,
+                sp.mode AS study_program_mode
+            FROM app.courses c
+            LEFT JOIN app.study_programs sp ON c.study_program_id = sp.id
             WHERE 1 = 1
         """);
 
         Map<String, Object> params = new HashMap<>();
 
         if (studyProgramId != null) {
-            sql.append(" AND spc.study_program_id = :programId");
+            sql.append(" AND c.study_program_id = :programId");
             params.put("programId", studyProgramId);
         }
 

@@ -9,6 +9,12 @@ export type RichBlock =
       ordered?: boolean
     }
 
+export interface StudyProgramRef {
+  id: string
+  name: string
+  mode?: string
+}
+
 export interface Course {
   courseId?: string
   title: string
@@ -26,4 +32,5 @@ export interface Course {
   literature?: RichBlock[]
   teachingLanguage?: RichBlock[]
   sourceUrl?: string
+  studyProgram?: StudyProgramRef
 }

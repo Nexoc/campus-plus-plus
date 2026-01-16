@@ -26,6 +26,7 @@ public class Course {
     private final Object literature;
     private final Object teachingLanguage;
     private final String sourceUrl;
+    private final StudyProgramRef studyProgram;
 
     public Course(
             UUID courseId,
@@ -43,7 +44,8 @@ public class Course {
                 Object examMethod,
                 Object literature,
                 Object teachingLanguage,
-            String sourceUrl
+            String sourceUrl,
+            StudyProgramRef studyProgram
     ) {
         this.courseId = courseId;
         this.title = title;
@@ -61,6 +63,7 @@ public class Course {
         this.literature = literature;
         this.teachingLanguage = teachingLanguage;
         this.sourceUrl = sourceUrl;
+        this.studyProgram = studyProgram;
     }
 
     public UUID getCourseId() {
@@ -104,5 +107,7 @@ public class Course {
     public Object getTeachingLanguage() { return teachingLanguage; }
 
     public String getSourceUrl() { return sourceUrl; }
+
+    public StudyProgramRef getStudyProgram() { return studyProgram; }
 
 }

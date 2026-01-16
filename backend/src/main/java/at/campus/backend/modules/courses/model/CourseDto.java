@@ -29,7 +29,8 @@ public record CourseDto(
         Object examMethod,
         Object literature,
         Object teachingLanguage,
-        String sourceUrl
+        String sourceUrl,
+        StudyProgramRef studyProgram
 ) {
 
     // -------------------------
@@ -52,7 +53,8 @@ public record CourseDto(
                 course.getExamMethod(),
                 course.getLiterature(),
                 course.getTeachingLanguage(),
-                course.getSourceUrl()
+                course.getSourceUrl(),
+                course.getStudyProgram()
         );
     }
 
@@ -78,7 +80,8 @@ public record CourseDto(
                 examMethod,
                 literature,
                 teachingLanguage,
-                sourceUrl
+                sourceUrl,
+                null
         );
     }
 
@@ -104,7 +107,8 @@ public record CourseDto(
                 examMethod,
                 literature,
                 teachingLanguage,
-                sourceUrl
+                sourceUrl,
+                null
         );
     }
 }
