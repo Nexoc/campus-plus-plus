@@ -12,7 +12,7 @@
   >
     <StarIcon :size="size" :filled="isFavourited" />
     <span v-if="showLabel" class="favourite-button__label">
-      {{ isFavourited ? 'Remove from favourite' : 'Add to favourite' }}
+      {{ isFavourited ? 'Remove from favourites' : 'Add to favourites' }}
     </span>
   </button>
 </template>
