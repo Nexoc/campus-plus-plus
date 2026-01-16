@@ -2,35 +2,12 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { studyProgramsApi } from '../api/studyProgramsApi'
+import CampusMap from '../components/CampusMap.vue'
+import type { StudyProgramDetail } from '../model/StudyProgramDetail'
 
-interface CourseSummaryDto {
-  courseId: string
-  title: string
-  ects?: number
-  language?: string
-}
-
-interface ModuleDto {
-  moduleId: string
-  title: string
-  semester?: number
-  courses: CourseSummaryDto[]
-}
-
-interface StudyProgramDetailDto {
-  studyProgramId: string
-  name: string
-  description?: string
-  degree?: string
-  semesters?: number
-  mode?: string
-  totalEcts?: number
-  language?: string
-  modules: ModuleDto[]
-}
 
 const route = useRoute()
-const program = ref<StudyProgramDetailDto | null>(null)
+const program = ref<StudyProgramDetail | null>(null)
 const loading = ref(false)
 const error = ref('')
 
@@ -48,7 +25,8 @@ async function load() {
   error.value = ''
   try {
     const id = route.params.id as string
-    program.value = (await studyProgramsApi.getDetails(id)).data
+    const response = await studyProgramsApi.getDetails(id)
+    program.value = response.data
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load program'
   } finally {
@@ -74,6 +52,7 @@ onMounted(load)
         <div v-if="program.description" class="entity-description">
           {{ program.description }}
         </div>
+        <CampusMap :buildings="program.campusBuildings ?? []" />
         <div class="modules-list">
           <div
             v-for="m in program.modules"
