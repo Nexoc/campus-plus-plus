@@ -153,7 +153,7 @@ public class SecurityConfig {
 
                         // Admin endpoints
                         // Role-based access control
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("Moderator")
 
                         // Any other endpoint requires authentication
                         .anyRequest().authenticated()

@@ -91,7 +91,7 @@ public class AdminUserService {
     @Transactional(readOnly = true)
     public List<AdminUserResponse> listUsers() {
 
-        log.info("Listing all users (admin)");
+        log.info("Listing all users (Moderator)");
 
         return userRepository.findAll().stream()
                 .map(user -> new AdminUserResponse(

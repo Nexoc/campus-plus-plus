@@ -123,7 +123,7 @@ public class GlobalExceptionHandler {
      *   "timestamp": "...",
      *   "status": 403,
      *   "error": "FORBIDDEN",
-     *   "message": "ADMIN role required"
+     *   "message": "Moderator role required"
      * }
      */
     private Map<String, Object> errorBody(

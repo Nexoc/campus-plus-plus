@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.UUID;
 
-@Schema(description = "Admin request to change user role")
+@Schema(description = "Moderator request to change user role")
 public class AdminChangeRoleRequest {
 
     @Schema(
@@ -20,7 +20,7 @@ public class AdminChangeRoleRequest {
 
     @Schema(
             description = "New role for the user",
-            example = "ADMIN"
+            example = "Moderator"
     )
     @NotNull
     private UserRole role;

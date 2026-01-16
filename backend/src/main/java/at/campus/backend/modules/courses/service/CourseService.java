@@ -71,7 +71,7 @@ public class CourseService {
     }
 
     // ==================================================
-    // WRITE OPERATIONS (ADMIN ONLY)
+    // WRITE OPERATIONS (Moderator  ONLY)
     // ==================================================
 
     public void createCourse(Course course) {
@@ -141,14 +141,14 @@ public class CourseService {
     // ==================================================
 
     private void requireAdmin() {
-        if (!userContext.hasRole("ADMIN")) {
+        if (!userContext.hasRole("Moderator")) {
 
             log.warn(
-                    "Forbidden access: user {} tried ADMIN operation",
+                    "Forbidden access: user {} tried Moderator operation",
                     userContext.getUserId()
             );
 
-            throw new ForbiddenException("ADMIN role required");
+            throw new ForbiddenException("Moderator role required");
         }
     }
 }

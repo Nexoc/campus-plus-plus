@@ -14,11 +14,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public enum UserRole {
 
     @Schema(description = "Unauthenticated or limited-access user")
-    VISITOR,
+    Applicant,
 
     @Schema(description = "Standard authenticated user")
     STUDENT,
 
-    @Schema(description = "Administrator with elevated privileges")
-    ADMIN
+    @Schema(description = "Moderator with elevated privileges")
+    Moderator
 }
