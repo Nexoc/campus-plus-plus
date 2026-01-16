@@ -110,6 +110,15 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiresModerator: true },
   },
 
+  {
+    path: '/moderation/reviews',
+    name: 'ModerationReviews',
+    component: () => import('@/modules/reviews/pages/ModerationReviewsPage.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresModerator: true,
+    },
+  },
 
 ]
 
@@ -146,9 +155,9 @@ router.beforeEach((to) => {
   }
 
   // --------------------------------------------
-  // Admin-only pages
+  // Moderator-only pages
   // --------------------------------------------
-  if (to.meta.requiresModerator && !auth.isAdmin) {
+  if (to.meta.requiresModerator && !auth.isModerator) {
     return { name: 'home' }
   }
 

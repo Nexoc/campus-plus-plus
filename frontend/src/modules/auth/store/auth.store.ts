@@ -68,12 +68,12 @@ export const useAuthStore = defineStore('auth', {
     },
 
     /**
-     * Admin role check.
+     * Moderator role check.
      * Role information comes from backend (/auth/me),
      * NOT from JWT parsing.
      */
-    isAdmin: (state): boolean => {
-      return state.user?.role === 'Moderator'
+    isModerator: (state): boolean => {
+      return state.user?.role === 'ADMIN'
     },
   },
 

@@ -31,8 +31,8 @@
 
         <router-link to="/account">Account</router-link>
 
-        <router-link v-if="isAdmin" to="/admin/users">
-          Admin
+        <router-link v-if="isModerator" to="/moderation/reviews">
+          Moderation
         </router-link>
 
         <button @click="logout">Logout</button>
@@ -68,7 +68,7 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
-const isAdmin = computed(() => authStore.isAdmin)
+const isModerator = computed(() => authStore.isModerator)
 
 const nickname = computed(() => {
   return authStore.user?.nickname || authStore.user?.email

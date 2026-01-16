@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { coursesApi } from '../api/coursesApi'
 import type { Course, RichBlock } from '../model/Course'
+import ReviewsSection from '@/modules/reviews/components/ReviewsSection.vue'
 
 const route = useRoute()
 const course = ref<Course | null>(null)
@@ -112,6 +113,9 @@ onMounted(load)
           <h3>Source</h3>
           <a :href="course.sourceUrl" target="_blank" rel="noreferrer">{{ course.sourceUrl }}</a>
         </div>
+
+        <!-- Reviews Section -->
+        <ReviewsSection :courseId="course.courseId!" />
       </template>
       <template v-else>
         <div v-if="loading">Loading...</div>
