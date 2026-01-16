@@ -5,7 +5,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { coursesApi } from '../api/coursesApi'
 import type { Course } from '../model/Course'
-import EntityTable from '@/shared/components/EntityTable.vue'
 import StarIcon from '@/shared/components/icons/StarIcon.vue'
 
 const auth = useAuthStore()
