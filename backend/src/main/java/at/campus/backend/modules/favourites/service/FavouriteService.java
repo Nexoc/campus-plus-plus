@@ -226,8 +226,8 @@ public class FavouriteService {
         if (deleted) {
             log.info(
                     "Removed study program {} from favourites for user {}",
-                    userId,
-                    studyProgramId
+                    studyProgramId,
+                    userId
             );
         } else {
             log.debug(

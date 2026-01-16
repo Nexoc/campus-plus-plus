@@ -93,8 +93,8 @@
                   </span>
                 </div>
 
-                <p v-if="favourite.description" class="favourite-card__description">
-                  {{ favourite.description }}
+                <p v-if="favourite.studyProgramDescription" class="favourite-card__description">
+                  {{ favourite.studyProgramDescription }}
                 </p>
 
                 <div class="favourite-card__meta">
