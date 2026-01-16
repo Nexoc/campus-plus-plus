@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
+import EntityTable from '@/shared/components/EntityTable.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { coursesApi } from '../api/coursesApi'
@@ -70,7 +71,9 @@ async function load() {
     await favouritesStore.loadFavourites()
   }
 }
-function editCourse(course: Course) {
+
+function editCourse(row: any) {
+  const course = row as Course
   router.push({ name: 'CourseEdit', params: { id: course.courseId } })
 }
 
