@@ -1,0 +1,199 @@
+package at.campus.backend.modules.reviews.service;
+
+import at.campus.backend.modules.reviews.model.Review;
+import at.campus.backend.modules.reviews.repository.ReviewRepository;
+import at.campus.backend.security.UserContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Service layer for Review business logic.
+ *
+ * Responsibilities:
+ * - Role-based authorization
+ * - Data validation
+ * - User ownership enforcement
+ */
+@Service
+public class ReviewService {
+
+    private final ReviewRepository repository;
+    private final UserContext userContext;
+
+    public ReviewService(ReviewRepository repository, UserContext userContext) {
+        this.repository = repository;
+        this.userContext = userContext;
+    }
+
+    /**
+     * Get all reviews for a course.
+     * Public endpoint - no authentication required.
+     */
+    public List<Review> getReviewsByCourse(UUID courseId) {
+        return repository.findByCourseId(courseId);
+    }
+
+    /**
+     * Get a single review by ID.
+     * Public endpoint - no authentication required.
+     */
+    public Review getReviewById(UUID id) {
+        return repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+    }
+
+    /**
+     * Get all reviews.
+     * Public endpoint - no authentication required.
+     */
+    public List<Review> getAllReviews() {
+        return repository.findAll();
+    }
+
+    /**
+     * Create a new review.
+     *
+     * Authorization rules:
+     * - Only STUDENT and ADMIN (Moderator) can create reviews
+     * - Applicants are forbidden
+     *
+     * Validation:
+     * - Rating is required and must be 1-5
+     * - Course ID is required
+     * - User ID is taken from UserContext (not from request)
+     */
+    public Review createReview(Review review) {
+        // 1. Check authentication
+        String userId = userContext.getUserId();
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+
+        // 2. Check role authorization
+        boolean hasStudentRole = userContext.hasRole("STUDENT");
+        boolean hasAdminRole = userContext.hasRole("ADMIN");
+
+        if (!hasStudentRole && !hasAdminRole) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "Only students and moderators can create reviews");
+        }
+
+        // 3. Validate required fields
+        if (review.getRating() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating is required");
+        }
+
+        if (review.getRating() < 1 || review.getRating() > 5) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Rating must be between 1 and 5");
+        }
+
+        if (review.getCourseId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course ID is required");
+        }
+
+        // 4. Enforce user ownership (security)
+        // User ID MUST come from UserContext, never from request
+        UUID authenticatedUserId = UUID.fromString(userId);
+        review.setUserId(authenticatedUserId);
+
+        // 5. Optional: Prevent duplicate reviews
+        if (repository.existsByUserIdAndCourseId(authenticatedUserId, review.getCourseId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, 
+                "You have already reviewed this course");
+        }
+
+        // 6. Generate ID and save
+        review.setId(UUID.randomUUID());
+        repository.save(review);
+
+        return review;
+    }
+
+    /**
+     * Update an existing review.
+     *
+     * Authorization:
+     * - Only the author can update their review
+     */
+    public Review updateReview(UUID id, Review updatedReview) {
+        // 1. Check authentication
+        String userId = userContext.getUserId();
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+
+        // 2. Find existing review
+        Review existing = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        // 3. Check ownership
+        if (!existing.getUserId().toString().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "You can only edit your own reviews");
+        }
+
+        // 4. Validate rating
+        if (updatedReview.getRating() != null) {
+            if (updatedReview.getRating() < 1 || updatedReview.getRating() > 5) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Rating must be between 1 and 5");
+            }
+            existing.setRating(updatedReview.getRating());
+        }
+
+        // 5. Update fields
+        if (updatedReview.getDifficulty() != null) {
+            existing.setDifficulty(updatedReview.getDifficulty());
+        }
+        if (updatedReview.getWorkload() != null) {
+            existing.setWorkload(updatedReview.getWorkload());
+        }
+        if (updatedReview.getSatisfaction() != null) {
+            existing.setSatisfaction(updatedReview.getSatisfaction());
+        }
+        if (updatedReview.getPriorRequirements() != null) {
+            existing.setPriorRequirements(updatedReview.getPriorRequirements());
+        }
+        if (updatedReview.getExamInfo() != null) {
+            existing.setExamInfo(updatedReview.getExamInfo());
+        }
+        if (updatedReview.getText() != null) {
+            existing.setText(updatedReview.getText());
+        }
+
+        repository.update(existing);
+        return existing;
+    }
+
+    /**
+     * Delete a review.
+     *
+     * Authorization:
+     * - Only the author can delete their review
+     */
+    public void deleteReview(UUID id) {
+        // 1. Check authentication
+        String userId = userContext.getUserId();
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+
+        // 2. Find existing review
+        Review existing = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        // 3. Check ownership
+        if (!existing.getUserId().toString().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "You can only delete your own reviews");
+        }
+
+        // 4. Delete
+        repository.deleteById(id);
+    }
+}

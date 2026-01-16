@@ -2,6 +2,11 @@
   <div class="reviews-section">
     <h2>Reviews ({{ reviews.length }})</h2>
 
+    <!-- Success Message -->
+    <div v-if="successMessage" class="success-message">
+      {{ successMessage }}
+    </div>
+
     <!-- Write Review Button (Students & Moderators) -->
     <div v-if="auth.isAuthenticated && auth.user?.role !== 'APPLICANT'" class="write-review-section">
       <button 
@@ -14,8 +19,12 @@
 
       <!-- Create Review Form -->
       <form v-if="showCreateForm" @submit.prevent="submitReview" class="review-form">
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
+
         <div class="form-group">
-          <label>Rating</label>
+          <label>Rating <span class="required">*</span></label>
           <select v-model.number="formData.rating" required>
             <option value="">Select rating...</option>
             <option value="5">5 - Excellent</option>
@@ -27,28 +36,16 @@
         </div>
 
         <div class="form-group">
-          <label>Title</label>
-          <input 
-            v-model="formData.title"
-            type="text"
-            placeholder="Review title..."
-            required
-            maxlength="100"
-          />
-        </div>
-
-        <div class="form-group">
-          <label>Content</label>
+          <label>Review Text <span class="optional">(optional)</span></label>
           <textarea
-            v-model="formData.content"
-            placeholder="Share your thoughts..."
-            required
+            v-model="formData.text"
+            placeholder="Share your thoughts about this course..."
             rows="5"
           ></textarea>
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="base-button" :disabled="loading">
+          <button type="submit" class="base-button" :disabled="loading || !formData.rating">
             {{ loading ? 'Submitting...' : 'Post Review' }}
           </button>
           <button 
@@ -87,48 +84,10 @@
               Delete
             </button>
           </div>
-
-          <!-- Moderation actions -->
-          <div v-if="auth.isModerator" class="moderation-actions">
-            <button
-              v-if="!review.isModerationFlagged"
-              class="small-button warning"
-              @click="flagReview(review.reviewId!, 'Inappropriate content')"
-            >
-              Flag
-            </button>
-            <button
-              v-else
-              class="small-button"
-              @click="unflagReview(review.reviewId!)"
-            >
-              Unflag
-            </button>
-            <button
-              class="small-button danger"
-              @click="deleteReviewAsModerator(review.reviewId!)"
-            >
-              Remove
-            </button>
-          </div>
         </div>
 
-        <h3 class="review-title">{{ review.title }}</h3>
-        <p class="review-content">{{ review.content }}</p>
-
-        <!-- Moderation badge -->
-        <div v-if="review.isModerationFlagged" class="moderation-badge">
-          Flagged: {{ review.moderationReason }}
-        </div>
-
-        <div class="review-footer">
-          <button class="helpful-button" @click="markHelpful(review.reviewId!)">
-            👍 Helpful ({{ review.helpful }})
-          </button>
-          <button class="helpful-button" @click="markNotHelpful(review.reviewId!)">
-            👎 Not Helpful ({{ review.notHelpful }})
-          </button>
-        </div>
+        <p v-if="review.text" class="review-content">{{ review.text }}</p>
+        <p v-else class="review-content no-text">No additional comments</p>
       </article>
     </div>
 
@@ -156,12 +115,13 @@ const reviews = ref<Review[]>([])
 const loading = ref(false)
 const showCreateForm = ref(false)
 const editingId = ref<string | null>(null)
+const error = ref<string>('')
+const successMessage = ref<string>('')
 
 const formData = ref<CreateReviewRequest>({
   courseId: props.courseId,
   rating: 0,
-  title: '',
-  content: '',
+  text: '',
 })
 
 // Computed
@@ -181,28 +141,46 @@ const loadReviews = async () => {
   try {
     const response = await reviewsApi.getByCourse(props.courseId)
     reviews.value = response.data
-  } catch (error) {
-    console.error('Failed to load reviews', error)
+  } catch (err: any) {
+    console.error('Failed to load reviews', err)
+    error.value = err.response?.data?.message || 'Failed to load reviews'
   }
 }
 
 const submitReview = async () => {
+  // Validate rating
+  if (!formData.value.rating || formData.value.rating < 1 || formData.value.rating > 5) {
+    error.value = 'Please select a rating between 1 and 5'
+    return
+  }
+
+  error.value = ''
   loading.value = true
+  
   try {
     if (editingId.value) {
       await reviewsApi.update(editingId.value, {
         rating: formData.value.rating,
-        title: formData.value.title,
-        content: formData.value.content,
+        text: formData.value.text,
       })
+      successMessage.value = 'Review updated successfully!'
       editingId.value = null
     } else {
       await reviewsApi.create(props.courseId, formData.value)
+      successMessage.value = 'Review posted successfully!'
     }
+    
     resetForm()
+    showCreateForm.value = false
     await loadReviews()
-  } catch (error) {
-    console.error('Failed to submit review', error)
+    
+    // Clear success message after 3 seconds
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 3000)
+  } catch (err: any) {
+    console.error('Failed to submit review', err)
+    error.value = err.response?.data?.message || 'Failed to submit review'
   } finally {
     loading.value = false
   }
@@ -212,14 +190,14 @@ const cancelCreate = () => {
   resetForm()
   editingId.value = null
   showCreateForm.value = false
+  error.value = ''
 }
 
 const resetForm = () => {
   formData.value = {
     courseId: props.courseId,
     rating: 0,
-    title: '',
-    content: '',
+    text: '',
   }
 }
 
@@ -228,61 +206,26 @@ const startEdit = (review: Review) => {
   formData.value = {
     courseId: props.courseId,
     rating: review.rating,
-    title: review.title,
-    content: review.content,
+    text: review.text || '',
   }
   showCreateForm.value = true
+  error.value = ''
 }
 
 const deleteReview = async (reviewId: string) => {
-  if (confirm('Delete this review?')) {
+  if (confirm('Are you sure you want to delete this review?')) {
     try {
       await reviewsApi.delete(reviewId)
       await loadReviews()
-    } catch (error) {
-      console.error('Failed to delete review', error)
+      successMessage.value = 'Review deleted successfully'
+      setTimeout(() => {
+        successMessage.value = ''
+      }, 3000)
+    } catch (err: any) {
+      console.error('Failed to delete review', err)
+      error.value = err.response?.data?.message || 'Failed to delete review'
     }
   }
-}
-
-const deleteReviewAsModerator = async (reviewId: string) => {
-  const reason = prompt('Reason for removal:')
-  if (reason) {
-    try {
-      await reviewsApi.moderationDelete(reviewId, reason)
-      await loadReviews()
-    } catch (error) {
-      console.error('Failed to remove review', error)
-    }
-  }
-}
-
-const flagReview = async (reviewId: string, reason: string) => {
-  try {
-    await reviewsApi.moderationFlag(reviewId, reason)
-    await loadReviews()
-  } catch (error) {
-    console.error('Failed to flag review', error)
-  }
-}
-
-const unflagReview = async (reviewId: string) => {
-  try {
-    await reviewsApi.moderationUnflag(reviewId)
-    await loadReviews()
-  } catch (error) {
-    console.error('Failed to unflag review', error)
-  }
-}
-
-const markHelpful = async (reviewId: string) => {
-  // TODO: Implement helpful marking endpoint
-  console.log('Mark helpful:', reviewId)
-}
-
-const markNotHelpful = async (reviewId: string) => {
-  // TODO: Implement not helpful marking endpoint
-  console.log('Mark not helpful:', reviewId)
 }
 
 // Load reviews on mount
@@ -300,6 +243,24 @@ loadReviews()
 .reviews-section h2 {
   margin-bottom: 1.5rem;
   color: var(--color-text-primary);
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid #c3e6cb;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid #f5c6cb;
 }
 
 .write-review-section {
@@ -321,6 +282,17 @@ loadReviews()
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
+}
+
+.form-group .required {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.form-group .optional {
+  color: #666;
+  font-weight: normal;
+  font-size: 0.9rem;
 }
 
 .form-group input,
@@ -412,43 +384,15 @@ loadReviews()
   background: #c82333;
 }
 
-.review-title {
-  margin: 0.5rem 0;
-  color: var(--color-text-primary);
-}
-
 .review-content {
   color: #555;
   line-height: 1.6;
   margin: 0.5rem 0 1rem;
 }
 
-.moderation-badge {
-  background: #fff3cd;
-  color: #856404;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-}
-
-.review-footer {
-  display: flex;
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
-}
-
-.helpful-button {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.helpful-button:hover {
-  color: #007bff;
+.review-content.no-text {
+  font-style: italic;
+  color: #999;
 }
 
 .empty-state {

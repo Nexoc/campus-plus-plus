@@ -6,25 +6,33 @@ export interface Review {
   userId: string
   userName?: string
   rating: number
-  title: string
-  content: string
-  helpful: number
-  notHelpful: number
+  difficulty?: number
+  workload?: number
+  satisfaction?: number
+  priorRequirements?: string
+  examInfo?: string
+  text?: string
   createdAt?: string
   updatedAt?: string
-  isModerationFlagged?: boolean
-  moderationReason?: string
 }
 
 export interface CreateReviewRequest {
   courseId: string
   rating: number
-  title: string
-  content: string
+  difficulty?: number
+  workload?: number
+  satisfaction?: number
+  priorRequirements?: string
+  examInfo?: string
+  text?: string
 }
 
 export interface UpdateReviewRequest {
-  rating: number
-  title: string
-  content: string
+  rating?: number
+  difficulty?: number
+  workload?: number
+  satisfaction?: number
+  priorRequirements?: string
+  examInfo?: string
+  text?: string
 }
