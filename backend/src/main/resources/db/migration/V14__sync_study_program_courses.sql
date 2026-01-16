@@ -1,5 +1,5 @@
 -- =====================================================
--- V12__sync_study_program_courses.sql
+-- V14__sync_study_program_courses.sql
 -- =====================================================
 -- Sync study_program_id from study_program_courses
 -- to courses table for any records that are still NULL
@@ -23,5 +23,5 @@ WHERE c.study_program_id IS NULL
 );
 
 -- =====================================================
--- End of V12
+-- End of V14
 -- =====================================================
