@@ -35,6 +35,10 @@
           Moderation
         </router-link>
 
+        <router-link v-if="isModerator" to="/admin/users">
+          Admin Users
+        </router-link>
+
         <button @click="logout">Logout</button>
       </template>
 

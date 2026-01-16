@@ -73,14 +73,14 @@ export const useAuthStore = defineStore('auth', {
      * NOT from JWT parsing.
      */
     isModerator: (state): boolean => {
-      return state.user?.role === 'ADMIN'
+      return state.user?.role === 'Moderator'
     },
 
     /**
      * Alias for isModerator (backward compatibility).
      */
     isAdmin: (state): boolean => {
-      return state.user?.role === 'ADMIN'
+      return state.user?.role === 'Moderator'
     },
   },
 

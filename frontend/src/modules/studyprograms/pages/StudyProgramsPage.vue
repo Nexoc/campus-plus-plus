@@ -7,7 +7,6 @@ import type { StudyProgram } from '../model/StudyProgram'
 import EntityTable from '@/shared/components/EntityTable.vue'
 
 const auth = useAuthStore()
-const isAdmin = computed(() => auth.isAdmin)
 
 const router = useRouter()
 
@@ -90,7 +89,7 @@ onMounted(load)
     <div class="page-card">
       <div class="header-row">
         <h1>Study Programs</h1>
-        <button v-if="isAdmin" class="base-button small" @click="goCreate">
+        <button v-if="auth.isModerator" class="base-button small" @click="goCreate">
           + Add Program
         </button>
       </div>
@@ -121,7 +120,7 @@ onMounted(load)
         ]"
         :rows="programs"
         rowKey="studyProgramId"
-        :hasActions="isAdmin"
+        :hasActions="auth.isModerator"
         :sortBy="sortBy"
         :sortOrder="sortOrder"
         @sort="toggleSort"
