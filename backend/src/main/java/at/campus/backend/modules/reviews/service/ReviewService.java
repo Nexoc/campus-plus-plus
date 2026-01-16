@@ -75,7 +75,7 @@ public class ReviewService {
      * Create a new review.
      *
      * Authorization rules:
-     * - Only STUDENT and ADMIN (Moderator) can create reviews
+     * - Only STUDENT and Moderator can create reviews
      * - Applicants are forbidden
      *
      * Validation:
@@ -92,9 +92,9 @@ public class ReviewService {
 
         // 2. Check role authorization
         boolean hasStudentRole = userContext.hasRole("STUDENT");
-        boolean hasAdminRole = userContext.hasRole("ADMIN");
+        boolean hasModeratorRole = userContext.hasRole("Moderator");
 
-        if (!hasStudentRole && !hasAdminRole) {
+        if (!hasStudentRole && !hasModeratorRole) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
                 "Only students and moderators can create reviews");
         }
@@ -136,7 +136,7 @@ public class ReviewService {
      *
      * Authorization:
      * - Student: only own reviews
-     * - Moderator (ADMIN): any review
+     * - Moderator: any review
      */
     public Review updateReview(UUID id, Review updatedReview) {
         // 1. Check authentication
@@ -150,7 +150,7 @@ public class ReviewService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
 
         // 3. Check authorization: ownership or moderator role
-        boolean isModerator = userContext.hasRole("ADMIN");
+        boolean isModerator = userContext.hasRole("Moderator");
         boolean isOwner = existing.getUserId().toString().equals(userId);
         
         if (!isOwner && !isModerator) {
@@ -196,7 +196,7 @@ public class ReviewService {
      *
      * Authorization:
      * - Student: only own reviews
-     * - Moderator (ADMIN): any review
+     * - Moderator: any review
      */
     public void deleteReview(UUID id) {
         // 1. Check authentication
@@ -210,7 +210,7 @@ public class ReviewService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
 
         // 3. Check authorization: ownership or moderator role
-        boolean isModerator = userContext.hasRole("ADMIN");
+        boolean isModerator = userContext.hasRole("Moderator");
         boolean isOwner = existing.getUserId().toString().equals(userId);
         
         if (!isOwner && !isModerator) {
@@ -226,11 +226,11 @@ public class ReviewService {
      * Flag a review as inappropriate (moderator only).
      *
      * Authorization:
-     * - Only ADMIN (Moderator) role
+     * - Only Moderator role
      */
     public Review flagReview(UUID id, String reason) {
         // 1. Check moderator role
-        if (!userContext.hasRole("ADMIN")) {
+        if (!userContext.hasRole("Moderator")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
                 "Only moderators can flag reviews");
         }
@@ -251,11 +251,11 @@ public class ReviewService {
      * Unflag a review (moderator only).
      *
      * Authorization:
-     * - Only ADMIN (Moderator) role
+     * - Only Moderator role
      */
     public Review unflagReview(UUID id) {
         // 1. Check moderator role
-        if (!userContext.hasRole("ADMIN")) {
+        if (!userContext.hasRole("Moderator")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
                 "Only moderators can unflag reviews");
         }
@@ -276,11 +276,11 @@ public class ReviewService {
      * Delete a review by moderator (bypass ownership check).
      *
      * Authorization:
-     * - Only ADMIN (Moderator) role
+     * - Only Moderator role
      */
     public void deleteReviewByModerator(UUID id) {
         // 1. Check moderator role
-        if (!userContext.hasRole("ADMIN")) {
+        if (!userContext.hasRole("Moderator")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
                 "Only moderators can delete reviews");
         }

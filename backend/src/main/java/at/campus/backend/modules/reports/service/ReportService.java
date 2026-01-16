@@ -23,7 +23,7 @@ import java.util.UUID;
  * - Data validation
  *
  * Role mapping:
- * - Moderator (backend: ADMIN role)
+ * - Moderator role
  */
 @Service
 public class ReportService {
@@ -42,7 +42,7 @@ public class ReportService {
      * Get all reports (moderator only).
      *
      * Authorization:
-     * - Only ADMIN role (moderator)
+     * - Only Moderator role
      */
     public List<Report> getAllReports() {
         requireModerator();
@@ -70,7 +70,7 @@ public class ReportService {
      * Create a new report (any authenticated user).
      *
      * Authorization:
-     * - Any authenticated user (STUDENT or ADMIN)
+     * - Any authenticated user (STUDENT or Moderator)
      *
      * Validation:
      * - Target type is required (review, post, thread)
@@ -118,7 +118,7 @@ public class ReportService {
      * Update a report status (moderator only).
      *
      * Authorization:
-     * - Only ADMIN role (moderator)
+     * - Only Moderator role
      *
      * Allowed transitions:
      * - PENDING -> RESOLVED or REJECTED
@@ -161,7 +161,7 @@ public class ReportService {
      * Delete a report (moderator only).
      *
      * Authorization:
-     * - Only ADMIN role (moderator)
+     * - Only Moderator role
      */
     public void deleteReport(UUID id) {
         requireModerator();
@@ -179,11 +179,11 @@ public class ReportService {
     // ==================================================
 
     /**
-     * Require ADMIN role (moderator).
+     * Require Moderator role.
      * Throws 403 Forbidden if user is not a moderator.
      */
     private void requireModerator() {
-        if (!userContext.hasRole("ADMIN")) {
+        if (!userContext.hasRole("Moderator")) {
             log.warn("Forbidden: user {} attempted moderation operation", userContext.getUserId());
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
                 "Only moderators can access moderation functionality");
