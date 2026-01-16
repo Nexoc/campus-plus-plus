@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { studyProgramsApi } from '../api/studyProgramsApi'
 import CampusMap from '../components/CampusMap.vue'
 import type { StudyProgramDetail } from '../model/StudyProgramDetail'
-
+import StudyProgramFavouriteButton from '@/modules/favourites/components/StudyProgramFavouriteButton.vue'
+import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
+import { useAuthStore } from '@/modules/auth/store/auth.store'
 
 const route = useRoute()
+const authStore = useAuthStore()
+const favouritesStore = useFavouritesStore()
 const program = ref<StudyProgramDetail | null>(null)
 const loading = ref(false)
 const error = ref('')
+
+const isAuthenticated = computed(() => authStore.isAuthenticated)
 
 function slugify(text: string) {
   return text
@@ -27,6 +33,11 @@ async function load() {
     const id = route.params.id as string
     const response = await studyProgramsApi.getDetails(id)
     program.value = response.data
+    
+    // Load study program favourites if authenticated
+    if (isAuthenticated.value) {
+      await favouritesStore.loadStudyProgramFavourites()
+    }
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load program'
   } finally {
@@ -42,6 +53,14 @@ onMounted(load)
     <div class="page-card">
       <template v-if="program">
         <h1>{{ program.name }}</h1>
+        <div class="favourite-button-wrapper">
+          <StudyProgramFavouriteButton 
+            v-if="program.studyProgramId"
+            :study-program-id="program.studyProgramId"
+            :show-label="true"
+            :size="20"
+          />
+        </div>
         <p class="entity-meta">
           <span v-if="program.degree">Degree: {{ program.degree }}</span>
           <span v-if="program.semesters"> · Semesters: {{ program.semesters }}</span>
@@ -97,3 +116,15 @@ onMounted(load)
   </div>
 </template>
 
+<style scoped>
+.detail-page h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.favourite-button-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+</style>

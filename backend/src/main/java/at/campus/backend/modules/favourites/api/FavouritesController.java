@@ -1,8 +1,11 @@
 package at.campus.backend.modules.favourites.api;
 
 import at.campus.backend.modules.favourites.model.AddFavouriteRequest;
+import at.campus.backend.modules.favourites.model.AddStudyProgramFavouriteRequest;
 import at.campus.backend.modules.favourites.model.Favourite;
 import at.campus.backend.modules.favourites.model.FavouriteDto;
+import at.campus.backend.modules.favourites.model.StudyProgramFavourite;
+import at.campus.backend.modules.favourites.model.StudyProgramFavouriteDto;
 import at.campus.backend.modules.favourites.service.FavouriteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,5 +100,86 @@ public class FavouritesController {
         log.debug("DELETE /api/favourites/{}", courseId);
 
         service.removeFavourite(courseId);
+    }
+
+    // ==================================================
+    // STUDY PROGRAM FAVOURITES
+    // ==================================================
+
+    /**
+     * GET /api/favourites/study-programs
+     *
+     * List all study program favourites for the authenticated user.
+     *
+     * Response:
+     * - 200 OK with list of study program favourites (empty array if none)
+     * - 403 Forbidden if user is not authenticated
+     */
+    @GetMapping("/study-programs")
+    public List<StudyProgramFavouriteDto> getStudyProgramFavourites() {
+        log.debug("GET /api/favourites/study-programs");
+
+        List<StudyProgramFavourite> favourites = service.getAllStudyProgramFavourites();
+
+        return favourites.stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    /**
+     * POST /api/favourites/study-programs
+     *
+     * Add a study program to the authenticated user's favourites.
+     *
+     * Request body:
+     * {
+     *   "studyProgramId": "uuid"
+     * }
+     *
+     * Response:
+     * - 201 Created if successfully added
+     * - 400 Bad Request if study program is already in favourites
+     * - 403 Forbidden if user is not authenticated
+     * - 404 Not Found if study program does not exist
+     */
+    @PostMapping("/study-programs")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addStudyProgramFavourite(@RequestBody AddStudyProgramFavouriteRequest request) {
+        log.debug("POST /api/favourites/study-programs (studyProgramId={})", request.getStudyProgramId());
+
+        service.addStudyProgramFavourite(request.getStudyProgramId());
+    }
+
+    /**
+     * DELETE /api/favourites/study-programs/{studyProgramId}
+     *
+     * Remove a study program from the authenticated user's favourites.
+     *
+     * Response:
+     * - 204 No Content if successfully removed or if favourite did not exist
+     * - 403 Forbidden if user is not authenticated
+     */
+    @DeleteMapping("/study-programs/{studyProgramId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeStudyProgramFavourite(@PathVariable UUID studyProgramId) {
+        log.debug("DELETE /api/favourites/study-programs/{}", studyProgramId);
+
+        service.removeStudyProgramFavourite(studyProgramId);
+    }
+
+    // ==================================================
+    // DTO MAPPING
+    // ==================================================
+
+    private StudyProgramFavouriteDto toDto(StudyProgramFavourite fav) {
+        StudyProgramFavouriteDto dto = new StudyProgramFavouriteDto();
+        dto.setStudyProgramId(fav.getStudyProgramId());
+        dto.setStudyProgramName(fav.getStudyProgramName());
+        dto.setStudyProgramDescription(fav.getStudyProgramDescription());
+        dto.setDegree(fav.getDegree());
+        dto.setSemesters(fav.getSemesters());
+        dto.setTotalEcts(fav.getTotalEcts());
+        dto.setCreatedAt(fav.getCreatedAt());
+        return dto;
     }
 }
