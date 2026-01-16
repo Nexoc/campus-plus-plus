@@ -15,6 +15,10 @@
         <router-link to="/">Home</router-link>
         <router-link to="/programs">Study Programs</router-link>
         <router-link to="/courses">Courses</router-link>
+        <router-link v-if="isAuthenticated" to="/favourites" class="navbar__favourites">
+          <StarIcon :size="18" :filled="false" />
+          <span>Favourites</span>
+        </router-link>
       </div>
     </div>
 
@@ -57,6 +61,7 @@ import { useRouter } from 'vue-router'
 
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { logger } from '@/shared/utils/logger'
+import StarIcon from '@/shared/components/icons/StarIcon.vue'
 
 // ⬇️ ВАЖНО: импорт темы
 import {
@@ -94,3 +99,14 @@ function onToggleTheme(): void {
   theme.value = toggleTheme()
 }
 </script>
+<style scoped>
+.navbar__favourites {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.navbar__favourites :deep(.star-icon) {
+  margin-top: -2px;
+}
+</style>

@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/modules/auth/store/auth.store'
-import EntityTable from '@/shared/components/EntityTable.vue'
+import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { coursesApi } from '../api/coursesApi'
 import type { Course } from '../model/Course'
+import EntityTable from '@/shared/components/EntityTable.vue'
+import StarIcon from '@/shared/components/icons/StarIcon.vue'
 
 const auth = useAuthStore()
+const favouritesStore = useFavouritesStore()
+const isAuthenticated = computed(() => auth.isAuthenticated)
 
 const router = useRouter()
 
@@ -60,10 +64,13 @@ function toggleSort(field: 'title' | 'ects' | 'semester' | 'language') {
 async function load() {
   const response = await coursesApi.getAll()
   allCourses.value = response.data
+  
+  // Load favourites if authenticated
+  if (isAuthenticated.value) {
+    await favouritesStore.loadFavourites()
+  }
 }
-
-function editCourse(row: any) {
-  const course = row as Course
+function editCourse(course: Course) {
   router.push({ name: 'CourseEdit', params: { id: course.courseId } })
 }
 
@@ -116,9 +123,12 @@ onMounted(load)
         @sort="toggleSort"
       >
         <template #title="{ row }">
-          <router-link :to="{ name: 'CourseDetail', params: { id: row.courseId, slug: (row.title || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') } }">
-            {{ row.title }}
-          </router-link>
+          <div class="title-with-star">
+            <StarIcon v-if="isAuthenticated && favouritesStore.isFavourite(row.courseId)" :size="16" :filled="true" class="course-star-indicator" />
+            <router-link :to="{ name: 'CourseDetail', params: { id: row.courseId, slug: (row.title || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') } }">
+              {{ row.title }}
+            </router-link>
+          </div>
         </template>
         <template #studyProgram="{ row }">
           <router-link
@@ -142,3 +152,14 @@ onMounted(load)
     </div>
   </div>
 </template>
+<style scoped>
+.title-with-star {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.course-star-indicator {
+  flex-shrink: 0;
+}
+</style>

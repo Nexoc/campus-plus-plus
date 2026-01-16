@@ -4,8 +4,14 @@ import { useRoute } from 'vue-router'
 import { coursesApi } from '../api/coursesApi'
 import type { Course, RichBlock } from '../model/Course'
 import ReviewsSection from '@/modules/reviews/components/ReviewsSection.vue'
+import FavouriteButton from '@/modules/favourites/components/FavouriteButton.vue'
+import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
+import { useAuthStore } from '@/modules/auth/store/auth.store'
 
 const route = useRoute()
+const authStore = useAuthStore()
+const favouritesStore = useFavouritesStore()
+
 const course = ref<Course | null>(null)
 const loading = ref(false)
 const error = ref('')
@@ -58,6 +64,11 @@ async function load() {
   try {
     const id = route.params.id as string
     course.value = (await coursesApi.getById(id)).data
+    
+    // Load favourites if authenticated
+    if (authStore.isAuthenticated && !favouritesStore.loaded) {
+      await favouritesStore.loadFavourites()
+    }
   } catch (e: any) {
     error.value = e.response?.data?.message || 'Failed to load course'
   } finally {
@@ -73,6 +84,14 @@ onMounted(load)
     <div class="page-card">
       <template v-if="course">
         <h1>{{ course.title }}</h1>
+        <div class="favourite-button-wrapper">
+          <FavouriteButton 
+            v-if="course.courseId"
+            :course-id="course.courseId"
+            :show-label="true"
+            :size="20"
+          />
+        </div>
         <p class="entity-meta">
           <span v-if="course.ects">ECTS: {{ course.ects }}</span>
           <span v-if="course.language"> · Language: {{ course.language }}</span>
@@ -125,3 +144,15 @@ onMounted(load)
   </div>
 </template>
 
+<style scoped>
+.detail-page h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.favourite-button-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+</style>

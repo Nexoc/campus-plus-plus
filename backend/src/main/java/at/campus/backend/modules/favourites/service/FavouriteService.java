@@ -3,8 +3,10 @@ package at.campus.backend.modules.favourites.service;
 import at.campus.backend.common.exception.ForbiddenException;
 import at.campus.backend.common.exception.NotFoundException;
 import at.campus.backend.modules.favourites.model.Favourite;
+import at.campus.backend.modules.favourites.model.StudyProgramFavourite;
 import at.campus.backend.modules.favourites.repository.FavouriteRepository;
 import at.campus.backend.modules.courses.repository.CourseRepository;
+import at.campus.backend.modules.studyprograms.repository.StudyProgramRepository;
 import at.campus.backend.security.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +32,18 @@ public class FavouriteService {
 
     private final FavouriteRepository favouriteRepository;
     private final CourseRepository courseRepository;
+    private final StudyProgramRepository studyProgramRepository;
     private final UserContext userContext;
 
     public FavouriteService(
             FavouriteRepository favouriteRepository,
             CourseRepository courseRepository,
+            StudyProgramRepository studyProgramRepository,
             UserContext userContext
     ) {
         this.favouriteRepository = favouriteRepository;
         this.courseRepository = courseRepository;
+        this.studyProgramRepository = studyProgramRepository;
         this.userContext = userContext;
     }
 
@@ -154,6 +159,80 @@ public class FavouriteService {
             log.debug(
                     "Course {} was not in favourites for user {}",
                     courseId,
+                    userId
+            );
+        }
+
+        // Graceful handling - removing non-existent favourite is not an error
+    }
+
+    // ==================================================
+    // STUDY PROGRAM FAVOURITES
+    // ==================================================
+
+    /**
+     * Get all study program favourites for the authenticated user.
+     *
+     * @return list of study program favourites
+     */
+    public List<StudyProgramFavourite> getAllStudyProgramFavourites() {
+        requireAuthenticated();
+
+        UUID userId = UUID.fromString(userContext.getUserId());
+        return favouriteRepository.findAllStudyProgramsByUserId(userId);
+    }
+
+    /**
+     * Add a study program to the authenticated user's favourites.
+     *
+     * @param studyProgramId the study program ID
+     * @throws ForbiddenException if user is not authenticated
+     * @throws NotFoundException if study program doesn't exist
+     * @throws IllegalStateException if already in favourites
+     */
+    public void addStudyProgramFavourite(UUID studyProgramId) {
+        requireAuthenticated();
+
+        UUID userId = UUID.fromString(userContext.getUserId());
+
+        // Validate study program exists
+        if (studyProgramRepository.findById(studyProgramId).isEmpty()) {
+            log.warn("Attempted to favourite non-existent study program: {}", studyProgramId);
+            throw new NotFoundException("Study program not found: " + studyProgramId);
+        }
+
+        // Check for duplicates
+        if (favouriteRepository.existsByUserIdAndStudyProgramId(userId, studyProgramId)) {
+            log.warn("Study program {} is already in favourites for user {}", studyProgramId, userId);
+            throw new IllegalStateException("Study program is already in favourites");
+        }
+
+        favouriteRepository.insertStudyProgram(userId, studyProgramId);
+        log.info("Added study program {} to favourites for user {}", studyProgramId, userId);
+    }
+
+    /**
+     * Remove a study program from the authenticated user's favourites.
+     *
+     * @param studyProgramId the study program ID
+     * @throws ForbiddenException if user is not authenticated
+     */
+    public void removeStudyProgramFavourite(UUID studyProgramId) {
+        requireAuthenticated();
+
+        UUID userId = UUID.fromString(userContext.getUserId());
+        boolean deleted = favouriteRepository.deleteByUserIdAndStudyProgramId(userId, studyProgramId);
+
+        if (deleted) {
+            log.info(
+                    "Removed study program {} from favourites for user {}",
+                    userId,
+                    studyProgramId
+            );
+        } else {
+            log.debug(
+                    "Study program {} was not in favourites for user {}",
+                    studyProgramId,
                     userId
             );
         }
