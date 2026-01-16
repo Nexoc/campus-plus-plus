@@ -12,15 +12,15 @@ public class StudyProgramCampusMapRegistry {
     // We return a list of buildings (markers) to support labels like "A–D", "E–F", etc.
     private record BuildingMarker(String label, String address, double lat, double lon) {}
 
-    // --- HCW Favoriten locations (approximate is fine for FR-S-3) ---
+    // --- HCW Favoriten locations (precise coordinates from OpenStreetMap) ---
     private static final BuildingMarker FAVORITEN_226 =
-            new BuildingMarker("A–D, P, V, W", "Favoritenstraße 226, 1100 Wien", 48.1619, 16.3826);
+            new BuildingMarker("A–D, P, V, W", "Favoritenstraße 226, 1100 Wien", 48.1578869, 16.3818663);
 
     private static final BuildingMarker FAVORITEN_222 =
-            new BuildingMarker("E, F", "Favoritenstraße 222, 1100 Wien", 48.1622, 16.3821);
+            new BuildingMarker("E, F", "Favoritenstraße 222, 1100 Wien", 48.1596670, 16.3826104);
 
     private static final BuildingMarker FAVORITEN_232 =
-            new BuildingMarker("G, H, I", "Favoritenstraße 232, 1100 Wien", 48.1614, 16.3833);
+            new BuildingMarker("G, H, I", "Favoritenstraße 232, 1100 Wien", 48.1815186, 16.3752422);
 
     private static final List<BuildingMarker> FAVORITEN_ALL = List.of(
             FAVORITEN_226, FAVORITEN_222, FAVORITEN_232
