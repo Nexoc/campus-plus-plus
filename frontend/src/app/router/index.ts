@@ -45,7 +45,7 @@ const routes: RouteRecordRaw[] = [
       import('@/modules/admin/pages/AdminUsersPage.vue'),
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      requiresModerator: true,
     },
   },
   {
@@ -86,28 +86,28 @@ const routes: RouteRecordRaw[] = [
     path: '/courses/new',
     name: 'CourseCreate',
     component: () => import('@/modules/courses/pages/CourseCreatePage.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    meta: { requiresAuth: true, requiresModerator: true },
   },
 
   {
     path: '/courses/:id/edit',
     name: 'CourseEdit',
     component: () => import('@/modules/courses/pages/CourseEditPage.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    meta: { requiresAuth: true, requiresModerator: true },
   },
 
   {
     path: '/programs/new',
     name: 'StudyProgramCreate',
     component: () => import('@/modules/studyprograms/pages/StudyProgramCreatePage.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    meta: { requiresAuth: true, requiresModerator: true },
   },
 
   {
     path: '/programs/:id/edit',
     name: 'StudyProgramEdit',
     component: () => import('@/modules/studyprograms/pages/StudyProgramEditPage.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    meta: { requiresAuth: true, requiresModerator: true },
   },
 
 
@@ -148,7 +148,7 @@ router.beforeEach((to) => {
   // --------------------------------------------
   // Admin-only pages
   // --------------------------------------------
-  if (to.meta.requiresAdmin && !auth.isAdmin) {
+  if (to.meta.requiresModerator && !auth.isAdmin) {
     return { name: 'home' }
   }
 

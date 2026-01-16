@@ -49,9 +49,10 @@ class AdminUserControllerTest {
         String json = """
             {
               "userId": "11111111-1111-1111-1111-111111111111",
-              "role": "ADMIN"
+              "role": "Moderator"
             }
             """;
+
 
         // WHEN / THEN
         mockMvc.perform(post("/admin/users/change-role")
@@ -59,7 +60,7 @@ class AdminUserControllerTest {
                         .content(json))
                 .andExpect(status().isNoContent());
 
-        verify(adminUserService).changeRole(userId, UserRole.ADMIN);
+        verify(adminUserService).changeRole(userId, UserRole.Moderator);
         verifyNoMoreInteractions(adminUserService);
     }
 

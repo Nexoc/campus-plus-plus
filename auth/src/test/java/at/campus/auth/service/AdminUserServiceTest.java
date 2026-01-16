@@ -35,9 +35,9 @@ class AdminUserServiceTest {
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(user));
 
-        adminUserService.changeRole(userId, UserRole.ADMIN);
+        adminUserService.changeRole(userId, UserRole.Moderator);
 
-        verify(user).changeRole(UserRole.ADMIN);
+        verify(user).changeRole(UserRole.Moderator);
         verify(userRepository).findById(userId);
     }
 
@@ -50,7 +50,7 @@ class AdminUserServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> adminUserService.changeRole(userId, UserRole.ADMIN)
+                () -> adminUserService.changeRole(userId, UserRole.Moderator)
         );
     }
 
@@ -87,7 +87,7 @@ class AdminUserServiceTest {
         when(user.getId()).thenReturn(UUID.randomUUID());
         when(user.getEmail()).thenReturn("admin@test.com");
         when(user.getNickname()).thenReturn("admin");
-        when(user.getRole()).thenReturn(UserRole.ADMIN);
+        when(user.getRole()).thenReturn(UserRole.Moderator);
         when(user.isEnabled()).thenReturn(true);
         when(user.isAccountNonLocked()).thenReturn(true);
         when(user.getCreatedAt()).thenReturn(Instant.now());
@@ -98,7 +98,7 @@ class AdminUserServiceTest {
 
         assertEquals(1, result.size());
         assertEquals("admin@test.com", result.getFirst().getEmail());
-        assertEquals(UserRole.ADMIN, result.getFirst().getRole());
+        assertEquals(UserRole.Moderator, result.getFirst().getRole());
     }
 
 }

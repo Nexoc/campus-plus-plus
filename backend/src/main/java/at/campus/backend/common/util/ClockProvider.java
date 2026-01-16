@@ -1,4 +1,4 @@
-package at.campus.backend.util;
+package at.campus.backend.common.util;
 
 public class ClockProvider {
 }

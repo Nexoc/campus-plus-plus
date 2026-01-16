@@ -137,7 +137,7 @@ class AuthControllerTest {
         User user = new User(
                 "admin@test.com",
                 "hash",
-                UserRole.ADMIN
+                UserRole.Moderator
         );
         setUserIdViaReflection(user, fixedId);
 
@@ -154,7 +154,7 @@ class AuthControllerTest {
                         .principal(authentication))
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-User-Id", fixedId.toString()))
-                .andExpect(header().string("X-User-Roles", "ADMIN"));
+                .andExpect(header().string("X-User-Roles", "Moderator"));
 
         verifyNoInteractions(authService);
     }

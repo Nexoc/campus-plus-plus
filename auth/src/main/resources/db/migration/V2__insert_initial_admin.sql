@@ -12,9 +12,9 @@ INSERT INTO users (
 ) VALUES (
   gen_random_uuid(),
   'admin@test.com',
-  'admin',
+  'my name',
   '$2a$12$QzPOk6ym.QvmyHAlBQXRSO6i1y/3.vwGSTssrqlts/yBd.LmkwBgC',
-  'ADMIN',
+  'Moderator',
   true,
   true
 );

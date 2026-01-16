@@ -51,7 +51,7 @@ public class UserContext {
 
     /**
      * Set of roles assigned to the user.
-     * Example: STUDENT, MODERATOR, ADMIN
+     * Example: STUDENT, MODERATOR, APPLICANT
      */
     private Set<String> roles;
 

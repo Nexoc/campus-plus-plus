@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ensureCsrf } from '@/app/security/csrf'
-import { useAuthStore } from '@/modules/auth/store/auth.store'
 import type { UserRole } from '@/modules/admin/api/admin-user.api'
 import { useAdminUserStore } from '@/modules/admin/store/admin-user.store'
+import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { computed, onMounted } from 'vue'
 
 
@@ -34,7 +34,7 @@ async function onChangeRole(userId: string, event: Event) {
   const oldRole = user?.role
 
   // Prevent self-demotion to avoid locking the only admin account
-  if (currentUserId.value && userId === currentUserId.value && newRole !== 'ADMIN') {
+  if (currentUserId.value && userId === currentUserId.value && newRole !== 'Moderator') {
     select.value = oldRole as string
     return
   }
@@ -114,12 +114,12 @@ function formatDate(value: unknown): string {
             <td>
               <select
                 :value="user.role"
-                :disabled="adminUserStore.loading || (currentUserId && user.id === currentUserId)"
+                :disabled="adminUserStore.loading || (!!currentUserId && user.id === currentUserId)"
                 @change="onChangeRole(user.id, $event)"
               >
-                <option value="VISITOR">VISITOR</option>
+                <option value="Applicant">Applicant</option>
                 <option value="STUDENT">STUDENT</option>
-                <option value="ADMIN">ADMIN</option>
+                <option value="Moderator">Moderator</option>
               </select>
             </td>
 

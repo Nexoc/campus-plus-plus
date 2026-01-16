@@ -44,7 +44,7 @@ public class AdminUserController {
 
     @Operation(
             summary = "Change user role",
-            description = "Changes the role of a user. Requires ROLE_ADMIN."
+            description = "Changes the role of a user. Requires ROLE_Moderator."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Role successfully changed"),
@@ -54,7 +54,7 @@ public class AdminUserController {
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = @Content(schema = @Schema()))
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('Moderator')")
     @PostMapping(
             value = "/change-role",
             consumes = "application/json",
@@ -72,7 +72,7 @@ public class AdminUserController {
 
     @Operation(
             summary = "Disable user",
-            description = "Disables (bans) a user account. Requires ROLE_ADMIN."
+            description = "Disables (bans) a user account. Requires ROLE_Moderator."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "User successfully disabled"),
@@ -82,7 +82,7 @@ public class AdminUserController {
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = @Content(schema = @Schema()))
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('Moderator')")
     @PostMapping(
             value = "/disable",
             consumes = "application/json",
@@ -99,7 +99,7 @@ public class AdminUserController {
 
     @Operation(
             summary = "Enable user",
-            description = "Enables (unbans) a user account. Requires ROLE_ADMIN."
+            description = "Enables (unbans) a user account. Requires ROLE_Moderator."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "User successfully enabled"),
@@ -109,7 +109,7 @@ public class AdminUserController {
             @ApiResponse(responseCode = "400", description = "Validation error",
                     content = @Content(schema = @Schema()))
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('Moderator')")
     @PostMapping(
             value = "/enable",
             consumes = "application/json",
@@ -127,14 +127,14 @@ public class AdminUserController {
 
     @Operation(
             summary = "List all users",
-            description = "Returns a list of all users. Requires ROLE_ADMIN."
+            description = "Returns a list of all users. Requires ROLE_Moderator."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Users list returned"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('Moderator')")
     @GetMapping(produces = "application/json")
     public ResponseEntity<List<AdminUserResponse>> listUsers() {
         log.info("Admin list users request");
