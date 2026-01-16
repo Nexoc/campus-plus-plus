@@ -4,7 +4,7 @@ import http from '@/app/api/http'
 // DTOs
 // --------------------------------------------------
 
-export type UserRole = 'VISITOR' | 'STUDENT' | 'Moderator'
+export type UserRole = 'Applicant' | 'STUDENT' | 'Moderator'
 
 export interface AdminUser {
   id: string
