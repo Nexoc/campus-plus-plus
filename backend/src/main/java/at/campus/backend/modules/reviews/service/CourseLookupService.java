@@ -16,10 +16,14 @@ public class CourseLookupService {
     }
 
     public String getCourseTitle(UUID courseId) {
-        return jdbc.queryForObject(
-                "SELECT title FROM app.courses WHERE id = ?",
-                String.class,
-                courseId
-        );
+        try {
+            return jdbc.queryForObject(
+                    "SELECT title FROM app.courses WHERE id = ?",
+                    String.class,
+                    courseId
+            );
+        } catch (Exception e) {
+            return null; // frontend can fallback to courseId
+        }
     }
 }

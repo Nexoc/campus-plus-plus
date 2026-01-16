@@ -27,12 +27,19 @@ public class ReviewService {
 
     private final ReviewRepository repository;
     private final UserContext userContext;
-    private UserLookupService userLookupService;
-    private CourseLookupService courseLookupService;
+    private final UserLookupService userLookupService;
+    private final CourseLookupService courseLookupService;
 
-    public ReviewService(ReviewRepository repository, UserContext userContext) {
+    public ReviewService(
+            ReviewRepository repository,
+            UserContext userContext,
+            UserLookupService userLookupService,
+            CourseLookupService courseLookupService
+    ) {
         this.repository = repository;
         this.userContext = userContext;
+        this.userLookupService = userLookupService;
+        this.courseLookupService = courseLookupService;
     }
 
     /**

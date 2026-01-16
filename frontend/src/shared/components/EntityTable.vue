@@ -15,7 +15,7 @@
           <slot :name="col.key" :row="row">{{ row[col.key] }}</slot>
         </td>
         <td v-if="hasActions" class="entity-actions actions-col">
-          <slot name="actions" :row="row" />
+          <slot name="actions" :row="row"></slot>
         </td>
       </tr>
     </tbody>

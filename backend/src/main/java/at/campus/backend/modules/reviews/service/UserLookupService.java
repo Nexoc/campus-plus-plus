@@ -15,10 +15,14 @@ public class UserLookupService {
     }
 
     public String getUserName(UUID userId) {
-        return jdbc.queryForObject(
-                "SELECT name FROM auth.users WHERE id = ?",
-                String.class,
-                userId
-        );
+        try {
+            return jdbc.queryForObject(
+                    "SELECT name FROM auth.users WHERE id = ?",
+                    String.class,
+                    userId
+            );
+        } catch (Exception e) {
+            return null; // frontend will show "Anonymous"
+        }
     }
 }

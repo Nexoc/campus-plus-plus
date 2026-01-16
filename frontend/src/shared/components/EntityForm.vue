@@ -1,7 +1,7 @@
 <template>
   <form class="form-container" @submit.prevent="onSubmit">
     <h2>{{ title }}</h2>
-    <slot name="fields" :form="form" :errors="errors" />
+    <slot name="fields" :form="form" :errors="errors"></slot>
     <div class="form-actions">
       <button class="base-button" type="submit">{{ submitLabel }}</button>
       <button v-if="showCancel" class="base-button secondary" type="button" @click="$emit('cancel')">Cancel</button>
@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, toRefs } from 'vue'
+import { ref, watch } from 'vue';
 
 const props = defineProps<{
   title: string

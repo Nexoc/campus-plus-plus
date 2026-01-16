@@ -12,7 +12,7 @@
     :type="type"
     :disabled="disabled"
   >
-    <slot />
+    <slot></slot>
   </button>
 </template>
 

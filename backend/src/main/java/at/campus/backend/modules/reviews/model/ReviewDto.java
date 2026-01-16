@@ -53,15 +53,8 @@ public class ReviewDto {
     @JsonProperty("moderationReason")
     private String moderationReason;
 
-    @JsonProperty("userName")
-    private String userName;
-
-    @JsonProperty("courseTitle")
-    private String courseTitle;
-
 
     // Constructors
-
     public ReviewDto() {
     }
 

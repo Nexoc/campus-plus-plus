@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
+import EntityTable from '@/shared/components/EntityTable.vue'
+import StarIcon from '@/shared/components/icons/StarIcon.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { coursesApi } from '../api/coursesApi'
 import type { Course } from '../model/Course'
-import StarIcon from '@/shared/components/icons/StarIcon.vue'
+
 
 const auth = useAuthStore()
 const favouritesStore = useFavouritesStore()
@@ -28,29 +30,30 @@ const tableColumns = [
 
 // Filtered and sorted courses
 const courses = computed(() => {
-  let filtered = allCourses.value.filter(c =>
-    c.title?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    c.language?.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
+  const query = searchQuery.value.toLowerCase().trim()
+
+  let filtered = allCourses.value.filter(c => {
+    const title = c.title?.toLowerCase() ?? ''
+    const language = c.language?.toLowerCase() ?? ''
+
+    return title.includes(query) || language.includes(query)
+  })
 
   filtered.sort((a, b) => {
-    let aVal: any = a[sortBy.value]
-    let bVal: any = b[sortBy.value]
+    let aVal = a[sortBy.value] ?? ''
+    let bVal = b[sortBy.value] ?? ''
 
-    if (aVal === undefined || aVal === null) aVal = ''
-    if (bVal === undefined || bVal === null) bVal = ''
+    if (typeof aVal === 'string') aVal = aVal.toLowerCase()
+    if (typeof bVal === 'string') bVal = bVal.toLowerCase()
 
-    if (typeof aVal === 'string') {
-      aVal = aVal.toLowerCase()
-      bVal = bVal.toLowerCase()
-    }
-
-    const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0
-    return sortOrder.value === 'asc' ? comparison : -comparison
+    if (aVal < bVal) return sortOrder.value === 'asc' ? -1 : 1
+    if (aVal > bVal) return sortOrder.value === 'asc' ? 1 : -1
+    return 0
   })
 
   return filtered
 })
+
 
 function toggleSort(field: 'title' | 'ects' | 'semester' | 'language') {
   if (sortBy.value === field) {
@@ -69,8 +72,13 @@ async function load() {
     await favouritesStore.loadFavourites()
   }
 }
+
 function editCourse(course: Course) {
   router.push({ name: 'CourseEdit', params: { id: course.courseId } })
+}
+
+function asCourse(row: Record<string, any>): Course {
+  return row as Course
 }
 
 async function remove(courseId: string) {
@@ -139,7 +147,7 @@ onMounted(load)
           <span v-else class="text-muted">—</span>
         </template>
         <template #actions="{ row }">
-          <button class="base-button" @click="editCourse(row)">Edit</button>
+          <button class="base-button" @click="editCourse(asCourse(row))">Edit</button>
           <button class="base-button danger" @click="remove(row.courseId)">Delete</button>
         </template>
       </EntityTable>

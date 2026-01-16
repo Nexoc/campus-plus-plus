@@ -3,6 +3,7 @@
 export interface Review {
   reviewId?: string
   courseId: string
+  courseTitle?: string
   userId: string
   userName?: string
   rating: number
