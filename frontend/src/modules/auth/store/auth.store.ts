@@ -75,6 +75,13 @@ export const useAuthStore = defineStore('auth', {
     isModerator: (state): boolean => {
       return state.user?.role === 'ADMIN'
     },
+
+    /**
+     * Alias for isModerator (backward compatibility).
+     */
+    isAdmin: (state): boolean => {
+      return state.user?.role === 'ADMIN'
+    },
   },
 
   // --------------------------------------------------

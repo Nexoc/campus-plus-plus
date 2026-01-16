@@ -1,7 +1,7 @@
 // src/modules/reviews/api/reviewsApi.ts
 
 import http from '@/app/api/http'
-import type { Review, CreateReviewRequest, UpdateReviewRequest } from '../model/Review'
+import type { Review, ReviewSummary, CreateReviewRequest, UpdateReviewRequest } from '../model/Review'
 
 export const reviewsApi = {
   // Public endpoints (read-only)
@@ -11,6 +11,10 @@ export const reviewsApi = {
 
   getById(reviewId: string) {
     return http.get<Review>(`/api/public/reviews/${reviewId}`)
+  },
+
+  getSummary(courseId: string) {
+    return http.get<ReviewSummary>(`/api/public/courses/${courseId}/reviews/summary`)
   },
 
   // Protected endpoints (authenticated users)

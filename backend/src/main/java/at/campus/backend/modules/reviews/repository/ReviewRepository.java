@@ -46,4 +46,15 @@ public interface ReviewRepository {
      * (For preventing duplicate reviews)
      */
     boolean existsByUserIdAndCourseId(UUID userId, UUID courseId);
+
+    /**
+     * Get the average rating for a specific course.
+     * Returns null if no reviews exist.
+     */
+    Double getAverageRatingByCourseId(UUID courseId);
+
+    /**
+     * Get the count of reviews for a specific course.
+     */
+    Integer getReviewCountByCourseId(UUID courseId);
 }

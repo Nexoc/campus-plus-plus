@@ -118,6 +118,18 @@ public class JdbcReviewRepository implements ReviewRepository {
         return count != null && count > 0;
     }
 
+    @Override
+    public Double getAverageRatingByCourseId(UUID courseId) {
+        String sql = "SELECT AVG(rating) FROM app.reviews WHERE course_id = ?";
+        return jdbc.queryForObject(sql, Double.class, courseId);
+    }
+
+    @Override
+    public Integer getReviewCountByCourseId(UUID courseId) {
+        String sql = "SELECT COUNT(*) FROM app.reviews WHERE course_id = ?";
+        return jdbc.queryForObject(sql, Integer.class, courseId);
+    }
+
     /**
      * RowMapper for Review entity.
      */

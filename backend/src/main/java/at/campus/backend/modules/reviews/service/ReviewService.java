@@ -1,6 +1,7 @@
 package at.campus.backend.modules.reviews.service;
 
 import at.campus.backend.modules.reviews.model.Review;
+import at.campus.backend.modules.reviews.model.ReviewSummary;
 import at.campus.backend.modules.reviews.repository.ReviewRepository;
 import at.campus.backend.security.UserContext;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,22 @@ public class ReviewService {
      */
     public List<Review> getAllReviews() {
         return repository.findAll();
+    }
+
+    /**
+     * Get review summary (average rating and count) for a course.
+     * Public endpoint - no authentication required.
+     */
+    public ReviewSummary getReviewSummary(UUID courseId) {
+        Double averageRating = repository.getAverageRatingByCourseId(courseId);
+        Integer reviewCount = repository.getReviewCountByCourseId(courseId);
+        
+        // If no reviews exist, return null for average and 0 for count
+        if (reviewCount == null || reviewCount == 0) {
+            return new ReviewSummary(null, 0);
+        }
+        
+        return new ReviewSummary(averageRating, reviewCount);
     }
 
     /**

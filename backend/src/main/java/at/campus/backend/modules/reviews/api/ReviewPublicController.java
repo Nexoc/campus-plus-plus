@@ -1,6 +1,7 @@
 package at.campus.backend.modules.reviews.api;
 
 import at.campus.backend.modules.reviews.model.ReviewDto;
+import at.campus.backend.modules.reviews.model.ReviewSummary;
 import at.campus.backend.modules.reviews.service.ReviewService;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,5 +54,13 @@ public class ReviewPublicController {
         return service.getReviewsByCourse(courseId).stream()
             .map(ReviewDto::fromDomain)
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Get review summary (average rating and count) for a specific course.
+     */
+    @GetMapping("/courses/{courseId}/reviews/summary")
+    public ReviewSummary getReviewSummary(@PathVariable UUID courseId) {
+        return service.getReviewSummary(courseId);
     }
 }

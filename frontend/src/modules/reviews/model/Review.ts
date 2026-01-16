@@ -16,6 +16,11 @@ export interface Review {
   updatedAt?: string
 }
 
+export interface ReviewSummary {
+  averageRating: number | null
+  reviewCount: number
+}
+
 export interface CreateReviewRequest {
   courseId: string
   rating: number

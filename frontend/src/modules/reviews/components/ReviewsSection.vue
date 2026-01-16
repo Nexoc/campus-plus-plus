@@ -1,6 +1,23 @@
 <template>
   <div class="reviews-section">
-    <h2>Reviews ({{ reviews.length }})</h2>
+    <h2>Reviews</h2>
+
+    <!-- Average Rating Display -->
+    <div v-if="summary" class="rating-summary">
+      <div class="rating-display">
+        <span class="average-rating">
+          <template v-if="summary.averageRating !== null">
+            ★ {{ summary.averageRating.toFixed(1) }} / 5
+          </template>
+          <template v-else>
+            ★ No ratings yet
+          </template>
+        </span>
+        <span class="review-count">
+          ({{ summary.reviewCount }} {{ summary.reviewCount === 1 ? 'review' : 'reviews' }})
+        </span>
+      </div>
+    </div>
 
     <!-- Success Message -->
     <div v-if="successMessage" class="success-message">
@@ -102,7 +119,7 @@
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { computed, ref } from 'vue'
 import { reviewsApi } from '../api/reviewsApi'
-import type { Review, CreateReviewRequest } from '../model/Review'
+import type { Review, ReviewSummary, CreateReviewRequest } from '../model/Review'
 
 interface Props {
   courseId: string
@@ -112,6 +129,7 @@ const props = defineProps<Props>()
 const auth = useAuthStore()
 
 const reviews = ref<Review[]>([])
+const summary = ref<ReviewSummary | null>(null)
 const loading = ref(false)
 const showCreateForm = ref(false)
 const editingId = ref<string | null>(null)
@@ -147,6 +165,15 @@ const loadReviews = async () => {
   }
 }
 
+const loadSummary = async () => {
+  try {
+    const response = await reviewsApi.getSummary(props.courseId)
+    summary.value = response.data
+  } catch (err: any) {
+    console.error('Failed to load review summary', err)
+  }
+}
+
 const submitReview = async () => {
   // Validate rating
   if (!formData.value.rating || formData.value.rating < 1 || formData.value.rating > 5) {
@@ -173,6 +200,7 @@ const submitReview = async () => {
     resetForm()
     showCreateForm.value = false
     await loadReviews()
+    await loadSummary()
     
     // Clear success message after 3 seconds
     setTimeout(() => {
@@ -217,6 +245,7 @@ const deleteReview = async (reviewId: string) => {
     try {
       await reviewsApi.delete(reviewId)
       await loadReviews()
+      await loadSummary()
       successMessage.value = 'Review deleted successfully'
       setTimeout(() => {
         successMessage.value = ''
@@ -228,8 +257,9 @@ const deleteReview = async (reviewId: string) => {
   }
 }
 
-// Load reviews on mount
+// Load reviews and summary on mount
 loadReviews()
+loadSummary()
 </script>
 
 <style scoped>
@@ -241,8 +271,33 @@ loadReviews()
 }
 
 .reviews-section h2 {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   color: var(--color-text-primary);
+}
+
+.rating-summary {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.average-rating {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffc107;
+}
+
+.review-count {
+  font-size: 1rem;
+  color: #666;
 }
 
 .success-message {
