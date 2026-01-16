@@ -1,5 +1,6 @@
 package at.campus.backend.modules.reviews.api;
 
+import at.campus.backend.modules.reviews.model.ModerationReviewDto;
 import at.campus.backend.modules.reviews.model.Review;
 import at.campus.backend.modules.reviews.model.ReviewDto;
 import at.campus.backend.modules.reviews.service.ReviewService;
@@ -37,29 +38,27 @@ public class ModerationReviewsController {
      * - flaggedOnly: If true, show only flagged reviews
      */
     @GetMapping
-    public List<ReviewDto> getAllReviews(
-        @RequestParam(required = false) UUID courseId,
-        @RequestParam(required = false) Boolean flaggedOnly
+    public List<ModerationReviewDto> getAllReviews(
+            @RequestParam(required = false) UUID courseId,
+            @RequestParam(required = false) Boolean flaggedOnly
     ) {
         List<Review> reviews = service.getAllReviews();
 
-        // Apply filters if provided
         if (courseId != null) {
             reviews = reviews.stream()
-                .filter(r -> r.getCourseId().equals(courseId))
-                .collect(Collectors.toList());
+                    .filter(r -> r.getCourseId().equals(courseId))
+                    .toList();
         }
 
-        if (flaggedOnly != null && flaggedOnly) {
+        if (Boolean.TRUE.equals(flaggedOnly)) {
             reviews = reviews.stream()
-                .filter(Review::isModerationFlagged)
-                .collect(Collectors.toList());
+                    .filter(Review::isModerationFlagged)
+                    .toList();
         }
 
-        return reviews.stream()
-            .map(ReviewDto::fromDomain)
-            .collect(Collectors.toList());
+        return service.toModerationDtos(reviews);
     }
+
 
     /**
      * Flag a review as inappropriate (moderator only).

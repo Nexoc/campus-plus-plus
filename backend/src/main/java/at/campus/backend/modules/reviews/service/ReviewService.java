@@ -1,9 +1,12 @@
 package at.campus.backend.modules.reviews.service;
 
+import at.campus.backend.modules.reviews.model.ModerationReviewDto;
 import at.campus.backend.modules.reviews.model.Review;
+import at.campus.backend.modules.reviews.model.ReviewDto;
 import at.campus.backend.modules.reviews.model.ReviewSummary;
 import at.campus.backend.modules.reviews.repository.ReviewRepository;
 import at.campus.backend.security.UserContext;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +27,8 @@ public class ReviewService {
 
     private final ReviewRepository repository;
     private final UserContext userContext;
+    private UserLookupService userLookupService;
+    private CourseLookupService courseLookupService;
 
     public ReviewService(ReviewRepository repository, UserContext userContext) {
         this.repository = repository;
@@ -291,4 +296,53 @@ public class ReviewService {
         
         repository.deleteById(id);
     }
+
+    public List<ModerationReviewDto> getAllModerationReviews() {
+        List<Review> reviews = repository.findAll();
+
+        return reviews.stream().map(review -> {
+            ModerationReviewDto dto = new ModerationReviewDto();
+
+            // base fields
+            ReviewDto base = ReviewDto.fromDomain(review);
+            BeanUtils.copyProperties(base, dto);
+
+            // enrichment
+            dto.setUserName(userLookupService.getUserName(review.getUserId()));
+            dto.setCourseTitle(courseLookupService.getCourseTitle(review.getCourseId()));
+
+            return dto;
+        }).toList();
+    }
+
+
+    public List<ModerationReviewDto> toModerationDtos(List<Review> reviews) {
+        return reviews.stream().map(review -> {
+            ModerationReviewDto dto = new ModerationReviewDto();
+
+            // base fields (как ReviewDto.fromDomain, но вручную)
+            dto.setId(review.getId());
+            dto.setUserId(review.getUserId());
+            dto.setCourseId(review.getCourseId());
+            dto.setRating(review.getRating());
+            dto.setDifficulty(review.getDifficulty());
+            dto.setWorkload(review.getWorkload());
+            dto.setSatisfaction(review.getSatisfaction());
+            dto.setPriorRequirements(review.getPriorRequirements());
+            dto.setExamInfo(review.getExamInfo());
+            dto.setText(review.getText());
+            dto.setCreatedAt(review.getCreatedAt());
+            dto.setUpdatedAt(review.getUpdatedAt());
+            dto.setModerationFlagged(review.isModerationFlagged());
+            dto.setModerationReason(review.getModerationReason());
+
+            // 🔥 enrichment
+            dto.setUserName(userLookupService.getUserName(review.getUserId()));
+            dto.setCourseTitle(courseLookupService.getCourseTitle(review.getCourseId()));
+
+            return dto;
+        }).toList();
+    }
+
+
 }
