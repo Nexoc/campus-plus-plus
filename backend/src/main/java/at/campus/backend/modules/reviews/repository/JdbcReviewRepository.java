@@ -27,7 +27,8 @@ public class JdbcReviewRepository implements ReviewRepository {
     public List<Review> findByCourseId(UUID courseId) {
         String sql = """
             SELECT id, user_id, course_id, rating, difficulty, workload, satisfaction,
-                   prior_requirements, exam_info, text, created_at, updated_at
+                   prior_requirements, exam_info, text, created_at, updated_at,
+                   moderation_flagged, moderation_reason
             FROM app.reviews
             WHERE course_id = ?
             ORDER BY created_at DESC
@@ -39,7 +40,8 @@ public class JdbcReviewRepository implements ReviewRepository {
     public Optional<Review> findById(UUID id) {
         String sql = """
             SELECT id, user_id, course_id, rating, difficulty, workload, satisfaction,
-                   prior_requirements, exam_info, text, created_at, updated_at
+                   prior_requirements, exam_info, text, created_at, updated_at,
+                   moderation_flagged, moderation_reason
             FROM app.reviews
             WHERE id = ?
         """;
@@ -51,7 +53,8 @@ public class JdbcReviewRepository implements ReviewRepository {
     public List<Review> findAll() {
         String sql = """
             SELECT id, user_id, course_id, rating, difficulty, workload, satisfaction,
-                   prior_requirements, exam_info, text, created_at, updated_at
+                   prior_requirements, exam_info, text, created_at, updated_at,
+                   moderation_flagged, moderation_reason
             FROM app.reviews
             ORDER BY created_at DESC
         """;
@@ -84,7 +87,8 @@ public class JdbcReviewRepository implements ReviewRepository {
         String sql = """
             UPDATE app.reviews
             SET rating = ?, difficulty = ?, workload = ?, satisfaction = ?,
-                prior_requirements = ?, exam_info = ?, text = ?, updated_at = now()
+                prior_requirements = ?, exam_info = ?, text = ?,
+                moderation_flagged = ?, moderation_reason = ?, updated_at = now()
             WHERE id = ?
         """;
         jdbc.update(sql,
@@ -95,6 +99,8 @@ public class JdbcReviewRepository implements ReviewRepository {
             review.getPriorRequirements(),
             review.getExamInfo(),
             review.getText(),
+            review.isModerationFlagged(),
+            review.getModerationReason(),
             review.getId()
         );
     }
@@ -139,6 +145,8 @@ public class JdbcReviewRepository implements ReviewRepository {
             review.setText(rs.getString("text"));
             review.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
             review.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+            review.setModerationFlagged(rs.getBoolean("moderation_flagged"));
+            review.setModerationReason(rs.getString("moderation_reason"));
             return review;
         }
     }

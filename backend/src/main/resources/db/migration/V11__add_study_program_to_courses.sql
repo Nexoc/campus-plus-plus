@@ -32,8 +32,8 @@ ALTER TABLE courses
 CREATE INDEX idx_courses_study_program
     ON courses (study_program_id);
 
--- Drop the old join table
-DROP TABLE IF EXISTS study_program_courses;
+-- Keep the study_program_courses table for importer compatibility
+-- (maintains the many-to-many relationship alongside the many-to-one)
 
 -- =====================================================
 -- End of V11

@@ -118,7 +118,8 @@ public class ReviewService {
      * Update an existing review.
      *
      * Authorization:
-     * - Only the author can update their review
+     * - Student: only own reviews
+     * - Moderator (ADMIN): any review
      */
     public Review updateReview(UUID id, Review updatedReview) {
         // 1. Check authentication
@@ -131,8 +132,11 @@ public class ReviewService {
         Review existing = repository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
 
-        // 3. Check ownership
-        if (!existing.getUserId().toString().equals(userId)) {
+        // 3. Check authorization: ownership or moderator role
+        boolean isModerator = userContext.hasRole("ADMIN");
+        boolean isOwner = existing.getUserId().toString().equals(userId);
+        
+        if (!isOwner && !isModerator) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
                 "You can only edit your own reviews");
         }
@@ -174,7 +178,8 @@ public class ReviewService {
      * Delete a review.
      *
      * Authorization:
-     * - Only the author can delete their review
+     * - Student: only own reviews
+     * - Moderator (ADMIN): any review
      */
     public void deleteReview(UUID id) {
         // 1. Check authentication
@@ -187,13 +192,86 @@ public class ReviewService {
         Review existing = repository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
 
-        // 3. Check ownership
-        if (!existing.getUserId().toString().equals(userId)) {
+        // 3. Check authorization: ownership or moderator role
+        boolean isModerator = userContext.hasRole("ADMIN");
+        boolean isOwner = existing.getUserId().toString().equals(userId);
+        
+        if (!isOwner && !isModerator) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
                 "You can only delete your own reviews");
         }
 
         // 4. Delete
+        repository.deleteById(id);
+    }
+
+    /**
+     * Flag a review as inappropriate (moderator only).
+     *
+     * Authorization:
+     * - Only ADMIN (Moderator) role
+     */
+    public Review flagReview(UUID id, String reason) {
+        // 1. Check moderator role
+        if (!userContext.hasRole("ADMIN")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "Only moderators can flag reviews");
+        }
+
+        // 2. Find existing review
+        Review existing = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        // 3. Flag the review
+        existing.setModerationFlagged(true);
+        existing.setModerationReason(reason);
+        repository.update(existing);
+
+        return existing;
+    }
+
+    /**
+     * Unflag a review (moderator only).
+     *
+     * Authorization:
+     * - Only ADMIN (Moderator) role
+     */
+    public Review unflagReview(UUID id) {
+        // 1. Check moderator role
+        if (!userContext.hasRole("ADMIN")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "Only moderators can unflag reviews");
+        }
+
+        // 2. Find existing review
+        Review existing = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        // 3. Unflag the review
+        existing.setModerationFlagged(false);
+        existing.setModerationReason(null);
+        repository.update(existing);
+
+        return existing;
+    }
+
+    /**
+     * Delete a review by moderator (bypass ownership check).
+     *
+     * Authorization:
+     * - Only ADMIN (Moderator) role
+     */
+    public void deleteReviewByModerator(UUID id) {
+        // 1. Check moderator role
+        if (!userContext.hasRole("ADMIN")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                "Only moderators can delete reviews");
+        }
+
+        // 2. Find and delete
+        Review existing = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+        
         repository.deleteById(id);
     }
 }

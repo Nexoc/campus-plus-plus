@@ -25,4 +25,21 @@ export const reviewsApi = {
   delete(reviewId: string) {
     return http.delete(`/api/reviews/${reviewId}`)
   },
+
+  // Moderation endpoints (ADMIN role only)
+  moderationGetAll(filters?: { courseId?: string; flaggedOnly?: boolean }) {
+    return http.get<Review[]>('/api/moderation/reviews', { params: filters })
+  },
+
+  moderationFlag(reviewId: string, reason: string) {
+    return http.post(`/api/moderation/reviews/${reviewId}/flag`, { reason })
+  },
+
+  moderationUnflag(reviewId: string) {
+    return http.post(`/api/moderation/reviews/${reviewId}/unflag`)
+  },
+
+  moderationDelete(reviewId: string) {
+    return http.delete(`/api/moderation/reviews/${reviewId}`)
+  },
 }

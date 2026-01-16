@@ -245,12 +245,12 @@ def import_data(json_path: str):
                         language, sws, semester, kind,
                         details_html, content, learning_outcomes,
                         teaching_method, exam_method, literature,
-                        teaching_language, source_url,
+                        teaching_language, source_url, study_program_id,
                         created_at, updated_at
                     )
                     VALUES
                         (%s,%s,%s,%s,%s,%s,%s,%s,%s,
-                         %s,%s,%s,%s,%s,%s,%s,%s,
+                         %s,%s,%s,%s,%s,%s,%s,%s,%s,
                          now(),now())
                     ON CONFLICT ON CONSTRAINT uq_courses_module_title
                     DO NOTHING
@@ -274,6 +274,7 @@ def import_data(json_path: str):
                         j(item.get("literature")),
                         j(item.get("teaching_language")),
                         url,
+                        program_id,
                     ),
                 )
 

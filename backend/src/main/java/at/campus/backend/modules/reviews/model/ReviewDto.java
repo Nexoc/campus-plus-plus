@@ -47,6 +47,12 @@ public class ReviewDto {
     @JsonProperty("updatedAt")
     private LocalDateTime updatedAt;
 
+    @JsonProperty("isModerationFlagged")
+    private boolean moderationFlagged;
+
+    @JsonProperty("moderationReason")
+    private String moderationReason;
+
     // Constructors
 
     public ReviewDto() {
@@ -67,6 +73,8 @@ public class ReviewDto {
         dto.text = review.getText();
         dto.createdAt = review.getCreatedAt();
         dto.updatedAt = review.getUpdatedAt();
+        dto.moderationFlagged = review.isModerationFlagged();
+        dto.moderationReason = review.getModerationReason();
         return dto;
     }
 
@@ -85,6 +93,8 @@ public class ReviewDto {
         review.setText(this.text);
         review.setCreatedAt(this.createdAt);
         review.setUpdatedAt(this.updatedAt);
+        review.setModerationFlagged(this.moderationFlagged);
+        review.setModerationReason(this.moderationReason);
         return review;
     }
 
@@ -184,5 +194,21 @@ public class ReviewDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isModerationFlagged() {
+        return moderationFlagged;
+    }
+
+    public void setModerationFlagged(boolean moderationFlagged) {
+        this.moderationFlagged = moderationFlagged;
+    }
+
+    public String getModerationReason() {
+        return moderationReason;
+    }
+
+    public void setModerationReason(String moderationReason) {
+        this.moderationReason = moderationReason;
     }
 }

@@ -26,6 +26,9 @@ public class Review {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    private boolean moderationFlagged;
+    private String moderationReason;
+
     // Constructors
 
     public Review() {
@@ -134,5 +137,21 @@ public class Review {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isModerationFlagged() {
+        return moderationFlagged;
+    }
+
+    public void setModerationFlagged(boolean moderationFlagged) {
+        this.moderationFlagged = moderationFlagged;
+    }
+
+    public String getModerationReason() {
+        return moderationReason;
+    }
+
+    public void setModerationReason(String moderationReason) {
+        this.moderationReason = moderationReason;
     }
 }

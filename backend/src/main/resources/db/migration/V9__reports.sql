@@ -7,16 +7,18 @@
 SET search_path TO app;
 
 CREATE TABLE reports (
-    id           UUID PRIMARY KEY,
-    user_id      UUID,
+    id               UUID PRIMARY KEY,
+    user_id          UUID,
 
-    target_type  VARCHAR(20) NOT NULL,
-    target_id    UUID NOT NULL,
+    target_type      VARCHAR(20) NOT NULL,
+    target_id        UUID NOT NULL,
 
-    reason       TEXT NOT NULL,
-    status       VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    reason           TEXT NOT NULL,
+    status           VARCHAR(20) NOT NULL DEFAULT 'PENDING',
 
-    created_at   TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+    resolved_at      TIMESTAMP,
+    moderator_notes  TEXT
 );
 
 -- Constraints
