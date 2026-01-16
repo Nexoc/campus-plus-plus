@@ -1,10 +1,8 @@
-# docker compose up -d --build
 services:
   # =========================
-  # PostgreSQL Database
+  # PostgreSQL
   # =========================
   postgres:
-
     image: postgres:14.11
     container_name: campus-postgres
     restart: unless-stopped
@@ -27,60 +25,8 @@ services:
     networks:
       - campus-net
 
-
-
   # =========================
-  # Auth Service (Spring Boot)
-  # =========================
-  auth:
-    build: ./auth
-    # Build image from auth/Dockerfile
-
-    container_name: campus-auth
-
-    environment:
-      SPRING_PROFILES_ACTIVE: prod
-      # Activate production Spring profile
-
-      DB_HOST: postgres
-      # Hostname of the database
-      # Uses Docker service name for internal DNS resolution
-
-      DB_PORT: 5432
-      # PostgreSQL default port
-
-      DB_NAME: campus
-      # Database name
-
-      DB_USERNAME: ${DB_USERNAME}
-      # Database username
-      DB_PASSWORD: ${DB_PASSWORD}
-      # Database password injected from environment
-
-      JWT_SECRET: ${JWT_SECRET}
-      # Secret key for signing JWT tokens
-      # MUST be provided via environment variable / CI secrets
-
-      JWT_EXPIRATION_MINUTES: 15
-      # JWT token lifetime (short TTL for production security)
-
-    depends_on:
-      postgres:
-        condition: service_healthy
-      # Ensures database container is started before auth service
-      # (does NOT wait for DB to be fully ready)
-
-    expose:
-      - "8080"
-      # Exposes port only inside Docker network
-      # Not accessible from outside directly
-
-    networks:
-      - campus-net
-
-
-  # =========================
-  # Backend Service
+  # Backend (Flyway runs here)
   # =========================
   backend:
     build: ./backend
@@ -88,11 +34,9 @@ services:
 
     environment:
       SPRING_PROFILES_ACTIVE: dev
-
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: campus
-
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
 
@@ -106,9 +50,63 @@ services:
     networks:
       - campus-net
 
+  # =========================
+  # Importer (one-shot)
+  # =========================
+  importer:
+    build: ./importer
+    container_name: campus-importer
+    restart: "no"
+
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: campus
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DATA_FILE: /data/hcw_courses.json
+
+    volumes:
+      - importer-data:/data
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started   # ⬅ backend должен запуститься
+
+    networks:
+      - campus-net
 
   # =========================
-  # Frontend Service
+  # Auth
+  # =========================
+  auth:
+    build: ./auth
+    container_name: campus-auth
+
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: campus
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MINUTES: 15
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    expose:
+      - "8080"
+
+    networks:
+      - campus-net
+
+  # =========================
+  # Frontend
   # =========================
   frontend:
     build: ./frontend
@@ -117,9 +115,8 @@ services:
     networks:
       - campus-net
 
-
   # =========================
-  # Nginx Reverse Proxy
+  # Nginx
   # =========================
   nginx:
     build: ./nginx
@@ -127,34 +124,19 @@ services:
 
     ports:
       - "80:80"
-      # Exposes HTTP port to host
-      # Single entry point to the system
 
     depends_on:
       - frontend
       - auth
       - backend
-      # Ensure all application services are started before Nginx
 
     networks:
       - campus-net
 
-
-# =========================
-# Docker Network
-# =========================
 networks:
   campus-net:
     driver: bridge
-    # Isolated internal network
-    # Services can communicate by service name
-    # Not directly accessible from outside
 
-
-# =========================
-# Persistent Volumes
-# =========================
 volumes:
   postgres-data:
-  # Named volume for PostgreSQL data
-  # Managed by Docker
+  importer-data:
