@@ -189,6 +189,15 @@ export const useAuthStore = defineStore('auth', {
       this.token = null
       this.user = null
       localStorage.removeItem('token')
+      
+      // Clear favourites on logout
+      try {
+        const { useFavouritesStore } = await import('@/modules/favourites/store/favourites.store')
+        const favouritesStore = useFavouritesStore()
+        favouritesStore.clearFavourites()
+      } catch (e) {
+        // Favourites store might not be loaded
+      }
     },
   },
 })

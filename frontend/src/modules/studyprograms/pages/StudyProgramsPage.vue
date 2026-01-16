@@ -5,8 +5,12 @@ import { useRouter } from 'vue-router'
 import { studyProgramsApi } from '../api/studyProgramsApi'
 import type { StudyProgram } from '../model/StudyProgram'
 import EntityTable from '@/shared/components/EntityTable.vue'
+import StarIcon from '@/shared/components/icons/StarIcon.vue'
+import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
 
 const auth = useAuthStore()
+const isAuthenticated = computed(() => auth.isAuthenticated)
+const favouritesStore = useFavouritesStore()
 
 const router = useRouter()
 
@@ -62,6 +66,10 @@ function getSortIndicator(field: string) {
 // Load programs
 async function load() {
   allPrograms.value = (await studyProgramsApi.getAll()).data
+  // Load study program favourites if authenticated
+  if (isAuthenticated.value) {
+    await favouritesStore.loadStudyProgramFavourites()
+  }
 }
 
 // Edit program (navigate to edit page)
@@ -126,9 +134,16 @@ onMounted(load)
         @sort="toggleSort"
       >
         <template #name="{ row }">
-          <router-link :to="{ name: 'StudyProgramDetail', params: { id: row.studyProgramId, slug: (row.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') } }">
-            {{ row.name }}
-          </router-link>
+          <div class="title-with-star">
+            <StarIcon 
+              v-if="isAuthenticated && favouritesStore.isStudyProgramFavourite(row.studyProgramId)" 
+              :size="16" 
+              :filled="true" 
+            />
+            <router-link :to="{ name: 'StudyProgramDetail', params: { id: row.studyProgramId, slug: (row.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') } }">
+              {{ row.name }}
+            </router-link>
+          </div>
         </template>
         <template #actions="{ row }">
           <button class="base-button" @click="editProgram(row)">Edit</button>
@@ -143,3 +158,16 @@ onMounted(load)
     </div>
   </div>
 </template>
+
+<style scoped>
+.title-with-star {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-with-star :deep(.star-icon) {
+  color: var(--star-color, #fbbf24);
+  flex-shrink: 0;
+}
+</style>
