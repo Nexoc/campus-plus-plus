@@ -10,7 +10,18 @@ export interface PagedResponse<T> {
 }
 
 export const coursesApi = {
-  getAll(params?: { studyProgramId?: string; ects?: number; page?: number; size?: number; sort?: string }) {
+  getAll(params?: {
+    studyProgramId?: string
+    ects?: number
+    semester?: number
+    language?: string
+    title?: string
+    studyProgramName?: string
+    search?: string
+    page?: number
+    size?: number
+    sort?: string
+  }) {
     return http.get<PagedResponse<Course>>('/api/public/courses', { params })
   },
 

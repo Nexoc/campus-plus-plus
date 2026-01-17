@@ -2,7 +2,18 @@ import http from '@/app/api/http'
 import type { StudyProgram } from '../model/StudyProgram'
 
 export const studyProgramsApi = {
-  getAll(params?: { page?: number; size?: number; sort?: string }) {
+  getAll(params?: {
+    page?: number
+    size?: number
+    sort?: string
+    search?: string
+    name?: string
+    degree?: string
+    semesters?: number
+    totalEcts?: number
+    mode?: string
+    language?: string
+  }) {
     return http.get<{ content: StudyProgram[]; totalElements: number }>('/api/public/study-programs', { params })
   },
 

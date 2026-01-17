@@ -24,11 +24,32 @@ public class StudyProgramPublicController {
     // ---------- READ (PUBLIC) ----------
 
     @GetMapping
-    public Page<StudyProgramDto> getPrograms(Pageable pageable) {
-        List<StudyProgramDto> allPrograms = service.getAllPrograms()
+            public Page<StudyProgramDto> getPrograms(
+                @RequestParam(required = false) String search,
+                @RequestParam(required = false) String name,
+                @RequestParam(required = false) String degree,
+                @RequestParam(required = false) Integer semesters,
+                @RequestParam(required = false) Integer totalEcts,
+                @RequestParam(required = false) String mode,
+                @RequestParam(required = false) String language,
+                Pageable pageable
+            ) {
+            List<StudyProgramDto> allPrograms = service.getAllPrograms()
                 .stream()
                 .map(StudyProgramDto::fromDomain)
                 .toList();
+
+            // Column filters
+            allPrograms = allPrograms.stream()
+                .filter(p -> matchesFilters(p, name, degree, semesters, totalEcts, mode, language))
+                .toList();
+
+            if (search != null && !search.isBlank()) {
+                String query = search.toLowerCase();
+                allPrograms = allPrograms.stream()
+                    .filter(p -> matchesProgram(p, query))
+                    .toList();
+            }
         
         // Apply sorting
         if (pageable.getSort().isSorted()) {
@@ -69,6 +90,34 @@ public class StudyProgramPublicController {
         if (a == null) return 1;
         if (b == null) return -1;
         return a.compareToIgnoreCase(b);
+    }
+
+    private boolean matchesProgram(StudyProgramDto program, String query) {
+        return containsIgnoreCase(program.name, query)
+                || containsIgnoreCase(program.degree, query)
+                || containsIgnoreCase(program.mode, query)
+                || containsIgnoreCase(program.language, query);
+    }
+
+    private boolean matchesFilters(StudyProgramDto program,
+                                   String name,
+                                   String degree,
+                                   Integer semesters,
+                                   Integer totalEcts,
+                                   String mode,
+                                   String language) {
+        if (name != null && !containsIgnoreCase(program.name, name)) return false;
+        if (degree != null && !containsIgnoreCase(program.degree, degree)) return false;
+        if (semesters != null && (program.semesters == null || !program.semesters.equals(semesters))) return false;
+        if (totalEcts != null && (program.totalEcts == null || !program.totalEcts.equals(totalEcts))) return false;
+        if (mode != null && !containsIgnoreCase(program.mode, mode)) return false;
+        if (language != null && !containsIgnoreCase(program.language, language)) return false;
+        return true;
+    }
+
+    private boolean containsIgnoreCase(String value, String query) {
+        if (value == null || query == null) return false;
+        return value.toLowerCase().contains(query.toLowerCase());
     }
     
     private int compareIntegers(Integer a, Integer b) {

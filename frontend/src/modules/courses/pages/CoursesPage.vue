@@ -15,8 +15,20 @@ const isAuthenticated = computed(() => auth.isAuthenticated)
 const router = useRouter()
 
 const courses = ref<Course[]>([])
-const searchQuery = ref('')
-const sortBy = ref<'title' | 'ects' | 'semester' | 'language'>('title')
+const filterTitle = ref('')
+const filterStudyProgram = ref('')
+const filterEcts = ref('')
+const filterSemester = ref('')
+const filterLanguage = ref('')
+
+// Template refs for input fields
+const titleInputRef = ref<HTMLInputElement | null>(null)
+const studyProgramInputRef = ref<HTMLInputElement | null>(null)
+const ectsInputRef = ref<HTMLInputElement | null>(null)
+const semesterInputRef = ref<HTMLInputElement | null>(null)
+const languageInputRef = ref<HTMLInputElement | null>(null)
+
+const sortBy = ref<string>('title')
 const sortOrder = ref<'asc' | 'desc'>('asc')
 
 // Pagination - Spring uses 0-based page numbers
@@ -27,18 +39,43 @@ const totalPages = computed(() => Math.ceil(totalElements.value / pageSize))
 
 const tableColumns = [
   { key: 'title', label: 'Title', thClass: 'sortable', sortable: true },
-  { key: 'studyProgram', label: 'Study Program', thClass: '', sortable: false },
+  { key: 'studyProgram', label: 'Study Program', thClass: 'sortable', sortable: true, sortKey: 'studyProgram.name' },
   { key: 'ects', label: 'ECTS', thClass: 'sortable', sortable: true },
   { key: 'semester', label: 'Semester', thClass: 'sortable', sortable: true },
   { key: 'language', label: 'Language', thClass: 'sortable', sortable: true },
 ]
 
+const uniqueTitles = computed(() => [...new Set(courses.value.map(c => c.title))].sort())
+const uniqueStudyPrograms = computed(() => {
+  const programs = new Set<string>()
+  courses.value.forEach(c => {
+    if (c.studyProgram?.name) {
+      const displayName = c.studyProgram.mode 
+        ? `${c.studyProgram.name} (${c.studyProgram.mode})`
+        : c.studyProgram.name
+      programs.add(displayName)
+    }
+  })
+  return [...programs].sort()
+})
+const uniqueEcts = computed(() => [...new Set(courses.value.map(c => c.ects).filter(v => v !== null && v !== undefined))].sort((a, b) => a - b))
+const uniqueSemesters = computed(() => [...new Set(courses.value.map(c => c.semester).filter(v => v !== null && v !== undefined))].sort((a, b) => a - b))
+const uniqueLanguages = computed(() => [...new Set(courses.value.map(c => c.language).filter(Boolean))].sort())
+
 // Pagination info for display (convert to 1-based for user)
 const startIndex = computed(() => currentPage.value * pageSize + 1)
 const endIndex = computed(() => Math.min((currentPage.value + 1) * pageSize, totalElements.value))
 
-// Reset to page 0 when search changes
-function onSearchChange() {
+function clearAllFilters() {
+  filterTitle.value = ''
+  filterStudyProgram.value = ''
+  filterEcts.value = ''
+  filterSemester.value = ''
+  filterLanguage.value = ''
+  onFiltersChange()
+}
+
+function onFiltersChange() {
   currentPage.value = 0
   load()
 }
@@ -47,6 +84,10 @@ function onSearchChange() {
 watch([sortBy, sortOrder], () => {
   currentPage.value = 0
   load()
+})
+
+watch([filterTitle, filterStudyProgram, filterEcts, filterSemester, filterLanguage], () => {
+  onFiltersChange()
 })
 
 function goToPage(page: number) {
@@ -67,7 +108,7 @@ function prevPage() {
   }
 }
 
-function toggleSort(field: 'title' | 'ects' | 'semester' | 'language') {
+function toggleSort(field: string) {
   if (sortBy.value === field) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
   } else {
@@ -106,11 +147,17 @@ function getPaginationRange() {
 }
 
 async function load() {
-  const response = await coursesApi.getAll({
+  const params: any = {
     page: currentPage.value,
     size: pageSize,
     sort: `${sortBy.value},${sortOrder.value}`
-  })
+  }
+  if (filterTitle.value) params.title = filterTitle.value
+  if (filterStudyProgram.value) params.studyProgramName = filterStudyProgram.value
+  if (filterEcts.value) params.ects = Number(filterEcts.value)
+  if (filterSemester.value) params.semester = Number(filterSemester.value)
+  if (filterLanguage.value) params.language = filterLanguage.value
+  const response = await coursesApi.getAll(params)
   courses.value = response.data.content
   totalElements.value = response.data.totalElements
   
@@ -118,7 +165,6 @@ async function load() {
     await favouritesStore.loadFavourites()
   }
 }
-
 function editCourse(course: Course) {
   router.push({ name: 'CourseEdit', params: { id: course.courseId } })
 }
@@ -150,14 +196,8 @@ onMounted(load)
         </button>
       </div>
 
-      <div class="search-bar">
-        <input
-          v-model="searchQuery"
-          @input="onSearchChange"
-          type="text"
-          placeholder="Search courses..."
-          class="search-input"
-        />
+      <div class="filters-actions">
+        <button class="base-button small" @click="clearAllFilters">Clear all filters</button>
       </div>
 
       <div class="results-info">
@@ -173,6 +213,123 @@ onMounted(load)
         :sortOrder="sortOrder"
         @sort="toggleSort"
       >
+        <template #th-title>
+          <div class="th-cell">
+            <div class="th-label">
+              Title
+              <span v-if="sortBy === 'title'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+            </div>
+            <div class="filter-group">
+              <input
+                ref="titleInputRef"
+                v-model="filterTitle"
+                type="text"
+                placeholder="Filter title"
+                class="th-filter"
+                list="titles-list"
+                @click.stop
+              />
+              <datalist id="titles-list">
+                <option v-for="title in uniqueTitles" :key="title" :value="title" />
+              </datalist>
+              <button v-if="filterTitle" class="clear-filter" @click.stop="filterTitle=''; onFiltersChange()">×</button>
+            </div>
+          </div>
+        </template>
+        <template #th-studyProgram>
+          <div class="th-cell">
+            <div class="th-label">
+              Study Program
+              <span v-if="sortBy === 'studyProgram.name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+            </div>
+            <div class="filter-group">
+              <input
+                ref="studyProgramInputRef"
+                v-model="filterStudyProgram"
+                type="text"
+                placeholder="Filter program"
+                class="th-filter"
+                list="programs-list"
+                @click.stop
+              />
+              <datalist id="programs-list">
+                <option v-for="prog in uniqueStudyPrograms" :key="prog" :value="prog" />
+              </datalist>
+              <button v-if="filterStudyProgram" class="clear-filter" @click.stop="filterStudyProgram=''; onFiltersChange()">×</button>
+            </div>
+          </div>
+        </template>
+        <template #th-ects>
+          <div class="th-cell">
+            <div class="th-label">
+              ECTS
+              <span v-if="sortBy === 'ects'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+            </div>
+            <div class="filter-group">
+              <input
+                ref="ectsInputRef"
+                v-model="filterEcts"
+                type="number"
+                min="0"
+                placeholder="ECTS"
+                class="th-filter th-filter-number"
+                list="ects-list"
+                @click.stop
+              />
+              <datalist id="ects-list">
+                <option v-for="ect in uniqueEcts" :key="ect" :value="ect" />
+              </datalist>
+              <button v-if="filterEcts" class="clear-filter clear-filter-number" @click.stop="filterEcts=''; onFiltersChange()">×</button>
+            </div>
+          </div>
+        </template>
+        <template #th-semester>
+          <div class="th-cell">
+            <div class="th-label">
+              Semester
+              <span v-if="sortBy === 'semester'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+            </div>
+            <div class="filter-group">
+              <input
+                ref="semesterInputRef"
+                v-model="filterSemester"
+                type="number"
+                min="0"
+                placeholder="Semester"
+                class="th-filter th-filter-number"
+                list="semester-list"
+                @click.stop
+              />
+              <datalist id="semester-list">
+                <option v-for="sem in uniqueSemesters" :key="sem" :value="sem" />
+              </datalist>
+              <button v-if="filterSemester" class="clear-filter clear-filter-number" @click.stop="filterSemester=''; onFiltersChange()">×</button>
+            </div>
+          </div>
+        </template>
+        <template #th-language>
+          <div class="th-cell">
+            <div class="th-label">
+              Language
+              <span v-if="sortBy === 'language'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+            </div>
+            <div class="filter-group">
+              <input
+                ref="languageInputRef"
+                v-model="filterLanguage"
+                type="text"
+                placeholder="Language"
+                class="th-filter"
+                list="language-list"
+                @click.stop
+              />
+              <datalist id="language-list">
+                <option v-for="lang in uniqueLanguages" :key="lang" :value="lang" />
+              </datalist>
+              <button v-if="filterLanguage" class="clear-filter" @click.stop="filterLanguage=''; onFiltersChange()">×</button>
+            </div>
+          </div>
+        </template>
         <template #title="{ row }">
           <div class="title-with-star">
             <StarIcon v-if="isAuthenticated && favouritesStore.isFavourite(row.courseId)" :size="16" :filled="true" class="course-star-indicator" />
@@ -278,5 +435,69 @@ onMounted(load)
   color: var(--color-text-muted);
   font-size: 0.9rem;
   margin-bottom: 12px;
+}
+.filters-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.th-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.th-label {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-group {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.th-filter {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  font-size: 0.9rem;
+  cursor: text;
+}
+
+/* Remove extra padding for number fields since controls are inside */
+.th-filter-number {
+  flex: 1;
+}
+
+.clear-filter {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.clear-filter:hover {
+  color: var(--color-text);
+}
+
+.clear-filter-number {
+  /* No extra positioning needed for flex layout */
 }
 </style>

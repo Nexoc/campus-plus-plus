@@ -2,9 +2,19 @@
   <table class="entity-table">
     <thead>
       <tr>
-        <th v-for="col in columns" :key="col.key" :class="col.thClass" @click="col.sortable ? $emit('sort', col.key) : null">
-          {{ col.label }}
-          <span v-if="col.sortable && sortBy === col.key">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+        <th
+          v-for="col in columns"
+          :key="col.key"
+          :class="col.thClass"
+        >
+          <div class="th-wrapper">
+            <div class="th-click" @click="col.sortable ? $emit('sort', col.sortKey ?? col.key) : null">
+              <slot :name="`th-${col.key}`" :col="col">
+                {{ col.label }}
+                <span v-if="col.sortable && sortBy === (col.sortKey ?? col.key)">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+              </slot>
+            </div>
+          </div>
         </th>
         <th v-if="hasActions" class="actions-col">Actions</th>
       </tr>
@@ -24,7 +34,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  columns: Array<{ key: string, label: string, thClass?: string, sortable?: boolean }>
+  columns: Array<{ key: string, label: string, thClass?: string, sortable?: boolean, sortKey?: string }>
   rows: Array<Record<string, any>>
   rowKey: string
   hasActions?: boolean
@@ -33,3 +43,15 @@ const props = defineProps<{
 }>()
 const emit = defineEmits(['sort'])
 </script>
+
+<style scoped>
+.th-wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+.th-click {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+</style>
