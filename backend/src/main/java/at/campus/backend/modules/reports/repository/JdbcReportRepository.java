@@ -1,6 +1,7 @@
 package at.campus.backend.modules.reports.repository;
 
 import at.campus.backend.modules.reports.model.Report;
+import at.campus.backend.modules.reports.model.ReportReason;
 import at.campus.backend.modules.reports.model.ReportStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -42,7 +43,7 @@ public class JdbcReportRepository implements ReportRepository {
 
     @Override
     public List<Report> findByStatus(ReportStatus status) {
-        String sql = "SELECT * FROM app.reports WHERE status = ?::app.report_status ORDER BY created_at DESC";
+        String sql = "SELECT * FROM app.reports WHERE status = ? ORDER BY created_at DESC";
         return jdbcTemplate.query(sql, new ReportRowMapper(), status.name());
     }
 
@@ -65,27 +66,42 @@ public class JdbcReportRepository implements ReportRepository {
     }
 
     @Override
+    public boolean existsByUserIdAndTargetTypeAndTargetId(UUID userId, String targetType, UUID targetId) {
+        String sql = "SELECT COUNT(*) FROM app.reports WHERE user_id = ? AND target_type = ? AND target_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userId, targetType, targetId);
+        return count != null && count > 0;
+    }
+
+    @Override
     public void save(Report report) {
+        // Note: Database stores reason as TEXT, comment is stored in moderator_notes for now
+        // In future migration, add a separate comment column
         String sql = """
             INSERT INTO app.reports (
                 id, target_type, target_id, user_id, reason, status, created_at, resolved_at, moderator_notes
-            ) VALUES (?, ?, ?, ?, ?, ?::app.report_status, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (id) DO UPDATE SET
                 status = EXCLUDED.status,
                 resolved_at = EXCLUDED.resolved_at,
                 moderator_notes = EXCLUDED.moderator_notes
             """;
         
+        // Combine comment and moderator notes (comment comes first)
+        String combinedNotes = report.getComment();
+        if (report.getModeratorNotes() != null && !report.getModeratorNotes().isBlank()) {
+            combinedNotes = (combinedNotes != null ? combinedNotes + "\n---\n" : "") + report.getModeratorNotes();
+        }
+        
         jdbcTemplate.update(sql,
             report.getId(),
             report.getTargetType(),
             report.getTargetId(),
             report.getUserId(),
-            report.getReason(),
+            report.getReason() != null ? report.getReason().name() : null,
             report.getStatus().name(),
             Timestamp.from(report.getCreatedAt().toInstant()),
             report.getResolvedAt() != null ? Timestamp.from(report.getResolvedAt().toInstant()) : null,
-            report.getModeratorNotes()
+            combinedNotes
         );
     }
 
@@ -106,7 +122,18 @@ public class JdbcReportRepository implements ReportRepository {
             report.setTargetType(rs.getString("target_type"));
             report.setTargetId((UUID) rs.getObject("target_id"));
             report.setUserId((UUID) rs.getObject("user_id"));
-            report.setReason(rs.getString("reason"));
+            
+            // Parse reason as enum
+            String reasonStr = rs.getString("reason");
+            if (reasonStr != null) {
+                try {
+                    report.setReason(ReportReason.valueOf(reasonStr));
+                } catch (IllegalArgumentException e) {
+                    // Fallback for old data that might not be enum values
+                    report.setReason(ReportReason.OTHER);
+                }
+            }
+            
             report.setStatus(ReportStatus.valueOf(rs.getString("status")));
             
             Timestamp createdAt = rs.getTimestamp("created_at");
@@ -119,6 +146,8 @@ public class JdbcReportRepository implements ReportRepository {
                 report.setResolvedAt(OffsetDateTime.ofInstant(resolvedAt.toInstant(), ZoneOffset.UTC));
             }
             
+            // moderator_notes might contain both comment and moderator notes
+            // For now, we'll put everything in moderator_notes
             report.setModeratorNotes(rs.getString("moderator_notes"));
             
             return report;

@@ -4,20 +4,34 @@ import java.util.UUID;
 
 /**
  * Request DTO for creating a report.
+ *
+ * Fields:
+ * - targetType: Type of content being reported (REVIEW, POST)
+ * - targetId: ID of the content being reported
+ * - reason: Predefined reason from ReportReason enum
+ * - comment: Optional free-text comment providing additional context
  */
 public class CreateReportRequest {
 
-    private String targetType;  // "review", "post", "thread"
+    private String targetType;  // "REVIEW", "POST"
     private UUID targetId;
-    private String reason;
+    private ReportReason reason;
+    private String comment;     // Optional additional context
 
     // Constructors
     public CreateReportRequest() {}
 
-    public CreateReportRequest(String targetType, UUID targetId, String reason) {
+    public CreateReportRequest(String targetType, UUID targetId, ReportReason reason) {
         this.targetType = targetType;
         this.targetId = targetId;
         this.reason = reason;
+    }
+
+    public CreateReportRequest(String targetType, UUID targetId, ReportReason reason, String comment) {
+        this.targetType = targetType;
+        this.targetId = targetId;
+        this.reason = reason;
+        this.comment = comment;
     }
 
     // Getters and setters
@@ -27,6 +41,9 @@ public class CreateReportRequest {
     public UUID getTargetId() { return targetId; }
     public void setTargetId(UUID targetId) { this.targetId = targetId; }
 
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
+    public ReportReason getReason() { return reason; }
+    public void setReason(ReportReason reason) { this.reason = reason; }
+
+    public String getComment() { return comment; }
+    public void setComment(String comment) { this.comment = comment; }
 }

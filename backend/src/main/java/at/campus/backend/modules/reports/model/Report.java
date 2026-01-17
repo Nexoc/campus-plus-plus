@@ -18,10 +18,11 @@ import java.util.UUID;
 public class Report {
 
     private UUID id;
-    private String targetType;      // "review", "post", "thread"
+    private String targetType;      // "REVIEW", "POST"
     private UUID targetId;
     private UUID userId;            // Who submitted the report
-    private String reason;
+    private ReportReason reason;    // Predefined reason enum
+    private String comment;         // Optional free-text comment
     private ReportStatus status;
     private OffsetDateTime createdAt;
     private OffsetDateTime resolvedAt;
@@ -30,7 +31,7 @@ public class Report {
     // Constructors
     public Report() {}
 
-    public Report(String targetType, UUID targetId, UUID userId, String reason) {
+    public Report(String targetType, UUID targetId, UUID userId, ReportReason reason) {
         this.id = UUID.randomUUID();
         this.targetType = targetType;
         this.targetId = targetId;
@@ -53,8 +54,11 @@ public class Report {
     public UUID getUserId() { return userId; }
     public void setUserId(UUID userId) { this.userId = userId; }
 
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
+    public ReportReason getReason() { return reason; }
+    public void setReason(ReportReason reason) { this.reason = reason; }
+
+    public String getComment() { return comment; }
+    public void setComment(String comment) { this.comment = comment; }
 
     public ReportStatus getStatus() { return status; }
     public void setStatus(ReportStatus status) { this.status = status; }
