@@ -38,14 +38,18 @@ const http = axios.create({
 // REQUEST INTERCEPTOR
 // --------------------------------------------------
 // Responsibilities:
-// - Attach JWT if present
+// - Attach JWT if present (but NOT for public endpoints)
 // - DO NOT modify cookie behavior
 // --------------------------------------------------
 http.interceptors.request.use((config) => {
   const authStore = useAuthStore()
+  const url = config.url || ''
+  
+  // Don't send JWT for public endpoints
+  const isPublicEndpoint = url.includes('/api/public/')
 
-  // Attach JWT token if available
-  if (authStore.token) {
+  // Attach JWT token if available and not a public endpoint
+  if (authStore.token && !isPublicEndpoint) {
     config.headers = config.headers || {}
     config.headers.Authorization = `Bearer ${authStore.token}`
   }
@@ -83,11 +87,18 @@ http.interceptors.response.use(
     // --------------------------------------------
     // REAL AUTHENTICATION FAILURE
     // --------------------------------------------
+    // Only force logout if the 401 is NOT from a public endpoint
     if (error.response?.status === 401) {
-      console.warn('[AUTH] 401 Unauthorized -> force logout')
-
-      authStore.logout()
-      router.push('/login')
+      const url = error.config?.url || ''
+      const isPublicEndpoint = url.includes('/api/public/') || url.includes('/auth/')
+      
+      if (!isPublicEndpoint) {
+        console.warn('[AUTH] 401 Unauthorized -> force logout')
+        authStore.logout()
+        router.push('/login')
+      } else {
+        console.log('[AUTH] 401 on public endpoint - ignoring')
+      }
     }
 
     return Promise.reject(error)

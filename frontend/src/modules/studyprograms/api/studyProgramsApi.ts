@@ -2,8 +2,8 @@ import http from '@/app/api/http'
 import type { StudyProgram } from '../model/StudyProgram'
 
 export const studyProgramsApi = {
-  getAll() {
-    return http.get<StudyProgram[]>('/api/public/study-programs')
+  getAll(params?: { page?: number; size?: number; sort?: string }) {
+    return http.get<{ content: StudyProgram[]; totalElements: number }>('/api/public/study-programs', { params })
   },
 
   getById(id: string) {

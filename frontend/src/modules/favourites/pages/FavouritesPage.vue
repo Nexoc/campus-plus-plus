@@ -255,8 +255,8 @@ onMounted(async () => {
   align-items: flex-start;
   gap: 16px;
   padding: 20px;
-  background: var(--card-bg, #fff);
-  border: 1px solid var(--border-color, #e0e0e0);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
@@ -292,12 +292,12 @@ onMounted(async () => {
 }
 
 .favourite-card__ects {
-  padding: 2px 8px;
-  background: var(--bg-secondary, #f5f5f5);
+  padding: 4px 10px;
+  background: var(--primary-color, #3b82f6);
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary, #666);
+  color: white;
 }
 
 .favourite-card__description {
@@ -313,11 +313,28 @@ onMounted(async () => {
   color: var(--text-secondary, #666);
 }
 
+.favourite-card__date {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+:root[data-theme='dark'] .favourite-card__date {
+  color: #9ca3af;
+}
+
 .meta-item {
-  padding: 2px 8px;
-  background: var(--bg-secondary, #f5f5f5);
+  padding: 4px 10px;
+  background: var(--color-surface-alt, #e5e7eb);
   border-radius: 4px;
   font-size: 12px;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+:root[data-theme='dark'] .meta-item {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93c5fd;
 }
 
 .favourite-card__actions {

@@ -53,7 +53,7 @@ onMounted(load)
     <div class="page-card">
       <template v-if="program">
         <h1>{{ program.name }}</h1>
-        <div class="favourite-button-wrapper">
+        <div v-if="isAuthenticated" class="favourite-button-wrapper">
           <StudyProgramFavouriteButton 
             v-if="program.studyProgramId"
             :study-program-id="program.studyProgramId"

@@ -1,53 +1,73 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/modules/auth/store/auth.store'
-import { computed, onMounted, ref } from 'vue'
+import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { studyProgramsApi } from '../api/studyProgramsApi'
 import type { StudyProgram } from '../model/StudyProgram'
 import EntityTable from '@/shared/components/EntityTable.vue'
 import StarIcon from '@/shared/components/icons/StarIcon.vue'
-import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
 
 const auth = useAuthStore()
-const isAuthenticated = computed(() => auth.isAuthenticated)
 const favouritesStore = useFavouritesStore()
+const isAuthenticated = computed(() => auth.isAuthenticated)
 
 const router = useRouter()
 
-const allPrograms = ref<StudyProgram[]>([])
+const programs = ref<StudyProgram[]>([])
 const searchQuery = ref('')
 const sortBy = ref<'name' | 'degree' | 'semesters' | 'totalEcts' | 'mode' | 'language'>('name')
 const sortOrder = ref<'asc' | 'desc'>('asc')
 
-// Filtered and sorted programs
-const programs = computed(() => {
-  let filtered = allPrograms.value.filter(p =>
-    p.name?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    p.degree?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    p.mode?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    p.language?.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
+// Pagination - Spring uses 0-based page numbers
+const currentPage = ref(0)
+const pageSize = 50
+const totalElements = ref(0)
+const totalPages = computed(() => Math.ceil(totalElements.value / pageSize))
 
-  filtered.sort((a, b) => {
-    let aVal: any = a[sortBy.value]
-    let bVal: any = b[sortBy.value]
+const tableColumns = [
+  { key: 'name', label: 'Name', thClass: 'sortable', sortable: true },
+  { key: 'degree', label: 'Degree', thClass: 'sortable', sortable: true },
+  { key: 'semesters', label: 'Semesters', thClass: 'sortable', sortable: true },
+  { key: 'totalEcts', label: 'Total ECTS', thClass: 'sortable', sortable: true },
+  { key: 'mode', label: 'Mode', thClass: 'sortable', sortable: true },
+  { key: 'language', label: 'Language', thClass: 'sortable', sortable: true },
+]
 
-    if (aVal === undefined || aVal === null) aVal = ''
-    if (bVal === undefined || bVal === null) bVal = ''
+// Pagination info for display (convert to 1-based for user)
+const startIndex = computed(() => currentPage.value * pageSize + 1)
+const endIndex = computed(() => Math.min((currentPage.value + 1) * pageSize, totalElements.value))
 
-    if (typeof aVal === 'string') {
-      aVal = aVal.toLowerCase()
-      bVal = bVal.toLowerCase()
-    }
+// Reset to page 0 when search changes
+function onSearchChange() {
+  currentPage.value = 0
+  load()
+}
 
-    const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0
-    return sortOrder.value === 'asc' ? comparison : -comparison
-  })
-
-  return filtered
+// Watch for sort changes
+watch([sortBy, sortOrder], () => {
+  currentPage.value = 0
+  load()
 })
 
-// Toggle sort
+function goToPage(page: number) {
+  currentPage.value = page
+  load()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function nextPage() {
+  if (currentPage.value < totalPages.value - 1) {
+    goToPage(currentPage.value + 1)
+  }
+}
+
+function prevPage() {
+  if (currentPage.value > 0) {
+    goToPage(currentPage.value - 1)
+  }
+}
+
 function toggleSort(field: 'name' | 'degree' | 'semesters' | 'totalEcts' | 'mode' | 'language') {
   if (sortBy.value === field) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
@@ -57,22 +77,49 @@ function toggleSort(field: 'name' | 'degree' | 'semesters' | 'totalEcts' | 'mode
   }
 }
 
-// Get sort indicator
-function getSortIndicator(field: string) {
-  if (sortBy.value !== field) return ''
-  return sortOrder.value === 'asc' ? ' ↑' : ' ↓'
+function getPaginationRange() {
+  const range: number[] = []
+  const maxVisible = 7
+  
+  if (totalPages.value <= maxVisible) {
+    for (let i = 0; i < totalPages.value; i++) {
+      range.push(i)
+    }
+  } else {
+    if (currentPage.value <= 3) {
+      for (let i = 0; i < 5; i++) range.push(i)
+      range.push(-1)
+      range.push(totalPages.value - 1)
+    } else if (currentPage.value >= totalPages.value - 4) {
+      range.push(0)
+      range.push(-1)
+      for (let i = totalPages.value - 5; i < totalPages.value; i++) range.push(i)
+    } else {
+      range.push(0)
+      range.push(-1)
+      for (let i = currentPage.value - 1; i <= currentPage.value + 1; i++) range.push(i)
+      range.push(-1)
+      range.push(totalPages.value - 1)
+    }
+  }
+  
+  return range
 }
 
-// Load programs
 async function load() {
-  allPrograms.value = (await studyProgramsApi.getAll()).data
-  // Load study program favourites if authenticated
+  const response = await studyProgramsApi.getAll({
+    page: currentPage.value,
+    size: pageSize,
+    sort: `${sortBy.value},${sortOrder.value}`
+  })
+  programs.value = response.data.content
+  totalElements.value = response.data.totalElements
+  
   if (isAuthenticated.value) {
     await favouritesStore.loadStudyProgramFavourites()
   }
 }
 
-// Edit program (navigate to edit page)
 function editProgram(program: StudyProgram) {
   router.push({ name: 'StudyProgramEdit', params: { id: program.studyProgramId } })
 }
@@ -102,30 +149,22 @@ onMounted(load)
         </button>
       </div>
 
-      <!-- Search and Filter Bar -->
       <div class="search-bar">
         <input
           v-model="searchQuery"
+          @input="onSearchChange"
           type="text"
           placeholder="Search programs..."
           class="search-input"
         />
       </div>
 
-      <!-- Results Count -->
       <div class="results-info">
-        Showing {{ programs.length }} of {{ allPrograms.length }} programs
+        Showing {{ startIndex }} - {{ endIndex }} of {{ totalElements }} programs
       </div>
 
       <EntityTable
-        :columns="[
-          { key: 'name', label: 'Name', sortable: true },
-          { key: 'degree', label: 'Degree', sortable: true },
-          { key: 'semesters', label: 'Semesters', sortable: true },
-          { key: 'totalEcts', label: 'Total ECTS', sortable: true },
-          { key: 'mode', label: 'Mode', sortable: true },
-          { key: 'language', label: 'Language', sortable: true }
-        ]"
+        :columns="tableColumns"
         :rows="programs"
         rowKey="studyProgramId"
         :hasActions="auth.isModerator"
@@ -151,9 +190,29 @@ onMounted(load)
         </template>
       </EntityTable>
 
-      <!-- Empty state -->
       <div v-if="programs.length === 0" class="empty-state">
         No programs found
+      </div>
+
+      <!-- Pagination Controls -->
+      <div v-if="totalPages > 1" class="pagination">
+        <button @click="prevPage" :disabled="currentPage === 0" class="page-btn">
+          ← Previous
+        </button>
+        
+        <button
+          v-for="page in getPaginationRange()"
+          :key="page"
+          @click="page >= 0 ? goToPage(page) : null"
+          :class="['page-btn', { active: page === currentPage, ellipsis: page < 0 }]"
+          :disabled="page < 0"
+        >
+          {{ page < 0 ? '...' : page + 1 }}
+        </button>
+        
+        <button @click="nextPage" :disabled="currentPage >= totalPages - 1" class="page-btn">
+          Next →
+        </button>
       </div>
     </div>
   </div>

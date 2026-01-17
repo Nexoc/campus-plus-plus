@@ -71,6 +71,7 @@ body {
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
+  color: var(--color-text);
 }
 
 /* =====================================================
@@ -97,15 +98,17 @@ form { display: flex; flex-direction: column; gap: 1.25rem; }
 .base-input__field {
   width: 100%; padding: 0.65rem 0.75rem; font-size: 0.95rem;
   border: 1px solid var(--color-border); border-radius: var(--radius-sm);
-/* Unified actions style for entity tables */
-.entity-actions {
-  display: flex;
-  gap: 0.5rem;
-}
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 .base-input__field:focus {
   outline: none; border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
+/* Unified actions style for entity tables */
+.entity-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 /* Remove old .programs-actions, use .entity-actions everywhere */
 .programs-actions {
@@ -166,9 +169,9 @@ form { display: flex; flex-direction: column; gap: 1.25rem; }
   max-width: 1200px;
   margin: 3rem auto;
   padding: 2.5rem;
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   width: 100%;
 }
 
@@ -227,7 +230,7 @@ form { display: flex; flex-direction: column; gap: 1.25rem; }
 
 .users-table select {
   height: 36px; padding: 0 0.6rem; font-size: 0.9rem; border-radius: 8px;
-  border: 1px solid var(--color-border); background: #fff; color: var(--color-text);
+  border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text);
 }
 
 /* Actions */
@@ -316,9 +319,10 @@ form { display: flex; flex-direction: column; gap: 1.25rem; }
   max-width: 400px;
   padding: 0.75rem 1rem;
   border: 1px solid var(--color-border);
-  background: #fff;
+  background: var(--color-input-bg);
+  color: var(--color-text);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   width: 100%;
   font-size: 0.95rem;
 }
@@ -529,10 +533,10 @@ form { display: flex; flex-direction: column; gap: 1.25rem; }
 
 
 .page-card, .form-container, .EntityForm {
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 12px;
   padding: 2.5rem;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+  box-shadow: var(--shadow-lg);
   width: 100%;
   min-width: 600px;
   margin: 3rem auto;

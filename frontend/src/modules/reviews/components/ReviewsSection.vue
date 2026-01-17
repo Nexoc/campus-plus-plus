@@ -278,7 +278,7 @@ loadSummary()
 .rating-summary {
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: white;
+  background: var(--color-surface);
   border-radius: 8px;
   border-left: 4px solid #ffc107;
 }
@@ -297,7 +297,7 @@ loadSummary()
 
 .review-count {
   font-size: 1rem;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .success-message {
@@ -323,10 +323,11 @@ loadSummary()
 }
 
 .review-form {
-  background: white;
+  background: var(--color-surface);
   padding: 1.5rem;
   border-radius: 8px;
   margin-top: 1rem;
+  border: 1px solid var(--color-border);
 }
 
 .form-group {
@@ -337,6 +338,7 @@ loadSummary()
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 .form-group .required {
@@ -345,7 +347,7 @@ loadSummary()
 }
 
 .form-group .optional {
-  color: #666;
+  color: var(--color-text-secondary);
   font-weight: normal;
   font-size: 0.9rem;
 }
@@ -355,9 +357,26 @@ loadSummary()
 .form-group textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-family: inherit;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+.form-group select option {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  padding: 0.5rem;
+}
+
+:root[data-theme='dark'] .form-group select option {
+  background: #1f2937;
+  color: #f9fafb;
 }
 
 .form-actions {
@@ -373,10 +392,11 @@ loadSummary()
 }
 
 .review-card {
-  background: white;
+  background: var(--color-surface);
   padding: 1.5rem;
   border-radius: 8px;
   border-left: 4px solid #007bff;
+  border: 1px solid var(--color-border);
 }
 
 .review-header {
@@ -390,7 +410,11 @@ loadSummary()
   display: flex;
   gap: 1rem;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-secondary);
+}
+
+.review-meta strong {
+  color: var(--color-text-primary);
 }
 
 .review-date {
@@ -440,19 +464,19 @@ loadSummary()
 }
 
 .review-content {
-  color: #555;
+  color: var(--color-text-primary);
   line-height: 1.6;
   margin: 0.5rem 0 1rem;
 }
 
 .review-content.no-text {
   font-style: italic;
-  color: #999;
+  color: var(--color-text-secondary);
 }
 
 .empty-state {
   text-align: center;
   padding: 2rem;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 </style>

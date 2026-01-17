@@ -84,7 +84,7 @@ onMounted(load)
     <div class="page-card">
       <template v-if="course">
         <h1>{{ course.title }}</h1>
-        <div class="favourite-button-wrapper">
+        <div v-if="authStore.isAuthenticated" class="favourite-button-wrapper">
           <FavouriteButton 
             v-if="course.courseId"
             :course-id="course.courseId"

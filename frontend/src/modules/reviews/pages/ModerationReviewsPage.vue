@@ -272,7 +272,7 @@ loadReviews()
 }
 
 .page-card {
-  background: white;
+  background: var(--color-surface);
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -280,6 +280,7 @@ loadReviews()
 
 .page-card h1 {
   margin-bottom: 1.5rem;
+  color: var(--color-text-primary);
 }
 
 .filters {
@@ -294,8 +295,10 @@ loadReviews()
   flex: 1;
   min-width: 200px;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-text-primary);
 }
 
 .checkbox-filter {
@@ -304,6 +307,7 @@ loadReviews()
   gap: 0.5rem;
   cursor: pointer;
   white-space: nowrap;
+  color: var(--color-text-primary);
 }
 
 .moderation-table {
@@ -313,14 +317,19 @@ loadReviews()
 }
 
 .moderation-table thead {
-  background: #f5f5f5;
+  background: var(--color-surface-alt, #f5f5f5);
+}
+
+:root[data-theme='dark'] .moderation-table thead {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .moderation-table th,
 .moderation-table td {
   padding: 1rem;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
 }
 
 .moderation-table th {
@@ -328,11 +337,19 @@ loadReviews()
 }
 
 .moderation-table tbody tr:hover {
-  background: #f9f9f9;
+  background: var(--color-surface-alt, #f9f9f9);
+}
+
+:root[data-theme='dark'] .moderation-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .moderation-table tbody tr.flagged {
   background: #fff3cd;
+}
+
+:root[data-theme='dark'] .moderation-table tbody tr.flagged {
+  background: rgba(255, 193, 7, 0.2);
 }
 
 .badge-warning {
@@ -393,13 +410,13 @@ loadReviews()
 .empty-state {
   text-align: center;
   padding: 3rem 2rem;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .loading {
   text-align: center;
   padding: 2rem;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 /* Modal Styles */
@@ -417,7 +434,7 @@ loadReviews()
 }
 
 .modal {
-  background: white;
+  background: var(--color-surface);
   border-radius: 8px;
   max-width: 500px;
   width: 90%;
@@ -427,7 +444,7 @@ loadReviews()
 
 .modal-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -435,6 +452,7 @@ loadReviews()
 
 .modal-header h2 {
   margin: 0;
+  color: var(--color-text-primary);
 }
 
 .close-button {
@@ -442,11 +460,12 @@ loadReviews()
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .modal-body {
   padding: 1.5rem;
+  color: var(--color-text-primary);
 }
 
 .modal-body p {
@@ -454,25 +473,28 @@ loadReviews()
 }
 
 .content-preview {
-  background: #f5f5f5;
+  background: var(--color-background);
   padding: 1rem;
   border-radius: 4px;
   max-height: 200px;
   overflow-y: auto;
+  color: var(--color-text-primary);
 }
 
 .modal-body textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-family: inherit;
   resize: vertical;
+  background: var(--color-background);
+  color: var(--color-text-primary);
 }
 
 .modal-footer {
   padding: 1.5rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--color-border);
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
