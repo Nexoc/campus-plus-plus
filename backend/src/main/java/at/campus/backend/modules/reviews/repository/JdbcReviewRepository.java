@@ -1,6 +1,7 @@
 package at.campus.backend.modules.reviews.repository;
 
 import at.campus.backend.modules.reviews.model.Review;
+import at.campus.backend.modules.reviews.model.ReviewSortOption;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -25,14 +26,19 @@ public class JdbcReviewRepository implements ReviewRepository {
 
     @Override
     public List<Review> findByCourseId(UUID courseId) {
-        String sql = """
+        return findByCourseId(courseId, ReviewSortOption.NEWEST);
+    }
+
+    @Override
+    public List<Review> findByCourseId(UUID courseId, ReviewSortOption sortOption) {
+        String sql = String.format("""
             SELECT id, user_id, course_id, rating, difficulty, workload, satisfaction,
                    prior_requirements, exam_info, text, created_at, updated_at,
                    moderation_flagged, moderation_reason
             FROM app.reviews
             WHERE course_id = ?
-            ORDER BY created_at DESC
-        """;
+            ORDER BY %s
+        """, sortOption.getSqlOrderBy());
         return jdbc.query(sql, new ReviewRowMapper(), courseId);
     }
 

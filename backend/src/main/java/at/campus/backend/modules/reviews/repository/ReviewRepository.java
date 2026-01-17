@@ -1,6 +1,7 @@
 package at.campus.backend.modules.reviews.repository;
 
 import at.campus.backend.modules.reviews.model.Review;
+import at.campus.backend.modules.reviews.model.ReviewSortOption;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,11 @@ public interface ReviewRepository {
      * Find all reviews for a specific course.
      */
     List<Review> findByCourseId(UUID courseId);
+
+    /**
+     * Find all reviews for a specific course with sorting.
+     */
+    List<Review> findByCourseId(UUID courseId, ReviewSortOption sortOption);
 
     /**
      * Find a review by ID.

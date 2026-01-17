@@ -80,6 +80,25 @@
 
     <!-- Reviews List -->
     <div v-if="reviews.length > 0" class="reviews-list">
+      <!-- Sort Controls -->
+      <div class="reviews-header">
+        <h3>All Reviews</h3>
+        <div class="sort-controls">
+          <label for="review-sort">Sort by:</label>
+          <select 
+            id="review-sort"
+            v-model="sortOption" 
+            @change="onSortChange"
+            class="sort-select"
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="highest_rating">Highest rating</option>
+            <option value="lowest_rating">Lowest rating</option>
+          </select>
+        </div>
+      </div>
+
       <article v-for="review in reviews" :key="review.reviewId" class="review-card">
         <div class="review-header">
           <div class="review-meta">
@@ -158,6 +177,7 @@ const showCreateForm = ref(false)
 const editingId = ref<string | null>(null)
 const error = ref<string>('')
 const successMessage = ref<string>('')
+const sortOption = ref<string>('newest')
 
 // Report modal state
 const showReportModal = ref(false)
@@ -225,12 +245,16 @@ const formatDate = (date?: string) => {
 
 const loadReviews = async () => {
   try {
-    const response = await reviewsApi.getByCourse(props.courseId)
+    const response = await reviewsApi.getByCourse(props.courseId, sortOption.value)
     reviews.value = response.data
   } catch (err: any) {
     console.error('Failed to load reviews', err)
     error.value = err.response?.data?.message || 'Failed to load reviews'
   }
+}
+
+const onSortChange = async () => {
+  await loadReviews()
 }
 
 const loadSummary = async () => {
@@ -457,6 +481,55 @@ loadSummary()
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.reviews-header h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.25rem;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-controls label {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.sort-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.sort-select:hover {
+  border-color: #007bff;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 .review-card {

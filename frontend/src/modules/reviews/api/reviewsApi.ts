@@ -5,8 +5,10 @@ import type { Review, ReviewSummary, CreateReviewRequest, UpdateReviewRequest } 
 
 export const reviewsApi = {
   // Public endpoints (read-only)
-  getByCourse(courseId: string) {
-    return http.get<Review[]>(`/api/public/courses/${courseId}/reviews`)
+  getByCourse(courseId: string, sort?: string) {
+    return http.get<Review[]>(`/api/public/courses/${courseId}/reviews`, {
+      params: sort ? { sort } : undefined
+    })
   },
 
   getById(reviewId: string) {

@@ -3,6 +3,7 @@ package at.campus.backend.modules.reviews.service;
 import at.campus.backend.modules.reviews.model.ModerationReviewDto;
 import at.campus.backend.modules.reviews.model.Review;
 import at.campus.backend.modules.reviews.model.ReviewDto;
+import at.campus.backend.modules.reviews.model.ReviewSortOption;
 import at.campus.backend.modules.reviews.model.ReviewSummary;
 import at.campus.backend.modules.reviews.repository.ReviewRepository;
 import at.campus.backend.security.UserContext;
@@ -48,6 +49,14 @@ public class ReviewService {
      */
     public List<Review> getReviewsByCourse(UUID courseId) {
         return repository.findByCourseId(courseId);
+    }
+
+    /**
+     * Get all reviews for a course with sorting.
+     * Public endpoint - no authentication required.
+     */
+    public List<Review> getReviewsByCourse(UUID courseId, ReviewSortOption sortOption) {
+        return repository.findByCourseId(courseId, sortOption);
     }
 
     /**

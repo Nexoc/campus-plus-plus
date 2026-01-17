@@ -1,6 +1,7 @@
 package at.campus.backend.modules.reviews.api;
 
 import at.campus.backend.modules.reviews.model.ReviewDto;
+import at.campus.backend.modules.reviews.model.ReviewSortOption;
 import at.campus.backend.modules.reviews.model.ReviewSummary;
 import at.campus.backend.modules.reviews.service.ReviewService;
 import at.campus.backend.modules.reviews.service.UserLookupService;
@@ -60,10 +61,17 @@ public class ReviewPublicController {
 
     /**
      * Get all reviews for a specific course.
+     * 
+     * @param courseId The course ID
+     * @param sort Optional sort parameter (newest, oldest, highest_rating, lowest_rating). Default: newest
      */
     @GetMapping("/courses/{courseId}/reviews")
-    public List<ReviewDto> getReviewsByCourse(@PathVariable UUID courseId) {
-        return service.getReviewsByCourse(courseId).stream()
+    public List<ReviewDto> getReviewsByCourse(
+            @PathVariable UUID courseId,
+            @RequestParam(required = false) String sort
+    ) {
+        ReviewSortOption sortOption = ReviewSortOption.fromString(sort);
+        return service.getReviewsByCourse(courseId, sortOption).stream()
             .map(review -> {
                 ReviewDto dto = ReviewDto.fromDomain(review);
                 // Fetch and set user nickname
