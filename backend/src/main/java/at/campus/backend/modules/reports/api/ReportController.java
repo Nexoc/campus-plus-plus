@@ -30,12 +30,13 @@ public class ReportController {
      * Submit a new report.
      *
      * Authorization:
-     * - Any authenticated user (STUDENT or ADMIN)
+     * - Any authenticated user (STUDENT or MODERATOR)
      *
      * Validation:
      * - Target type is required
      * - Target ID is required
-     * - Reason is required
+     * - Reason is required (from predefined enum)
+     * - Comment is optional
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -45,6 +46,7 @@ public class ReportController {
         report.setTargetType(request.getTargetType());
         report.setTargetId(request.getTargetId());
         report.setReason(request.getReason());
+        report.setComment(request.getComment());
 
         // Create report via service (handles authorization)
         Report created = service.createReport(report);
