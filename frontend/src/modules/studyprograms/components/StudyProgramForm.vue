@@ -57,24 +57,24 @@ function resetForm() {
   }
 }
 
-async function handleSubmit() {
+async function handleSubmit(formData: StudyProgram) {
   error.value = ''
   success.value = ''
 
-  if (!form.value.name?.trim()) {
+  if (!formData.name?.trim()) {
     error.value = 'Program name is required'
     return
   }
 
   loading.value = true
   try {
-    if (form.value.studyProgramId) {
+    if (formData.studyProgramId) {
       // Update
-      await studyProgramsApi.update(form.value.studyProgramId, form.value)
+      await studyProgramsApi.update(formData.studyProgramId, formData)
       success.value = 'Program updated successfully'
     } else {
       // Create
-      await studyProgramsApi.create(form.value)
+      await studyProgramsApi.create(formData)
       success.value = 'Program created successfully'
     }
 
