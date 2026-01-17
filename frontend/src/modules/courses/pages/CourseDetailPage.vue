@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/modules/auth/store/auth.store'
+import CourseMaterialsSection from '@/modules/courses/components/CourseMaterialsSection.vue'
+import FavouriteButton from '@/modules/favourites/components/FavouriteButton.vue'
+import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
+import ReviewsSection from '@/modules/reviews/components/ReviewsSection.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { coursesApi } from '../api/coursesApi'
 import type { Course, RichBlock } from '../model/Course'
-import ReviewsSection from '@/modules/reviews/components/ReviewsSection.vue'
 import DiscussionsSection from '@/modules/discussions/components/DiscussionsSection.vue'
-import FavouriteButton from '@/modules/favourites/components/FavouriteButton.vue'
-import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
-import { useAuthStore } from '@/modules/auth/store/auth.store'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -65,8 +66,7 @@ async function load() {
   try {
     const id = route.params.id as string
     course.value = (await coursesApi.getById(id)).data
-    
-    // Load favourites if authenticated
+
     if (authStore.isAuthenticated && !favouritesStore.loaded) {
       await favouritesStore.loadFavourites()
     }
@@ -85,14 +85,16 @@ onMounted(load)
     <div class="page-card">
       <template v-if="course">
         <h1>{{ course.title }}</h1>
+
         <div v-if="authStore.isAuthenticated" class="favourite-button-wrapper">
-          <FavouriteButton 
+          <FavouriteButton
             v-if="course.courseId"
             :course-id="course.courseId"
             :show-label="true"
             :size="20"
           />
         </div>
+
         <p class="entity-meta">
           <span v-if="course.ects">ECTS: {{ course.ects }}</span>
           <span v-if="course.language"> · Language: {{ course.language }}</span>
@@ -100,13 +102,16 @@ onMounted(load)
           <span v-if="course.semester"> · Semester: {{ course.semester }}</span>
           <span v-if="course.kind"> · Type: {{ course.kind }}</span>
         </p>
+
         <div v-if="course.description" class="entity-description">
           {{ course.description }}
         </div>
+
         <div class="course-section" v-if="course.detailsHtml">
           <h3>Details</h3>
           <div class="html-content" v-html="course.detailsHtml"></div>
         </div>
+
         <div v-else>
           <div
             class="course-section"
@@ -129,17 +134,26 @@ onMounted(load)
             </div>
           </div>
         </div>
+
         <div class="course-section" v-if="course.sourceUrl">
           <h3>Source</h3>
-          <a :href="course.sourceUrl" target="_blank" rel="noreferrer">{{ course.sourceUrl }}</a>
+          <a :href="course.sourceUrl" target="_blank" rel="noreferrer">
+            {{ course.sourceUrl }}
+          </a>
         </div>
 
-        <!-- Reviews Section -->
+        <!-- 🔽 ВОТ ТУТ МЫ ДОБАВИЛИ, БОЛЬШЕ НИЧЕГО -->
+        <CourseMaterialsSection
+          v-if="authStore.isAuthenticated && course.courseId"
+          :courseId="course.courseId"
+        />
+
         <ReviewsSection :courseId="course.courseId!" />
 
         <!-- Discussions Section -->
         <DiscussionsSection :courseId="course.courseId!" />
       </template>
+
       <template v-else>
         <div v-if="loading">Loading...</div>
         <div v-if="error" class="error-message">{{ error }}</div>
