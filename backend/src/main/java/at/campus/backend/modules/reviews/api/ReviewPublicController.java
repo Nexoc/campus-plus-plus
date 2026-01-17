@@ -3,6 +3,7 @@ package at.campus.backend.modules.reviews.api;
 import at.campus.backend.modules.reviews.model.ReviewDto;
 import at.campus.backend.modules.reviews.model.ReviewSummary;
 import at.campus.backend.modules.reviews.service.ReviewService;
+import at.campus.backend.modules.reviews.service.UserLookupService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,9 +24,11 @@ import java.util.stream.Collectors;
 public class ReviewPublicController {
 
     private final ReviewService service;
+    private final UserLookupService userLookupService;
 
-    public ReviewPublicController(ReviewService service) {
+    public ReviewPublicController(ReviewService service, UserLookupService userLookupService) {
         this.service = service;
+        this.userLookupService = userLookupService;
     }
 
     /**
@@ -34,7 +37,12 @@ public class ReviewPublicController {
     @GetMapping("/reviews")
     public List<ReviewDto> getAllReviews() {
         return service.getAllReviews().stream()
-            .map(ReviewDto::fromDomain)
+            .map(review -> {
+                ReviewDto dto = ReviewDto.fromDomain(review);
+                String nickname = userLookupService.getUserName(review.getUserId());
+                dto.setUserName(nickname != null && !nickname.isEmpty() ? nickname : "Anonymous");
+                return dto;
+            })
             .collect(Collectors.toList());
     }
 
@@ -43,7 +51,11 @@ public class ReviewPublicController {
      */
     @GetMapping("/reviews/{id}")
     public ReviewDto getReviewById(@PathVariable UUID id) {
-        return ReviewDto.fromDomain(service.getReviewById(id));
+        var review = service.getReviewById(id);
+        ReviewDto dto = ReviewDto.fromDomain(review);
+        String nickname = userLookupService.getUserName(review.getUserId());
+        dto.setUserName(nickname != null && !nickname.isEmpty() ? nickname : "Anonymous");
+        return dto;
     }
 
     /**
@@ -52,7 +64,13 @@ public class ReviewPublicController {
     @GetMapping("/courses/{courseId}/reviews")
     public List<ReviewDto> getReviewsByCourse(@PathVariable UUID courseId) {
         return service.getReviewsByCourse(courseId).stream()
-            .map(ReviewDto::fromDomain)
+            .map(review -> {
+                ReviewDto dto = ReviewDto.fromDomain(review);
+                // Fetch and set user nickname
+                String nickname = userLookupService.getUserName(review.getUserId());
+                dto.setUserName(nickname != null && !nickname.isEmpty() ? nickname : "Anonymous");
+                return dto;
+            })
             .collect(Collectors.toList());
     }
 

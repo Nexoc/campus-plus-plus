@@ -74,23 +74,16 @@ public class JdbcReportRepository implements ReportRepository {
 
     @Override
     public void save(Report report) {
-        // Note: Database stores reason as TEXT, comment is stored in moderator_notes for now
-        // In future migration, add a separate comment column
         String sql = """
             INSERT INTO app.reports (
-                id, target_type, target_id, user_id, reason, status, created_at, resolved_at, moderator_notes
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                id, target_type, target_id, user_id, reason, comment, status, created_at, resolved_at, moderator_notes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (id) DO UPDATE SET
                 status = EXCLUDED.status,
                 resolved_at = EXCLUDED.resolved_at,
-                moderator_notes = EXCLUDED.moderator_notes
+                moderator_notes = EXCLUDED.moderator_notes,
+                comment = EXCLUDED.comment
             """;
-        
-        // Combine comment and moderator notes (comment comes first)
-        String combinedNotes = report.getComment();
-        if (report.getModeratorNotes() != null && !report.getModeratorNotes().isBlank()) {
-            combinedNotes = (combinedNotes != null ? combinedNotes + "\n---\n" : "") + report.getModeratorNotes();
-        }
         
         jdbcTemplate.update(sql,
             report.getId(),
@@ -98,11 +91,19 @@ public class JdbcReportRepository implements ReportRepository {
             report.getTargetId(),
             report.getUserId(),
             report.getReason() != null ? report.getReason().name() : null,
+            report.getComment(),
             report.getStatus().name(),
             Timestamp.from(report.getCreatedAt().toInstant()),
             report.getResolvedAt() != null ? Timestamp.from(report.getResolvedAt().toInstant()) : null,
-            combinedNotes
+            report.getModeratorNotes()
         );
+    }
+
+    @Override
+    public int countByStatus(ReportStatus status) {
+        String sql = "SELECT COUNT(*) FROM app.reports WHERE status = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, status.name());
+        return count != null ? count : 0;
     }
 
     @Override
@@ -146,8 +147,7 @@ public class JdbcReportRepository implements ReportRepository {
                 report.setResolvedAt(OffsetDateTime.ofInstant(resolvedAt.toInstant(), ZoneOffset.UTC));
             }
             
-            // moderator_notes might contain both comment and moderator notes
-            // For now, we'll put everything in moderator_notes
+            report.setComment(rs.getString("comment"));
             report.setModeratorNotes(rs.getString("moderator_notes"));
             
             return report;

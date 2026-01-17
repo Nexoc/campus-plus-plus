@@ -118,9 +118,9 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
-    path: '/moderation/reviews',
-    name: 'ModerationReviews',
-    component: () => import('@/modules/reviews/pages/ModerationReviewsPage.vue'),
+    path: '/moderation/reports',
+    name: 'ModerationReports',
+    component: () => import('@/modules/moderation/pages/ModerationReportsPage.vue'),
     meta: {
       requiresAuth: true,
       requiresModerator: true,

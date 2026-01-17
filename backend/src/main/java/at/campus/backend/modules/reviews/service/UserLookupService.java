@@ -17,7 +17,7 @@ public class UserLookupService {
     public String getUserName(UUID userId) {
         try {
             return jdbc.queryForObject(
-                    "SELECT name FROM auth.users WHERE id = ?",
+                    "SELECT nickname FROM public.users WHERE id = ?",
                     String.class,
                     userId
             );

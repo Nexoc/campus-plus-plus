@@ -62,6 +62,15 @@ public class ReportService {
     }
 
     /**
+     * Count pending reports (moderator only).
+     * FR-S-4: Used to display open reports badge in navigation.
+     */
+    public int countPendingReports() {
+        requireModerator();
+        return repository.countByStatus(ReportStatus.PENDING);
+    }
+
+    /**
      * Get a single report (moderator only).
      */
     public Report getReportById(UUID id) {
