@@ -25,7 +25,7 @@
     </div>
 
     <!-- Write Review Button (Students & Moderators) -->
-    <div v-if="auth.isAuthenticated && auth.user?.role !== 'APPLICANT'" class="write-review-section">
+    <div v-if="auth.isAuthenticated && auth.user?.role !== 'APPLICANT' && !userHasReviewed" class="write-review-section">
       <button 
         v-if="!showCreateForm"
         class="base-button"
@@ -101,6 +101,17 @@
               Delete
             </button>
           </div>
+
+          <!-- Report button for other users' reviews (authenticated users only) -->
+          <div v-else-if="canReportReview(review)" class="review-actions">
+            <button 
+              class="small-button report-button"
+              @click="openReportModal(review.reviewId!)"
+              title="Report inappropriate review"
+            >
+              Report
+            </button>
+          </div>
         </div>
 
         <p v-if="review.text" class="review-content">{{ review.text }}</p>
@@ -112,6 +123,15 @@
     <div v-else class="empty-state">
       <p>No reviews yet. Be the first to share your thoughts!</p>
     </div>
+
+    <!-- Report Modal -->
+    <ReportModal
+      :is-open="showReportModal"
+      target-type="REVIEW"
+      :target-id="reportingReviewId"
+      @close="closeReportModal"
+      @success="handleReportSuccess"
+    />
   </div>
 </template>
 
@@ -120,6 +140,7 @@ import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { computed, ref } from 'vue'
 import { reviewsApi } from '../api/reviewsApi'
 import type { Review, ReviewSummary, CreateReviewRequest } from '../model/Review'
+import ReportModal from '@/modules/reports/components/ReportModal.vue'
 
 interface Props {
   courseId: string
@@ -136,6 +157,11 @@ const editingId = ref<string | null>(null)
 const error = ref<string>('')
 const successMessage = ref<string>('')
 
+// Report modal state
+const showReportModal = ref(false)
+const reportingReviewId = ref('')
+const reportedReviewIds = ref<Set<string>>(new Set())
+
 const formData = ref<CreateReviewRequest>({
   courseId: props.courseId,
   rating: 0,
@@ -145,9 +171,49 @@ const formData = ref<CreateReviewRequest>({
 // Computed
 const currentUserId = computed(() => auth.user?.id || '')
 
+const userHasReviewed = computed(() => {
+  return reviews.value.some(review => review.userId === currentUserId.value)
+})
+
 // Methods
 const isOwnReview = (review: Review) => {
   return auth.isAuthenticated && review.userId === currentUserId.value
+}
+
+const canReportReview = (review: Review) => {
+  // Only authenticated users who are not the review author can report
+  // Applicants (unauthenticated) cannot report
+  // Cannot report if already reported
+  return auth.isAuthenticated && 
+         auth.user?.role !== 'APPLICANT' && 
+         !isOwnReview(review) &&
+         !reportedReviewIds.value.has(review.reviewId || '')
+}
+
+const openReportModal = (reviewId: string) => {
+  reportingReviewId.value = reviewId
+  showReportModal.value = true
+}
+
+const closeReportModal = () => {
+  showReportModal.value = false
+  reportingReviewId.value = ''
+}
+
+const handleReportSuccess = () => {
+  // Mark the review as reported
+  if (reportingReviewId.value) {
+    reportedReviewIds.value.add(reportingReviewId.value)
+  }
+  
+  // Close the modal
+  closeReportModal()
+  
+  // Show success message
+  successMessage.value = 'Report submitted successfully. Thank you for helping maintain our community standards.'
+  setTimeout(() => {
+    successMessage.value = ''
+  }, 5000)
 }
 
 const formatDate = (date?: string) => {
@@ -444,6 +510,15 @@ loadSummary()
 
 .small-button:hover {
   background: #0056b3;
+}
+
+.small-button.report-button {
+  background: #6c757d;
+  color: white;
+}
+
+.small-button.report-button:hover {
+  background: #5a6268;
 }
 
 .small-button.warning {

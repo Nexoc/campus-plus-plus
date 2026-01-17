@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.Map;
@@ -104,6 +105,30 @@ public class GlobalExceptionHandler {
                 .body(errorBody(
                         HttpStatus.BAD_REQUEST,
                         ex.getMessage()
+                ));
+    }
+
+    // ==================================================
+    // 409 CONFLICT
+    // ==================================================
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatus(
+            ResponseStatusException ex
+    ) {
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+        
+        if (status.is4xxClientError()) {
+            log.warn("{}: {}", status.getReasonPhrase(), ex.getReason());
+        } else {
+            log.error("{}: {}", status.getReasonPhrase(), ex.getReason(), ex);
+        }
+
+        return ResponseEntity
+                .status(status)
+                .body(errorBody(
+                        status,
+                        ex.getReason() != null ? ex.getReason() : status.getReasonPhrase()
                 ));
     }
 

@@ -14,6 +14,7 @@ public class ReportDto {
     private UUID targetId;
     private UUID userId;
     private String reason;
+    private String comment;
     private String status;
     private OffsetDateTime createdAt;
     private OffsetDateTime resolvedAt;
@@ -27,7 +28,8 @@ public class ReportDto {
         this.targetType = report.getTargetType();
         this.targetId = report.getTargetId();
         this.userId = report.getUserId();
-        this.reason = report.getReason();
+        this.reason = report.getReason() != null ? report.getReason().toString() : null;
+        this.comment = report.getComment();
         this.status = report.getStatus().toString();
         this.createdAt = report.getCreatedAt();
         this.resolvedAt = report.getResolvedAt();
@@ -45,6 +47,7 @@ public class ReportDto {
     public UUID getTargetId() { return targetId; }
     public UUID getUserId() { return userId; }
     public String getReason() { return reason; }
+    public String getComment() { return comment; }
     public String getStatus() { return status; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getResolvedAt() { return resolvedAt; }

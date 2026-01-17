@@ -1,8 +1,10 @@
 package at.campus.backend.modules.reports.service;
 
 import at.campus.backend.modules.reports.model.Report;
+import at.campus.backend.modules.reports.model.ReportReason;
 import at.campus.backend.modules.reports.model.ReportStatus;
 import at.campus.backend.modules.reports.repository.ReportRepository;
+import at.campus.backend.modules.reviews.repository.ReviewRepository;
 import at.campus.backend.security.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +33,12 @@ public class ReportService {
     private static final Logger log = LoggerFactory.getLogger(ReportService.class);
 
     private final ReportRepository repository;
+    private final ReviewRepository reviewRepository;
     private final UserContext userContext;
 
-    public ReportService(ReportRepository repository, UserContext userContext) {
+    public ReportService(ReportRepository repository, ReviewRepository reviewRepository, UserContext userContext) {
         this.repository = repository;
+        this.reviewRepository = reviewRepository;
         this.userContext = userContext;
     }
 
@@ -73,9 +77,12 @@ public class ReportService {
      * - Any authenticated user (STUDENT or Moderator)
      *
      * Validation:
-     * - Target type is required (review, post, thread)
+     * - Target type is required (REVIEW or POST)
      * - Target ID is required
-     * - Reason is required and not empty
+     * - Reason is required (from predefined enum)
+     * - Target must exist (e.g., review must exist)
+     * - User cannot report the same target twice
+     * - User cannot report their own content (optional)
      */
     public Report createReport(Report report) {
         // 1. Check authentication
@@ -93,25 +100,71 @@ public class ReportService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Target ID is required");
         }
 
-        if (report.getReason() == null || report.getReason().isBlank()) {
+        if (report.getReason() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reason is required");
         }
 
-        // 3. Enforce user ownership (security)
+        // 3. Validate target type
+        String targetType = report.getTargetType().toUpperCase();
+        if (!targetType.equals("REVIEW") && !targetType.equals("POST")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Invalid target type. Must be REVIEW or POST");
+        }
+        report.setTargetType(targetType);
+
+        // 4. Validate that target exists
+        if (targetType.equals("REVIEW")) {
+            validateReviewExists(report.getTargetId());
+        }
+        // TODO: Add validation for POST when post reporting is implemented
+
+        // 5. Enforce user ownership (security)
         // User ID MUST come from UserContext, never from request
         UUID authenticatedUserId = UUID.fromString(userId);
         report.setUserId(authenticatedUserId);
 
-        // 4. Generate ID and save
+        // 6. Check for duplicate report (optional: prevent same user from reporting same target multiple times)
+        if (repository.existsByUserIdAndTargetTypeAndTargetId(authenticatedUserId, targetType, report.getTargetId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, 
+                "You have already reported this " + targetType.toLowerCase());
+        }
+
+        // 7. Optional: Prevent users from reporting their own content
+        if (targetType.equals("REVIEW")) {
+            preventSelfReporting(authenticatedUserId, report.getTargetId());
+        }
+
+        // 8. Generate ID and save
         report.setId(UUID.randomUUID());
         report.setStatus(ReportStatus.PENDING);
         report.setCreatedAt(OffsetDateTime.now());
         repository.save(report);
 
-        log.info("Report created: {} for {} with ID {}", 
-            report.getTargetType(), report.getTargetId(), report.getId());
+        log.info("Report created: {} for {} with ID {} by user {}", 
+            report.getTargetType(), report.getTargetId(), report.getId(), authenticatedUserId);
 
         return report;
+    }
+
+    /**
+     * Validate that a review exists.
+     */
+    private void validateReviewExists(UUID reviewId) {
+        reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                "Review not found. Cannot report non-existent review."));
+    }
+
+    /**
+     * Prevent users from reporting their own reviews (optional nice-to-have).
+     */
+    private void preventSelfReporting(UUID userId, UUID reviewId) {
+        reviewRepository.findById(reviewId).ifPresent(review -> {
+            if (review.getUserId().equals(userId)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "You cannot report your own review");
+            }
+        });
     }
 
     /**

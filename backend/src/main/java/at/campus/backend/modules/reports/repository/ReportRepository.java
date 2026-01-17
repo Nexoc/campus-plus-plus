@@ -43,6 +43,12 @@ public interface ReportRepository {
     List<Report> findByUserId(UUID userId);
 
     /**
+     * Check if a report already exists for the given user and target.
+     * Used to prevent duplicate reports from the same user.
+     */
+    boolean existsByUserIdAndTargetTypeAndTargetId(UUID userId, String targetType, UUID targetId);
+
+    /**
      * Save a new report.
      */
     void save(Report report);
