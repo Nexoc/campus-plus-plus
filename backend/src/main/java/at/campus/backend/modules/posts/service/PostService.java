@@ -1,0 +1,127 @@
+package at.campus.backend.modules.posts.service;
+
+import at.campus.backend.modules.posts.model.Post;
+import at.campus.backend.modules.posts.model.PostDto;
+import at.campus.backend.modules.posts.model.CreatePostRequest;
+import at.campus.backend.modules.posts.model.UpdatePostRequest;
+import at.campus.backend.modules.posts.repository.PostRepository;
+import at.campus.backend.modules.comments.repository.CommentRepository;
+import at.campus.backend.security.UserContext;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+/**
+ * Service for managing posts.
+ */
+@Service
+public class PostService {
+
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final UserContext userContext;
+
+    public PostService(PostRepository postRepository, CommentRepository commentRepository, UserContext userContext) {
+        this.postRepository = postRepository;
+        this.commentRepository = commentRepository;
+        this.userContext = userContext;
+    }
+
+    /**
+     * Get all posts for a thread.
+     */
+    public List<PostDto> getPostsByThreadId(UUID threadId) {
+        return postRepository.findByThreadId(threadId)
+            .stream()
+            .map(post -> {
+                Integer commentCount = commentRepository.getCommentCountByPostId(post.getId());
+                return PostDto.fromDomain(post, commentCount);
+            })
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get a specific post by ID.
+     */
+    public Optional<PostDto> getPostById(UUID postId) {
+        return postRepository.findById(postId)
+            .map(post -> {
+                Integer commentCount = commentRepository.getCommentCountByPostId(post.getId());
+                return PostDto.fromDomain(post, commentCount);
+            });
+    }
+
+    /**
+     * Create a new post (authenticated users only).
+     */
+    public PostDto createPost(UUID threadId, CreatePostRequest request) {
+        if (userContext.getUserId() == null) {
+            throw new SecurityException("Only authenticated users can create posts");
+        }
+
+        Post post = new Post();
+        post.setId(UUID.randomUUID());
+        post.setThreadId(threadId);
+        post.setUserId(UUID.fromString(userContext.getUserId()));
+        post.setUserName(request.getUserName());
+        post.setContent(request.getContent());
+
+        postRepository.save(post);
+
+        // Fetch the saved post
+        Post savedPost = postRepository.findById(post.getId()).orElse(post);
+        return PostDto.fromDomain(savedPost, 0);
+    }
+
+    /**
+     * Update a post (author or moderator only).
+     */
+    public PostDto updatePost(UUID postId, UpdatePostRequest request) {
+        if (userContext.getUserId() == null) {
+            throw new SecurityException("Only authenticated users can update posts");
+        }
+
+        Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        // Check authorization: author or moderator
+        boolean isAuthor = post.getUserId().equals(UUID.fromString(userContext.getUserId()));
+        boolean isModerator = userContext.hasRole("MODERATOR");
+
+        if (!isAuthor && !isModerator) {
+            throw new SecurityException("Only the author or a moderator can update this post");
+        }
+
+        post.setContent(request.getContent());
+        postRepository.update(post);
+
+        // Fetch the updated post
+        Post updatedPost = postRepository.findById(postId).orElse(post);
+        return PostDto.fromDomain(updatedPost, 0);
+    }
+
+    /**
+     * Delete a post (author or moderator only).
+     */
+    public void deletePost(UUID postId) {
+        if (userContext.getUserId() == null) {
+            throw new SecurityException("Only authenticated users can delete posts");
+        }
+
+        Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        // Check authorization: author or moderator
+        boolean isAuthor = post.getUserId().equals(UUID.fromString(userContext.getUserId()));
+        boolean isModerator = userContext.hasRole("MODERATOR");
+
+        if (!isAuthor && !isModerator) {
+            throw new SecurityException("Only the author or a moderator can delete this post");
+        }
+
+        postRepository.deleteById(postId);
+    }
+}

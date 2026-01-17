@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { coursesApi } from '../api/coursesApi'
 import type { Course, RichBlock } from '../model/Course'
 import ReviewsSection from '@/modules/reviews/components/ReviewsSection.vue'
+import DiscussionsSection from '@/modules/discussions/components/DiscussionsSection.vue'
 import FavouriteButton from '@/modules/favourites/components/FavouriteButton.vue'
 import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
 import { useAuthStore } from '@/modules/auth/store/auth.store'
@@ -135,6 +136,9 @@ onMounted(load)
 
         <!-- Reviews Section -->
         <ReviewsSection :courseId="course.courseId!" />
+
+        <!-- Discussions Section -->
+        <DiscussionsSection :courseId="course.courseId!" />
       </template>
       <template v-else>
         <div v-if="loading">Loading...</div>
