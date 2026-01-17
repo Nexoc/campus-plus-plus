@@ -321,4 +321,50 @@ const submitReport = async () => {
 .base-button.danger:hover:not(:disabled) {
   background-color: #c82333;
 }
+
+/* Light Mode Overrides */
+:root:not([data-theme="dark"]) .modal-dialog {
+  background: #ffffff;
+  color: #333;
+  border-color: #ddd;
+}
+
+:root:not([data-theme="dark"]) .modal-header {
+  border-bottom-color: #ddd;
+}
+
+:root:not([data-theme="dark"]) .modal-header h3 {
+  color: #333;
+}
+
+:root:not([data-theme="dark"]) .close-button {
+  color: #666;
+}
+
+:root:not([data-theme="dark"]) .close-button:hover {
+  color: #333;
+}
+
+:root:not([data-theme="dark"]) .form-group label {
+  color: #333;
+}
+
+:root:not([data-theme="dark"]) .form-control {
+  background: #f5f5f5;
+  color: #333;
+  border-color: #ddd;
+}
+
+:root:not([data-theme="dark"]) .form-control option {
+  background: #ffffff;
+  color: #333;
+}
+
+:root:not([data-theme="dark"]) .form-text {
+  color: #666;
+}
+
+:root:not([data-theme="dark"]) .modal-footer {
+  border-top-color: #ddd;
+}
 </style>

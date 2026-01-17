@@ -53,6 +53,8 @@ public class ReviewDto {
     @JsonProperty("moderationReason")
     private String moderationReason;
 
+    @JsonProperty("userName")
+    private String userName;
 
     // Constructors
     public ReviewDto() {
@@ -210,5 +212,13 @@ public class ReviewDto {
 
     public void setModerationReason(String moderationReason) {
         this.moderationReason = moderationReason;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

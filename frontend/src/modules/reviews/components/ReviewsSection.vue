@@ -25,17 +25,19 @@
     </div>
 
     <!-- Write Review Button (Students & Moderators) -->
-    <div v-if="auth.isAuthenticated && auth.user?.role !== 'APPLICANT' && !userHasReviewed" class="write-review-section">
+    <div v-if="auth.isAuthenticated && auth.user?.role !== 'APPLICANT' && (!userHasReviewed || editingId)" class="write-review-section">
       <button 
-        v-if="!showCreateForm"
+        v-if="!showCreateForm && !editingId"
         class="base-button"
         @click="showCreateForm = true"
       >
         Write a Review
       </button>
 
-      <!-- Create Review Form -->
-      <form v-if="showCreateForm" @submit.prevent="submitReview" class="review-form">
+      <!-- Create/Edit Review Form -->
+      <form v-if="showCreateForm || editingId" @submit.prevent="submitReview" class="review-form">
+        <h3>{{ editingId ? 'Edit Your Review' : 'Write a Review' }}</h3>
+        
         <div v-if="error" class="error-message">
           {{ error }}
         </div>
@@ -63,7 +65,7 @@
 
         <div class="form-actions">
           <button type="submit" class="base-button" :disabled="loading || !formData.rating">
-            {{ loading ? 'Submitting...' : 'Post Review' }}
+            {{ loading ? 'Submitting...' : (editingId ? 'Update Review' : 'Post Review') }}
           </button>
           <button 
             type="button"

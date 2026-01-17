@@ -49,6 +49,11 @@ public interface ReportRepository {
     boolean existsByUserIdAndTargetTypeAndTargetId(UUID userId, String targetType, UUID targetId);
 
     /**
+     * Count reports by status.
+     */
+    int countByStatus(ReportStatus status);
+
+    /**
      * Save a new report.
      */
     void save(Report report);
