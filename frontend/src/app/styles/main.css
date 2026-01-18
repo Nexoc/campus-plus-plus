@@ -644,7 +644,8 @@ form {
 
 .base-button, 
 button {
-  width: 100%;
+  width: auto;
+  display: inline-block;
   padding: var(--space-md) var(--space-lg);
   font-size: var(--font-base);
   font-weight: 500;
@@ -654,6 +655,7 @@ button {
   color: white;
   cursor: pointer;
   transition: background-color 0.2s, transform 0.05s;
+  white-space: nowrap;
 }
 
 .base-button:hover, 
@@ -672,16 +674,46 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.base-button.small {
-  width: auto;
-  padding: var(--space-sm) var(--space-md);
-  font-size: var(--font-sm);
-  white-space: nowrap;
+/* Button size variants */
+.base-button.small,
+button.small {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
 }
 
-.base-button.danger {
+/* Button style variants */
+.base-button.secondary,
+button.secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.base-button.secondary:hover,
+button.secondary:hover {
+  background: var(--color-border);
+}
+
+.base-button.danger,
+button.danger {
   background-color: var(--color-danger);
-  color: #fff;
+}
+
+.base-button.danger:hover,
+button.danger:hover {
+  background-color: #b91c1c;
+}
+
+/* Button containers with wrapping */
+.button-group,
+.button-container,
+.actions,
+.action-buttons,
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  align-items: center;
 }
 /* =====================================================
    FORM / PAGE ERRORS - RESPONSIVE
@@ -1858,3 +1890,114 @@ html[data-theme="dark"] {
     font-size: 1.35rem;
   }
 }
+
+/* =====================================================
+   UNIFIED SECTION & ITEM STYLING FOR COURSE DETAIL PAGE
+   ===================================================== */
+
+/* Common list item styling for materials, reviews, discussions */
+.material-item,
+.review-item,
+.thread-item,
+.discussion-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  transition: box-shadow 0.2s;
+}
+
+@media (min-width: 640px) {
+  .material-item,
+  .review-item,
+  .thread-item,
+  .discussion-item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.material-item:hover,
+.review-item:hover,
+.thread-item:hover,
+.discussion-item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Common item actions styling */
+.item-actions,
+.material-actions,
+.review-actions,
+.thread-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Ensure base-button small variant is properly sized */
+.base-button.small,
+button.small {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* Common form styling */
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Empty state styling */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Success/error messages */
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #c3e6cb;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #f5c6cb;
+  margin-bottom: 1rem;
+}
+

@@ -1,10 +1,13 @@
 <template>
-  <div class="reviews-section">
-    <h3>Reviews</h3>
-
-    <!-- Average Rating Display -->
-    <div v-if="summary" class="rating-summary">
-      <div class="rating-display">
+  <CollapsibleSection
+    title="Reviews"
+    :show-toggle="auth.isAuthenticated && auth.user?.role !== 'APPLICANT' && (!userHasReviewed || editingId !== null)"
+    show-label="Write a Review"
+    hide-label="Hide Form"
+  >
+    <template #summary>
+      <!-- Average Rating Display -->
+      <div v-if="summary" class="rating-display">
         <span class="average-rating">
           <template v-if="summary.averageRating !== null">
             ★ {{ summary.averageRating.toFixed(1) }} / 5
@@ -17,26 +20,17 @@
           ({{ summary.reviewCount }} {{ summary.reviewCount === 1 ? 'review' : 'reviews' }})
         </span>
       </div>
-    </div>
 
-    <!-- Success Message -->
-    <div v-if="successMessage" class="success-message">
-      {{ successMessage }}
-    </div>
+      <!-- Success Message -->
+      <div v-if="successMessage" class="success-message">
+        {{ successMessage }}
+      </div>
+    </template>
 
-    <!-- Write Review Button (Students & Moderators) -->
-    <div v-if="auth.isAuthenticated && auth.user?.role !== 'APPLICANT' && (!userHasReviewed || editingId)" class="write-review-section">
-      <button 
-        v-if="!showCreateForm && !editingId"
-        class="base-button"
-        @click="showCreateForm = true"
-      >
-        Write a Review
-      </button>
-
+    <template #form>
       <!-- Create/Edit Review Form -->
-      <form v-if="showCreateForm || editingId" @submit.prevent="submitReview" class="review-form">
-        <h3>{{ editingId ? 'Edit Your Review' : 'Write a Review' }}</h3>
+      <form @submit.prevent="submitReview" class="review-form">
+        <h4>{{ editingId ? 'Edit Your Review' : 'Write a Review' }}</h4>
         
         <div v-if="error" class="error-message">
           {{ error }}
@@ -44,7 +38,7 @@
 
         <div class="form-group">
           <label>Rating <span class="required">*</span></label>
-          <select v-model.number="formData.rating" required>
+          <select v-model.number="formData.rating" required class="form-select">
             <option value="">Select rating...</option>
             <option value="5">5 - Excellent</option>
             <option value="4">4 - Good</option>
@@ -60,6 +54,7 @@
             v-model="formData.text"
             placeholder="Share your thoughts about this course..."
             rows="5"
+            class="form-textarea"
           ></textarea>
         </div>
 
@@ -76,89 +71,91 @@
           </button>
         </div>
       </form>
-    </div>
+    </template>
 
-    <!-- Reviews List -->
-    <div v-if="reviews.length > 0" class="reviews-list">
-      <!-- Sort Controls -->
-      <div class="reviews-header">
-        <h3>All Reviews</h3>
-        <div class="sort-controls">
-          <label for="review-sort">Sort by:</label>
-          <select 
-            id="review-sort"
-            v-model="sortOption" 
-            @change="onSortChange"
-            class="sort-select"
-          >
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-            <option value="highest_rating">Highest rating</option>
-            <option value="lowest_rating">Lowest rating</option>
-          </select>
+    <template #content>
+      <!-- Reviews List -->
+      <div v-if="reviews.length > 0" class="reviews-list">
+        <!-- Sort Controls -->
+        <div class="list-header">
+          <h4>All Reviews</h4>
+          <div class="sort-controls">
+            <label for="review-sort">Sort by:</label>
+            <select 
+              id="review-sort"
+              v-model="sortOption" 
+              @change="onSortChange"
+              class="sort-select"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="highest_rating">Highest rating</option>
+              <option value="lowest_rating">Lowest rating</option>
+            </select>
+          </div>
         </div>
+
+        <article v-for="review in reviews" :key="review.reviewId" class="review-item">
+          <div class="item-header">
+            <div class="item-meta">
+              <strong>{{ review.userName || 'Anonymous' }}</strong>
+              <span class="meta-date">{{ formatDate(review.createdAt) }}</span>
+              <span class="meta-rating">★ {{ review.rating }}/5</span>
+            </div>
+
+            <!-- Edit/Delete for own reviews -->
+            <div v-if="isOwnReview(review)" class="item-actions">
+              <button 
+                class="base-button small"
+                @click="startEdit(review)"
+              >
+                Edit
+              </button>
+              <button 
+                class="base-button small danger"
+                @click="deleteReview(review.reviewId!)"
+              >
+                Delete
+              </button>
+            </div>
+
+            <!-- Report button for other users' reviews -->
+            <div v-else-if="canReportReview(review)" class="item-actions">
+              <button 
+                class="base-button small"
+                @click="openReportModal(review.reviewId!)"
+                title="Report inappropriate review"
+              >
+                Report
+              </button>
+            </div>
+          </div>
+
+          <p v-if="review.text" class="item-content">{{ review.text }}</p>
+          <p v-else class="item-content no-text">No additional comments</p>
+
+          <!-- Reactions -->
+          <div class="item-reactions">
+            <ReactionButton target-type="review" :target-id="review.reviewId!" />
+          </div>
+        </article>
       </div>
 
-      <article v-for="review in reviews" :key="review.reviewId" class="review-card">
-        <div class="review-header">
-          <div class="review-meta">
-            <strong>{{ review.userName || 'Anonymous' }}</strong>
-            <span class="review-date">{{ formatDate(review.createdAt) }}</span>
-            <span class="review-rating">★ {{ review.rating }}/5</span>
-          </div>
+      <!-- No reviews message -->
+      <div v-else class="empty-state">
+        <p>No reviews yet. Be the first to share your thoughts!</p>
+      </div>
+    </template>
+  </CollapsibleSection>
 
-          <!-- Edit/Delete for own reviews -->
-          <div v-if="isOwnReview(review)" class="review-actions">
-            <button 
-              class="small-button"
-              @click="startEdit(review)"
-            >
-              Edit
-            </button>
-            <button 
-              class="small-button danger"
-              @click="deleteReview(review.reviewId!)"
-            >
-              Delete
-            </button>
-          </div>
-
-          <!-- Report button for other users' reviews (authenticated users only) -->
-          <div v-else-if="canReportReview(review)" class="review-actions">
-            <button 
-              class="small-button report-button"
-              @click="openReportModal(review.reviewId!)"
-              title="Report inappropriate review"
-            >
-              Report
-            </button>
-          </div>
-        </div>
-
-        <p v-if="review.text" class="review-content">{{ review.text }}</p>
-        <p v-else class="review-content no-text">No additional comments</p>
-
-        <!-- Reactions -->
-        <div class="review-reactions">
-          <ReactionButton target-type="review" :target-id="review.reviewId!" />
-        </div>
-      </article>
-    </div>
-
-    <!-- No reviews message -->
-    <div v-else class="empty-state">
-      <p>No reviews yet. Be the first to share your thoughts!</p>
-    </div>
-
-    <!-- Report Modal -->
-    <ReportModal
-      :is-open="showReportModal"
-      target-type="REVIEW"
-      :target-id="reportingReviewId"
-      @close="closeReportModal"
-      @success="handleReportSuccess"
-    />
-  </div>
+  <!-- Report Modal -->
+  <ReportModal
+    :is-open="showReportModal"
+    target-type="REVIEW"
+    :target-id="reportingReviewId"
+    @close="closeReportModal"
+    @success="handleReportSuccess"
+  />
 </template>
 
 <script setup lang="ts">
@@ -168,6 +165,7 @@ import { reviewsApi } from '../api/reviewsApi'
 import type { Review, ReviewSummary, CreateReviewRequest } from '../model/Review'
 import ReportModal from '@/modules/reports/components/ReportModal.vue'
 import ReactionButton from '@/shared/components/ReactionButton.vue'
+import CollapsibleSection from '@/shared/components/CollapsibleSection.vue'
 
 interface Props {
   courseId: string
@@ -179,7 +177,6 @@ const auth = useAuthStore()
 const reviews = ref<Review[]>([])
 const summary = ref<ReviewSummary | null>(null)
 const loading = ref(false)
-const showCreateForm = ref(false)
 const editingId = ref<string | null>(null)
 const error = ref<string>('')
 const successMessage = ref<string>('')
@@ -296,7 +293,6 @@ const submitReview = async () => {
     }
     
     resetForm()
-    showCreateForm.value = false
     await loadReviews()
     await loadSummary()
     
@@ -315,7 +311,6 @@ const submitReview = async () => {
 const cancelCreate = () => {
   resetForm()
   editingId.value = null
-  showCreateForm.value = false
   error.value = ''
 }
 
@@ -334,7 +329,6 @@ const startEdit = (review: Review) => {
     rating: review.rating,
     text: review.text || '',
   }
-  showCreateForm.value = true
   error.value = ''
 }
 
@@ -361,26 +355,7 @@ loadSummary()
 </script>
 
 <style scoped>
-.reviews-section {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  background: var(--color-surface);
-  border-radius: 8px;
-}
-
-.reviews-section h3 {
-  margin: 0 0 1rem;
-  color: var(--color-text-primary);
-}
-
-.rating-summary {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: var(--color-surface);
-  border-radius: 8px;
-  border-left: 4px solid #ffc107;
-}
-
+/* Rating display */
 .rating-display {
   display: flex;
   align-items: center;
@@ -390,42 +365,37 @@ loadSummary()
 .average-rating {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #ffc107;
+  color: var(--star-color);
 }
 
 .review-count {
   font-size: 1rem;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
 }
 
+/* Messages */
 .success-message {
   background: #d4edda;
   color: #155724;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  margin-top: 1rem;
   border: 1px solid #c3e6cb;
 }
 
 .error-message {
   background: #f8d7da;
   color: #721c24;
-  padding: 1rem;
-  border-radius: 4px;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
   margin-bottom: 1rem;
   border: 1px solid #f5c6cb;
 }
 
-.write-review-section {
-  margin-bottom: 2rem;
-}
-
-.review-form {
-  background: var(--color-surface);
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-top: 1rem;
-  border: 1px solid var(--color-border);
+/* Form */
+.review-form h4 {
+  margin: 0 0 1rem;
+  color: var(--color-text);
 }
 
 .form-group {
@@ -436,71 +406,67 @@ loadSummary()
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 .form-group .required {
-  color: #dc3545;
-  font-weight: bold;
+  color: var(--color-danger);
 }
 
 .form-group .optional {
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-weight: normal;
   font-size: 0.9rem;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.form-select,
+.form-textarea {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-family: inherit;
-  background: var(--color-background);
-  color: var(--color-text-primary);
+  background: var(--color-input-bg);
+  color: var(--color-text);
 }
 
-.form-group select {
+.form-select {
   cursor: pointer;
 }
 
-.form-group select option {
-  background: var(--color-background);
-  color: var(--color-text-primary);
-  padding: 0.5rem;
-}
-
-:root[data-theme='dark'] .form-group select option {
-  background: #1f2937;
-  color: #f9fafb;
+.form-textarea {
+  min-height: 100px;
+  resize: vertical;
 }
 
 .form-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-top: 1.5rem;
+  flex-wrap: wrap;
 }
 
+/* List */
 .reviews-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.reviews-header {
+.list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.reviews-header h3 {
+.list-header h4 {
   margin: 0;
-  color: var(--color-text-primary);
+  color: var(--color-text);
   font-size: 1.2rem;
 }
 
@@ -512,131 +478,84 @@ loadSummary()
 
 .sort-controls label {
   font-size: 0.9rem;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 
 .sort-select {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: var(--color-surface);
-  color: var(--color-text-primary);
+  color: var(--color-text);
   font-family: inherit;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: border-color 0.2s;
 }
 
-.sort-select:hover {
-  border-color: #007bff;
-}
-
-.sort-select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-}
-
-.review-card {
+/* Review items */
+.review-item {
   background: var(--color-surface);
-  padding: 1.5rem;
-  border-radius: 8px;
-  border-left: 4px solid #007bff;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
 }
 
-.review-header {
+.item-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.review-meta {
-  display: flex;
+  margin-bottom: 0.75rem;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.item-meta {
+  display: flex;
+  gap: 0.75rem;
   font-size: 0.9rem;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
 }
 
-.review-meta strong {
-  color: var(--color-text-primary);
+.item-meta strong {
+  color: var(--color-text);
 }
 
-.review-date {
-  opacity: 0.7;
+.meta-date {
+  opacity: 0.8;
 }
 
-.review-rating {
+.meta-rating {
   font-weight: 500;
-  color: #ffc107;
+  color: var(--star-color);
 }
 
-.review-actions,
-.moderation-actions {
+.item-actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.small-button {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.small-button:hover {
-  background: #0056b3;
-}
-
-.small-button.report-button {
-  background: #6c757d;
-  color: white;
-}
-
-.small-button.report-button:hover {
-  background: #5a6268;
-}
-
-.small-button.warning {
-  background: #ffc107;
-  color: black;
-}
-
-.small-button.warning:hover {
-  background: #ffb300;
-}
-
-.small-button.danger {
-  background: #dc3545;
-}
-
-.small-button.danger:hover {
-  background: #c82333;
-}
-
-.review-content {
-  color: var(--color-text-primary);
+.item-content {
+  color: var(--color-text);
   line-height: 1.6;
-  margin: 0.5rem 0 1rem;
+  margin: 0.5rem 0;
 }
 
-.review-content.no-text {
+.item-content.no-text {
   font-style: italic;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
 }
 
-.review-reactions {
+.item-reactions {
   margin-top: 0.75rem;
 }
 
 .empty-state {
   text-align: center;
   padding: 2rem;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 </style>

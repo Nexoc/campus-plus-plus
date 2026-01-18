@@ -1,53 +1,46 @@
 <template>
-  <div class="discussions-section">
-    <div class="section-header">
-      <h3>Discussions</h3>
+  <CollapsibleSection
+    title="Discussions"
+    :show-toggle="authStore.isAuthenticated && view === 'list'"
+    show-label="Create New Thread"
+    hide-label="Hide Form"
+  >
+    <template #header-extra>
       <p v-if="!authStore.isAuthenticated" class="login-hint">
-        <a href="/login">Log in</a> to participate in discussions
+        <a href="/login">Log in</a> to participate
       </p>
-    </div>
+    </template>
 
-    <!-- Create Thread Form -->
-    <ThreadCreateForm
-      v-if="authStore.isAuthenticated"
-      :course-id="courseId"
-      @thread-created="onThreadCreated"
-    />
-
-    <!-- Main View Selector -->
-    <div class="view-selector">
-      <button
-        :class="{ active: view === 'list' }"
-        @click="view = 'list'"
-        class="btn-view"
-      >
-        Discussions
-      </button>
-      <button
-        v-if="selectedThreadId"
-        :class="{ active: view === 'detail' }"
-        @click="view = 'detail'"
-        class="btn-view"
-      >
-        Thread
-      </button>
-    </div>
-
-    <!-- Thread List View -->
-    <div v-show="view === 'list'" class="view-content">
-      <ThreadList
+    <template #form>
+      <ThreadCreateForm
         :course-id="courseId"
-        :selected-thread-id="selectedThreadId"
-        @thread-selected="onThreadSelected"
+        @thread-created="onThreadCreated"
       />
-    </div>
+    </template>
 
-    <!-- Thread Detail View -->
-    <div v-show="view === 'detail' && selectedThreadId" class="view-content">
-      <button @click="backToList" class="btn-back">← Back to Discussions</button>
-      <ThreadDetail :thread-id="selectedThreadId" />
-    </div>
-  </div>
+    <template #content>
+      <!-- View Selector -->
+      <div v-if="view === 'detail' && selectedThreadId" class="view-selector">
+        <button @click="backToList" class="base-button small">
+          ← Back to Discussions
+        </button>
+      </div>
+
+      <!-- Thread List View -->
+      <div v-if="view === 'list'">
+        <ThreadList
+          :course-id="courseId"
+          :selected-thread-id="selectedThreadId"
+          @thread-selected="onThreadSelected"
+        />
+      </div>
+
+      <!-- Thread Detail View -->
+      <div v-else-if="view === 'detail' && selectedThreadId">
+        <ThreadDetail :thread-id="selectedThreadId" />
+      </div>
+    </template>
+  </CollapsibleSection>
 </template>
 
 <script setup lang="ts">
@@ -56,6 +49,7 @@ import { useAuthStore } from '@/modules/auth/store/auth.store'
 import ThreadList from './ThreadList.vue'
 import ThreadCreateForm from './ThreadCreateForm.vue'
 import ThreadDetail from './ThreadDetail.vue'
+import CollapsibleSection from '@/shared/components/CollapsibleSection.vue'
 
 interface Props {
   courseId: string
@@ -87,30 +81,14 @@ function backToList() {
 </script>
 
 <style scoped>
-.discussions-section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 2px solid #e0e0e0;
-}
-
-.section-header {
-  margin-bottom: 1.5rem;
-}
-
-.section-header h2 {
-  margin: 0 0 0.5rem 0;
-  color: var(--color-text-primary);
-  font-size: 1.5rem;
-}
-
 .login-hint {
   margin: 0;
-  color: var(--color-text-secondary);
-  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
 }
 
 .login-hint a {
-  color: #007bff;
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 500;
 }
@@ -120,49 +98,6 @@ function backToList() {
 }
 
 .view-selector {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--color-border);
-}
-
-.btn-view {
-  padding: 0.75rem 1rem;
-  background: transparent;
-  border: none;
-  border-bottom: 3px solid transparent;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.btn-view:hover {
-  color: var(--color-text-primary);
-}
-
-.btn-view.active {
-  color: #007bff;
-  border-bottom-color: #007bff;
-}
-
-.view-content {
-  margin-top: 1rem;
-}
-
-.btn-back {
-  padding: 0.5rem 1rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  cursor: pointer;
-  color: var(--color-text-primary);
-  font-weight: 500;
-  transition: all 0.2s ease;
   margin-bottom: 1rem;
-}
-
-.btn-back:hover {
-  background: var(--color-background);
 }
 </style>

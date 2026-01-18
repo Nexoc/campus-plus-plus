@@ -7,6 +7,7 @@ import {
   uploadMaterial,
   type CourseMaterial,
 } from '@/modules/courses/api/courseMaterials.api';
+import CollapsibleSection from '@/shared/components/CollapsibleSection.vue';
 import { onMounted, ref } from 'vue';
 
 /* ---------------- props ---------------- */
@@ -141,274 +142,208 @@ onMounted(loadMaterials)
 </script>
 
 <template>
-  <section class="course-materials">
-    <h3>Course materials</h3>
+  <CollapsibleSection
+    title="Course Materials"
+    :show-toggle="auth.isAuthenticated"
+    show-label="Upload Material"
+    hide-label="Hide Form"
+  >
+    <template #content>
+      <p v-if="loading">Loading materials…</p>
+      <p v-if="error" class="error-message">{{ error }}</p>
 
-    <p v-if="loading">Loading materials…</p>
-    <p v-if="error" class="error">{{ error }}</p>
+      <!-- Materials List -->
+      <ul v-if="materials.length" class="materials-list">
+        <li v-for="m in materials" :key="m.id" class="material-item">
+          <div class="material-main">
+            <template v-if="editingId === m.id">
+              <input v-model="editTitle" placeholder="Title" class="edit-input" />
+              <textarea v-model="editDescription" placeholder="Description" class="edit-textarea" />
+            </template>
 
-    <!-- List -->
-    <ul v-if="materials.length">
-      <li v-for="m in materials" :key="m.id" class="material-item">
-        <div class="material-main">
-          <template v-if="editingId === m.id">
-            <input v-model="editTitle" placeholder="Title" />
-            <textarea v-model="editDescription" placeholder="Description" />
-          </template>
+            <template v-else>
+              <strong>{{ m.title || m.originalFilename }}</strong>
+              <span v-if="m.description"> — {{ m.description }}</span>
+            </template>
+          </div>
 
-          <template v-else>
-            <strong>{{ m.title || m.originalFilename }}</strong>
-            <span v-if="m.description"> — {{ m.description }}</span>
-          </template>
-        </div>
+          <div class="item-actions">
+            <button @click="handleDownload(m)" class="base-button small">Download</button>
 
-        <div class="material-actions">
-          <button @click="handleDownload(m)">Download</button>
+            <template v-if="canManage(m)">
+              <button
+                v-if="editingId !== m.id"
+                @click="startEdit(m)"
+                class="base-button small"
+              >
+                Edit
+              </button>
 
-          <template v-if="canManage(m)">
-            <button
-              v-if="editingId !== m.id"
-              @click="startEdit(m)"
-            >
-              Edit
-            </button>
+              <button
+                v-else
+                @click="saveEdit(m)"
+                class="base-button small"
+              >
+                Save
+              </button>
 
-            <button
-              v-else
-              @click="saveEdit(m)"
-            >
-              Save
-            </button>
+              <button
+                class="base-button small danger"
+                @click="removeMaterial(m)"
+              >
+                Delete
+              </button>
+            </template>
+          </div>
+        </li>
+      </ul>
 
-            <button
-              class="danger"
-              @click="removeMaterial(m)"
-            >
-              Delete
-            </button>
-          </template>
-        </div>
-      </li>
-    </ul>
+      <p v-else-if="!loading" class="empty-state">No materials yet.</p>
+    </template>
 
-    <p v-else-if="!loading">No materials yet.</p>
+    <template #form>
+      <div class="form-content">
+        <input
+          type="file"
+          @change="e => file = (e.target as HTMLInputElement).files?.[0] || null"
+          accept=".pdf,image/png,image/jpeg"
+          class="form-input"
+        />
 
-    <!-- Upload -->
-    <div v-if="auth.isAuthenticated" class="upload">
-      <h4>Upload material</h4>
+        <input
+          type="text"
+          v-model="title"
+          placeholder="Title (optional)"
+          class="form-input"
+        />
 
-      <input
-        type="file"
-        @change="e => file = (e.target as HTMLInputElement).files?.[0] || null"
-        accept=".pdf,image/png,image/jpeg"
-      />
+        <textarea
+          v-model="description"
+          placeholder="Description (optional)"
+          class="form-textarea"
+        />
 
-      <input
-        type="text"
-        v-model="title"
-        placeholder="Title (optional)"
-      />
-
-      <textarea
-        v-model="description"
-        placeholder="Description (optional)"
-      />
-
-      <button
-        :disabled="uploading"
-        @click="handleUpload"
-      >
-        {{ uploading ? 'Uploading…' : 'Upload' }}
-      </button>
-    </div>
-  </section>
+        <button
+          :disabled="uploading"
+          @click="handleUpload"
+          class="base-button"
+        >
+          {{ uploading ? 'Uploading…' : 'Upload' }}
+        </button>
+      </div>
+    </template>
+  </CollapsibleSection>
 </template>
 
 <style scoped>
-.course-materials {
-  margin-top: 2rem;
-  max-width: 900px;
+/* List items */
+.materials-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
-
-/* ===== list ===== */
 
 .material-item {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: stretch;
-  gap: 12px;
-
-  padding: 12px 14px;
-  margin-bottom: 10px;
-
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #fafafa;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
 }
 
 @media (min-width: 640px) {
   .material-item {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
   }
-}
-
-:root[data-theme='dark'] .material-item {
-  background: var(--color-surface);
-  border-color: var(--color-border);
 }
 
 .material-main {
   flex: 1;
   min-width: 0;
-  order: 1;
-}
-
-@media (max-width: 639px) {
-  .material-main {
-    order: 2;
-  }
 }
 
 .material-main strong {
-  display: inline;
   font-weight: 600;
   word-break: break-word;
-  margin-right: 8px;
+  margin-right: 0.5rem;
+  color: var(--color-text);
 }
 
 .material-main span {
-  color: #555;
-  font-size: 0.95rem;
-  display: inline;
-}
-
-:root[data-theme='dark'] .material-main span {
   color: var(--color-text-muted);
+  font-size: 0.95rem;
 }
 
-/* edit inputs */
-.material-main input,
-.material-main textarea {
+/* Edit inputs */
+.edit-input,
+.edit-textarea {
   width: 100%;
-  margin-bottom: 6px;
-  padding: 6px 8px;
-
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   font-size: 0.95rem;
-  background: #fff;
-  color: #000;
+  background: var(--color-input-bg);
+  color: var(--color-text);
 }
 
-:root[data-theme='dark'] .material-main input,
-:root[data-theme='dark'] .material-main textarea {
-  background: var(--color-background);
-  color: var(--color-text-primary);
-  border-color: var(--color-border);
-}
-
-/* ===== actions ===== */
-
-.material-actions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-  order: 1;
-  justify-content: flex-start;
-}
-
-@media (min-width: 640px) {
-  .material-actions {
-    order: 2;
-    justify-content: flex-end;
-  }
-}
-
-.material-actions button {
-  padding: 6px 10px;
-  font-size: 0.85rem;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-  background: #2563eb;
-  color: #fff;
-}
-
-.material-actions button:hover {
-  opacity: 0.9;
-}
-
-.material-actions button.danger {
-  background: #c0392b;
-}
-
-/* ===== upload ===== */
-
-.upload {
-  margin-top: 2rem;
-  padding: 16px;
-
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #f9fafb;
-
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-:root[data-theme='dark'] .upload {
-  background: var(--color-surface);
-  border-color: var(--color-border);
-}
-
-.upload input[type="file"],
-.upload input[type="text"],
-.upload textarea {
-  padding: 6px 8px;
-  font-size: 0.95rem;
-
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  background: #fff;
-  color: #000;
-}
-
-:root[data-theme='dark'] .upload input[type="file"],
-:root[data-theme='dark'] .upload input[type="text"],
-:root[data-theme='dark'] .upload textarea {
-  background: var(--color-background);
-  color: var(--color-text-primary);
-  border-color: var(--color-border);
-}
-
-.upload textarea {
-  min-height: 70px;
+.edit-textarea {
+  min-height: 60px;
   resize: vertical;
 }
 
-.upload button {
-  align-self: flex-start;
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  background: #2563eb;
-  color: #fff;
+/* Actions */
+.item-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
-.upload button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* Form content */
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-/* ===== misc ===== */
-
-.error {
-  color: #c0392b;
-  margin-bottom: 8px;
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: var(--color-input-bg);
+  color: var(--color-text);
 }
 
+.form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.error-message {
+  color: var(--color-danger);
+  padding: 0.75rem;
+  background: #fee2e2;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
 </style>
