@@ -3,6 +3,9 @@ package at.campus.backend.modules.threads.service;
 import at.campus.backend.modules.threads.model.Thread;
 import at.campus.backend.modules.threads.model.UpdateThreadRequest;
 import at.campus.backend.modules.threads.repository.ThreadRepository;
+import at.campus.backend.modules.watch.model.WatchTargetType;
+import at.campus.backend.modules.watch.service.NotificationService;
+import at.campus.backend.modules.watch.service.WatchService;
 import at.campus.backend.security.UserContext;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +20,19 @@ public class ThreadService {
 
     private final ThreadRepository threadRepository;
     private final UserContext userContext;
+    private final WatchService watchService;
+    private final NotificationService notificationService;
 
-    public ThreadService(ThreadRepository threadRepository, UserContext userContext) {
+    public ThreadService(
+            ThreadRepository threadRepository, 
+            UserContext userContext,
+            WatchService watchService,
+            NotificationService notificationService
+    ) {
         this.threadRepository = threadRepository;
         this.userContext = userContext;
+        this.watchService = watchService;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -61,7 +73,20 @@ public class ThreadService {
         threadRepository.save(thread);
         
         // Fetch the saved thread to get the timestamp
-        return threadRepository.findById(thread.getId()).orElse(thread);
+        Thread savedThread = threadRepository.findById(thread.getId()).orElse(thread);
+        
+        // Notify watchers of the course (fire-and-forget, safe failure)
+        try {
+            List<UUID> watchers = watchService.getUsersWatchingTarget(
+                WatchTargetType.COURSE, courseId);
+            if (!watchers.isEmpty()) {
+                notificationService.notifyNewThread(courseId, savedThread.getId(), savedThread.getTitle(), watchers);
+            }
+        } catch (Exception e) {
+            // Don't fail thread creation if notification fails
+        }
+        
+        return savedThread;
     }
 
     /**

@@ -137,6 +137,11 @@
 
         <p v-if="review.text" class="review-content">{{ review.text }}</p>
         <p v-else class="review-content no-text">No additional comments</p>
+
+        <!-- Reactions -->
+        <div class="review-reactions">
+          <ReactionButton target-type="review" :target-id="review.reviewId!" />
+        </div>
       </article>
     </div>
 
@@ -162,6 +167,7 @@ import { computed, ref } from 'vue'
 import { reviewsApi } from '../api/reviewsApi'
 import type { Review, ReviewSummary, CreateReviewRequest } from '../model/Review'
 import ReportModal from '@/modules/reports/components/ReportModal.vue'
+import ReactionButton from '@/shared/components/ReactionButton.vue'
 
 interface Props {
   courseId: string
@@ -622,6 +628,10 @@ loadSummary()
 .review-content.no-text {
   font-style: italic;
   color: var(--color-text-secondary);
+}
+
+.review-reactions {
+  margin-top: 0.75rem;
 }
 
 .empty-state {

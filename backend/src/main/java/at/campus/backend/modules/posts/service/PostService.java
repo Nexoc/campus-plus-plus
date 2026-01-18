@@ -6,6 +6,9 @@ import at.campus.backend.modules.posts.model.CreatePostRequest;
 import at.campus.backend.modules.posts.model.UpdatePostRequest;
 import at.campus.backend.modules.posts.repository.PostRepository;
 import at.campus.backend.modules.comments.repository.CommentRepository;
+import at.campus.backend.modules.watch.model.WatchTargetType;
+import at.campus.backend.modules.watch.service.NotificationService;
+import at.campus.backend.modules.watch.service.WatchService;
 import at.campus.backend.security.UserContext;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +26,21 @@ public class PostService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final UserContext userContext;
+    private final WatchService watchService;
+    private final NotificationService notificationService;
 
-    public PostService(PostRepository postRepository, CommentRepository commentRepository, UserContext userContext) {
+    public PostService(
+            PostRepository postRepository, 
+            CommentRepository commentRepository, 
+            UserContext userContext,
+            WatchService watchService,
+            NotificationService notificationService
+    ) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.userContext = userContext;
+        this.watchService = watchService;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -73,6 +86,18 @@ public class PostService {
 
         // Fetch the saved post
         Post savedPost = postRepository.findById(post.getId()).orElse(post);
+        
+        // Notify watchers of the thread (fire-and-forget, safe failure)
+        try {
+            List<UUID> watchers = watchService.getUsersWatchingTarget(
+                WatchTargetType.THREAD, threadId);
+            if (!watchers.isEmpty()) {
+                notificationService.notifyNewPost(threadId, savedPost.getId(), watchers);
+            }
+        } catch (Exception e) {
+            // Don't fail post creation if notification fails
+        }
+        
         return PostDto.fromDomain(savedPost, 0);
     }
 

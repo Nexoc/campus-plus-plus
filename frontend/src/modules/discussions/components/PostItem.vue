@@ -35,8 +35,15 @@
     </div>
 
     <!-- Display mode -->
-    <div v-if="!isEditing" class="post-content">
-      {{ post.content }}
+    <div v-if="!isEditing">
+      <div class="post-content">
+        {{ post.content }}
+      </div>
+
+      <!-- Reactions -->
+      <div class="post-reactions">
+        <ReactionButton target-type="post" :target-id="post.id" />
+      </div>
     </div>
 
     <!-- Edit mode -->
@@ -69,6 +76,7 @@ import { formatDate } from '@/shared/utils/dateFormatter'
 import type { Post } from '../model/Discussion'
 import CommentList from './CommentList.vue'
 import CommentCreateForm from './CommentCreateForm.vue'
+import ReactionButton from '@/shared/components/ReactionButton.vue'
 
 interface Props {
   post: Post
@@ -235,6 +243,10 @@ button {
   white-space: pre-wrap;
   word-break: break-word;
   color: var(--color-text-primary);
+}
+
+.post-reactions {
+  margin: 0.75rem 0;
 }
 
 .post-edit {

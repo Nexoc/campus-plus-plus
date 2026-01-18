@@ -7,6 +7,11 @@
         <div class="thread-title-row">
           <h2 v-if="!isEditingThread">{{ thread.title }}</h2>
           <div class="thread-actions" v-if="!isEditingThread">
+            <WatchButton
+              v-if="authStore.isAuthenticated"
+              target-type="THREAD"
+              :target-id="thread.id"
+            />
             <button
               v-if="isThreadAuthorOrModerator"
               class="btn-edit"
@@ -97,6 +102,7 @@ import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { formatDate } from '@/shared/utils/dateFormatter'
 import PostCreateForm from './PostCreateForm.vue'
 import PostItem from './PostItem.vue'
+import WatchButton from '@/shared/components/WatchButton.vue'
 
 interface Props {
   threadId: string

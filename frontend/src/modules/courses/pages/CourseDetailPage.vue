@@ -2,6 +2,7 @@
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import CourseMaterialsSection from '@/modules/courses/components/CourseMaterialsSection.vue'
 import FavouriteButton from '@/modules/favourites/components/FavouriteButton.vue'
+import WatchButton from '@/shared/components/WatchButton.vue'
 import { useFavouritesStore } from '@/modules/favourites/store/favourites.store'
 import ReviewsSection from '@/modules/reviews/components/ReviewsSection.vue'
 import { computed, onMounted, ref } from 'vue'
@@ -86,12 +87,17 @@ onMounted(load)
       <template v-if="course">
         <h1>{{ course.title }}</h1>
 
-        <div v-if="authStore.isAuthenticated" class="favourite-button-wrapper">
+        <div v-if="authStore.isAuthenticated" class="action-buttons">
           <FavouriteButton
             v-if="course.courseId"
             :course-id="course.courseId"
             :show-label="true"
             :size="20"
+          />
+          <WatchButton
+            v-if="course.courseId"
+            target-type="COURSE"
+            :target-id="course.courseId"
           />
         </div>
 
@@ -166,6 +172,14 @@ onMounted(load)
 .detail-page h1 {
   text-align: center;
   margin-bottom: 20px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .favourite-button-wrapper {

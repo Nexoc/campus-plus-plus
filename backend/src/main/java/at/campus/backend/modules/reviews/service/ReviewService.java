@@ -6,6 +6,9 @@ import at.campus.backend.modules.reviews.model.ReviewDto;
 import at.campus.backend.modules.reviews.model.ReviewSortOption;
 import at.campus.backend.modules.reviews.model.ReviewSummary;
 import at.campus.backend.modules.reviews.repository.ReviewRepository;
+import at.campus.backend.modules.watch.model.WatchTargetType;
+import at.campus.backend.modules.watch.service.NotificationService;
+import at.campus.backend.modules.watch.service.WatchService;
 import at.campus.backend.security.UserContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
@@ -30,17 +33,23 @@ public class ReviewService {
     private final UserContext userContext;
     private final UserLookupService userLookupService;
     private final CourseLookupService courseLookupService;
+    private final WatchService watchService;
+    private final NotificationService notificationService;
 
     public ReviewService(
             ReviewRepository repository,
             UserContext userContext,
             UserLookupService userLookupService,
-            CourseLookupService courseLookupService
+            CourseLookupService courseLookupService,
+            WatchService watchService,
+            NotificationService notificationService
     ) {
         this.repository = repository;
         this.userContext = userContext;
         this.userLookupService = userLookupService;
         this.courseLookupService = courseLookupService;
+        this.watchService = watchService;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -148,6 +157,18 @@ public class ReviewService {
         // 6. Generate ID and save
         review.setId(UUID.randomUUID());
         repository.save(review);
+
+        // 7. Notify watchers (fire-and-forget, safe failure)
+        try {
+            List<UUID> watchers = watchService.getUsersWatchingTarget(
+                WatchTargetType.COURSE, review.getCourseId());
+            if (!watchers.isEmpty()) {
+                notificationService.notifyNewReview(review.getCourseId(), review.getId(), watchers);
+            }
+        } catch (Exception e) {
+            // Don't fail the review creation if notification fails
+            // Just log the error
+        }
 
         return review;
     }

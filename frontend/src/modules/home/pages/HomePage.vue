@@ -29,51 +29,58 @@
       </p>
     </div>
 
-    <!-- MAIN ENTRY POINT -->
-    <RouterLink to="/courses">
-      <button class="base-button">
-        Browse courses
-      </button>
-    </RouterLink>
+    <!-- MAIN NAVIGATION BUTTONS -->
+    <div class="navigation-buttons">
+      <RouterLink to="/study-programs">
+        <button class="base-button">
+          Study Programs
+        </button>
+      </RouterLink>
 
-    <!-- TEMP DEBUG -->
-    <hr />
-
-    <button
-      class="base-button"
-      :disabled="!auth.isAuthenticated"
-      @click="debugMe"
-    >
-      Debug: /api/debug/me
-    </button>
-
-
-    <pre v-if="debugResult">{{ debugResult }}</pre>
-    <p v-if="debugError" class="error">{{ debugError }}</p>
-
-
+      <RouterLink to="/courses">
+        <button class="base-button">
+          Courses
+        </button>
+      </RouterLink>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useAuthStore } from '@/modules/auth/store/auth.store'
-import { getDebugMe } from '@/modules/home/api/debugApi'
-import { ref } from 'vue'
 
 const auth = useAuthStore()
-const debugResult = ref<string | null>(null)
-const debugError = ref<string | null>(null)
-
-async function debugMe() {
-  debugResult.value = null
-  debugError.value = null
-
-  try {
-    const data = await getDebugMe()
-    debugResult.value = JSON.stringify(data, null, 2)
-  } catch (e: any) {
-    debugError.value =
-      e?.response?.status + ' ' + e?.response?.statusText
-  }
-}
 </script>
+
+<style scoped>
+.home-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.home-subtitle {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+}
+
+.home-content {
+  text-align: left;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.navigation-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.navigation-buttons .base-button {
+  min-width: 200px;
+}
+</style>
