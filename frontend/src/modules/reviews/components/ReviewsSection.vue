@@ -353,53 +353,69 @@ const deleteReview = async (reviewId: string) => {
 loadReviews()
 loadSummary()
 </script>
-
 <style scoped>
 /* Rating display */
 .rating-display {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .average-rating {
   font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--star-color);
+  font-weight: 700;
+  color: var(--color-warning);
 }
 
 .review-count {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--color-text-muted);
+  font-weight: 500;
 }
 
 /* Messages */
 .success-message {
-  background: #d4edda;
-  color: #155724;
-  padding: 0.75rem;
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 0.75rem 1rem;
   border-radius: var(--radius-sm);
   margin-top: 1rem;
-  border: 1px solid #c3e6cb;
+  border: 1px solid #a7f3d0;
+  font-weight: 500;
+}
+
+html[data-theme="dark"] .success-message {
+  background: #064e3b;
+  color: #a7f3d0;
+  border-color: #047857;
 }
 
 .error-message {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 0.75rem;
+  background: #fef2f2;
+  color: #7f1d1d;
+  padding: 0.75rem 1rem;
   border-radius: var(--radius-sm);
   margin-bottom: 1rem;
-  border: 1px solid #f5c6cb;
+  border: 1px solid #fecaca;
+  font-weight: 500;
+}
+
+html[data-theme="dark"] .error-message {
+  background: #7f1d1d;
+  color: #fecaca;
+  border-color: #dc2626;
 }
 
 /* Form */
 .review-form h4 {
   margin: 0 0 1rem;
   color: var(--color-text);
+  font-weight: 600;
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .form-group label {
@@ -422,12 +438,21 @@ loadSummary()
 .form-select,
 .form-textarea {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.625rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-family: inherit;
   background: var(--color-input-bg);
   color: var(--color-text);
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .form-select {
@@ -467,38 +492,53 @@ loadSummary()
 .list-header h4 {
   margin: 0;
   color: var(--color-text);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .sort-controls {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .sort-controls label {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--color-text-muted);
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .sort-select {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  background: var(--color-input-bg);
   color: var(--color-text);
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* Review items */
 .review-item {
   background: var(--color-surface);
-  padding: 1rem;
+  padding: 1.25rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.review-item:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 .item-header {
@@ -513,13 +553,15 @@ loadSummary()
 .item-meta {
   display: flex;
   gap: 0.75rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--color-text-muted);
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .item-meta strong {
   color: var(--color-text);
+  font-weight: 600;
 }
 
 .meta-date {
@@ -527,8 +569,8 @@ loadSummary()
 }
 
 .meta-rating {
-  font-weight: 500;
-  color: var(--star-color);
+  font-weight: 600;
+  color: var(--color-warning);
 }
 
 .item-actions {
@@ -540,7 +582,7 @@ loadSummary()
 .item-content {
   color: var(--color-text);
   line-height: 1.6;
-  margin: 0.5rem 0;
+  margin: 0.75rem 0;
 }
 
 .item-content.no-text {
@@ -549,7 +591,9 @@ loadSummary()
 }
 
 .item-reactions {
-  margin-top: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
 }
 
 .empty-state {
@@ -557,5 +601,25 @@ loadSummary()
   padding: 2rem;
   color: var(--color-text-muted);
   font-style: italic;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+@media (max-width: 639px) {
+  .list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sort-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sort-select {
+    width: 100%;
+  }
 }
 </style>

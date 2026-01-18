@@ -83,7 +83,7 @@
               <div class="favourite-card__content">
                 <div class="favourite-card__header">
                   <router-link
-                    :to="`/study-programs/${favourite.studyProgramId}`"
+                    :to="`/programs/${favourite.studyProgramId}`"
                     class="favourite-card__title"
                   >
                     {{ favourite.studyProgramName }}

@@ -84,20 +84,36 @@ function backToList() {
 .login-hint {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--color-primary-light);
+  padding: 0.625rem 1rem;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-primary);
 }
 
 .login-hint a {
   color: var(--color-primary);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
 .login-hint a:hover {
+  color: var(--color-primary-hover);
   text-decoration: underline;
 }
 
 .view-selector {
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.view-selector .base-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>

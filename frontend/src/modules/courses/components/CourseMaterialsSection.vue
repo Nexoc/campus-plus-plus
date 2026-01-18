@@ -252,10 +252,16 @@ onMounted(loadMaterials)
   justify-content: space-between;
   align-items: stretch;
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 1.25rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.material-item:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 @media (min-width: 640px) {
@@ -279,7 +285,7 @@ onMounted(loadMaterials)
 
 .material-main span {
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 /* Edit inputs */
@@ -287,12 +293,21 @@ onMounted(loadMaterials)
 .edit-textarea {
   width: 100%;
   margin-bottom: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.625rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
   background: var(--color-input-bg);
   color: var(--color-text);
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.edit-input:focus,
+.edit-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .edit-textarea {
@@ -318,13 +333,21 @@ onMounted(loadMaterials)
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.625rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
   font-family: inherit;
   background: var(--color-input-bg);
   color: var(--color-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .form-textarea {
@@ -333,11 +356,19 @@ onMounted(loadMaterials)
 }
 
 .error-message {
-  color: var(--color-danger);
-  padding: 0.75rem;
-  background: #fee2e2;
+  color: #7f1d1d;
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: var(--radius-sm);
   margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+html[data-theme="dark"] .error-message {
+  background: #7f1d1d;
+  color: #fecaca;
+  border-color: #dc2626;
 }
 
 .empty-state {
@@ -345,5 +376,8 @@ onMounted(loadMaterials)
   padding: 2rem;
   color: var(--color-text-muted);
   font-style: italic;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
 }
 </style>

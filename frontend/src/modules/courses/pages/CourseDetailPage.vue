@@ -102,6 +102,12 @@ onMounted(load)
         </div>
 
         <p class="entity-meta">
+          <span v-if="course.studyProgram" class="study-program">
+            <router-link :to="{ name: 'StudyProgramDetail', params: { id: course.studyProgram.id } }">
+              📚 {{ course.studyProgram.name }}
+            </router-link>
+          </span>
+          <span v-if="course.studyProgram && course.ects"> · </span>
           <span v-if="course.ects">ECTS: {{ course.ects }}</span>
           <span v-if="course.language"> · Language: {{ course.language }}</span>
           <span v-if="course.sws"> · SWS: {{ course.sws }}</span>
@@ -169,9 +175,88 @@ onMounted(load)
 </template>
 
 <style scoped>
+.detail-page {
+  width: 100%;
+  background: var(--color-bg);
+  padding: var(--space-lg) 0;
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+.page-card {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-2xl);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  margin-left: var(--container-padding);
+  margin-right: var(--container-padding);
+}
+
 .detail-page h1 {
   text-align: center;
-  margin-bottom: 20px;
+  margin: 0 0 var(--space-lg);
+  color: var(--color-text);
+  font-size: var(--font-2xl);
+  font-weight: 700;
+}
+
+.entity-meta {
+  text-align: center;
+  color: var(--color-text);
+  font-size: var(--font-sm);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  line-height: 1.6;
+}
+
+.study-program {
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.study-program a {
+  color: var(--color-primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.study-program a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+.study-program:hover {
+  background: var(--color-primary);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+}
+
+.study-program:hover a {
+  color: white;
+}
+
+.entity-description {
+  text-align: center;
+  color: var(--color-text);
+  margin-bottom: var(--space-2xl);
+  padding: var(--space-lg);
+  background: var(--color-primary-light);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-style: italic;
 }
 
 .action-buttons {
@@ -182,9 +267,79 @@ onMounted(load)
   flex-wrap: wrap;
 }
 
+.course-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.course-section h3 {
+  color: var(--color-text);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.html-content {
+  color: var(--color-text);
+  line-height: 1.8;
+}
+
+.rich-block {
+  margin-bottom: 1rem;
+  color: var(--color-text);
+  line-height: 1.8;
+}
+
+.rich-block p,
+.rich-block ul,
+.rich-block ol {
+  margin: 0.5rem 0;
+}
+
+.rich-block li {
+  margin-left: 1.5rem;
+}
+
+.error-message {
+  padding: 1rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+}
+
 .favourite-button-wrapper {
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 639px) {
+  .page-card {
+    padding: var(--space-lg);
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .detail-page h1 {
+    font-size: var(--font-xl);
+  }
+
+  .entity-meta {
+    font-size: var(--font-xs);
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .action-buttons button,
+  .action-buttons a {
+    width: 100%;
+    min-height: 44px;
+  }
 }
 </style>
