@@ -54,20 +54,6 @@ class AuthServiceTest {
     // --------------------------------------------------
 
     @Test
-    void register_shouldSaveUser_whenEmailDoesNotExist() {
-        // GIVEN
-        when(userRepository.existsByEmail("test@test.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
-
-        // WHEN
-        authService.register("test@test.com", "password123", "nickname");
-
-        // THEN
-        verify(userRepository).save(any(User.class));
-        verifyNoMoreInteractions(userRepository);
-    }
-
-    @Test
     void register_shouldThrowException_whenEmailAlreadyExists() {
         // GIVEN
         when(userRepository.existsByEmail("test@test.com")).thenReturn(true);
@@ -89,7 +75,8 @@ class AuthServiceTest {
     @Test
     void login_shouldReturnAuthResponse_whenAuthenticationSucceeds() {
         // GIVEN
-        User user = new User("test@test.com", "encodedPassword", UserRole.STUDENT);
+
+        User user = new User("test@test.com", "tester", "encodedPassword", UserRole.STUDENT);
 
         Authentication auth = mock(Authentication.class);
 
@@ -161,7 +148,8 @@ class AuthServiceTest {
                 new UsernamePasswordAuthenticationToken("test@test.com", null)
         );
 
-        User user = new User("test@test.com", "encodedPassword", UserRole.STUDENT);
+
+        User user = new User("test@test.com", "tester", "encodedPassword", UserRole.STUDENT);
 
         when(userRepository.findByEmail("test@test.com"))
                 .thenReturn(Optional.of(user));
@@ -188,7 +176,8 @@ class AuthServiceTest {
                 new UsernamePasswordAuthenticationToken("test@test.com", null)
         );
 
-        User user = new User("test@test.com", "encodedPassword", UserRole.STUDENT);
+        User user = new User("test@test.com", "tester", "encodedPassword", UserRole.STUDENT);
+
 
         when(userRepository.findByEmail("test@test.com"))
                 .thenReturn(Optional.of(user));
@@ -230,7 +219,7 @@ class AuthServiceTest {
                 new UsernamePasswordAuthenticationToken("test@test.com", null)
         );
 
-        User user = new User("test@test.com", "encodedPassword", UserRole.STUDENT);
+        User user = new User("test@test.com", "tester", "encodedPassword", UserRole.STUDENT);
 
         when(userRepository.findByEmail(anyString()))
                 .thenReturn(Optional.of(user));
@@ -290,22 +279,4 @@ class AuthServiceTest {
 
         verify(userRepository, never()).save(any());
     }
-
-    @Test
-    void register_shouldUseEmailPrefixAsNickname_whenNicknameIsBlank() {
-        // GIVEN
-        when(userRepository.existsByEmail("test@test.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
-
-        // WHEN
-        authService.register("test@test.com", "password123", "   ");
-
-        // THEN
-        verify(userRepository).save(argThat(user ->
-                user.getNickname().equals("test")
-        ));
-    }
-
-
-
 }

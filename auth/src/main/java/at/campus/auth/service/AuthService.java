@@ -3,6 +3,7 @@ package at.campus.auth.service;
 import at.campus.auth.dto.AuthResponse;
 import at.campus.auth.exception.EmailAlreadyExistsException;
 import at.campus.auth.exception.InvalidCredentialsException;
+import at.campus.auth.exception.NicknameAlreadyExistsException;
 import at.campus.auth.model.User;
 import at.campus.auth.model.UserRole;
 import at.campus.auth.repository.UserRepository;
@@ -71,29 +72,30 @@ public class AuthService {
      * - Email uniqueness is enforced
      */
     public void register(String email, String rawPassword, String nickname) {
-
         log.info("Registration attempt for email={}", email);
 
+        // 1️⃣ Email uniqueness
         if (userRepository.existsByEmail(email)) {
             log.warn("Registration failed: email already exists, email={}", email);
             throw new EmailAlreadyExistsException(email);
         }
 
+        // 2️⃣ Nickname uniqueness
+        if (userRepository.existsByNickname(nickname)) {
+            log.warn("Registration failed: nickname already exists, nickname={}", nickname);
+            throw new NicknameAlreadyExistsException(nickname);
+        }
 
+        // 3️⃣ Password hashing
         String passwordHash = passwordEncoder.encode(rawPassword);
 
+        // 4️⃣ Create user (nickname REQUIRED)
         User user = new User(
                 email,
+                nickname,
                 passwordHash,
                 UserRole.STUDENT
         );
-
-        // Fallback nickname if none provided
-        if (nickname == null || nickname.isBlank()) {
-            nickname = email.split("@")[0];
-        }
-
-        user.setNickname(nickname);
 
         userRepository.save(user);
 
@@ -102,6 +104,7 @@ public class AuthService {
                 email, nickname, UserRole.STUDENT
         );
     }
+
 
     /**
      * Authenticates user credentials and issues a JWT token.

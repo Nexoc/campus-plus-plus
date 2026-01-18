@@ -15,6 +15,11 @@
         type="password"
       />
 
+      <FormError
+        v-if="formError"
+        :message="formError"
+      />
+
       <BaseButton type="submit">
         Login
       </BaseButton>
@@ -29,8 +34,22 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
+// --------------------------------------------------
+// Login Page
+//
+// Purpose:
+// - Authenticate user
+// - Store JWT via authStore
+// - Redirect to home page
+//
+// Security model:
+// - Stateless
+// - NO cookies
+// - NO CSRF
+// --------------------------------------------------
+
+import axios from 'axios'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -39,6 +58,7 @@ import { logger } from '@/shared/utils/logger'
 
 import BaseButton from '@/shared/components/BaseButton.vue'
 import BaseInput from '@/shared/components/BaseInput.vue'
+import FormError from '@/shared/components/FormError.vue'
 
 // --------------------------------------------------
 // FORM STATE
@@ -46,6 +66,7 @@ import BaseInput from '@/shared/components/BaseInput.vue'
 
 const email = ref('')
 const password = ref('')
+const formError = ref<string | null>(null)
 
 // --------------------------------------------------
 // DEPENDENCIES
@@ -59,13 +80,26 @@ const router = useRouter()
 // --------------------------------------------------
 
 const onSubmit = async (): Promise<void> => {
-  logger.log('LOGIN submit')
+  logger.log('LOGIN submit started')
+
+  formError.value = null
 
   try {
     await authStore.login(email.value, password.value)
     await router.push('/')
   } catch (error) {
     logger.error('LOGIN failed', error)
+
+    if (axios.isAxiosError(error)) {
+      const data = error.response?.data
+
+      if (data?.message) {
+        formError.value = data.message
+        return
+      }
+    }
+
+    formError.value = 'Login failed'
   }
 }
 </script>

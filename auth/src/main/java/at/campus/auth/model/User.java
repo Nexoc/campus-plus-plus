@@ -28,8 +28,7 @@ public class User implements UserDetails {
     // --------------------------------------------------
     // Profile (NOT used for auth)
     // --------------------------------------------------
-
-    @Column(length = 50)
+    @Column(nullable = false, unique = true, length = 50)
     private String nickname;
 
     // --------------------------------------------------
@@ -59,8 +58,9 @@ public class User implements UserDetails {
         // JPA only
     }
 
-    public User(String email, String passwordHash, UserRole role) {
+    public User(String email, String nickname, String passwordHash, UserRole role) {
         this.email = email;
+        this.nickname = nickname;
         this.passwordHash = passwordHash;
         this.role = role;
         this.createdAt = Instant.now();

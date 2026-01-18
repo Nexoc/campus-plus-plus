@@ -66,10 +66,10 @@ class AccountControllerTest {
         // GIVEN
         User user = new User(
                 "test@test.com",
+                "tester",
                 "hashedPassword",
                 UserRole.STUDENT
         );
-        user.setNickname("tester");
 
         when(authService.getCurrentUser()).thenReturn(user);
 

@@ -15,11 +15,13 @@
 
     <input
       class="base-input__field"
+      :class="{ 'base-input__field--error': error }"
       :type="type"
       :value="modelValue"
       :required="required"
       @input="onInput"
     />
+
 
     <p v-if="error" class="base-input__error">
       {{ error }}

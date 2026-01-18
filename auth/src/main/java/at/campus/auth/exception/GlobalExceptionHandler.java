@@ -208,6 +208,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 
+    @ExceptionHandler(NicknameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleNicknameAlreadyExists(
+            NicknameAlreadyExistsException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponse body = ErrorResponse.builder()
+                .timestamp(Instant.now().toString())
+                .status(HttpStatus.CONFLICT.value())
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .message("Validation failed")
+                .path(request.getRequestURI())
+                .fieldErrors(Map.of("nickname", ex.getMessage()))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+
+
     /**
      * Extracts request path from WebRequest.
      */

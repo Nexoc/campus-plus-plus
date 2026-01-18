@@ -7,18 +7,20 @@
         v-model="email"
         label="Email"
         type="email"
+        :error="fieldErrors.email"
       />
 
       <BaseInput
         v-model="nickname"
         label="Nickname"
-        placeholder="optional"
+        :error="fieldErrors.nickname"
       />
 
       <BaseInput
         v-model="password"
         label="Password"
         type="password"
+        :error="fieldErrors.password"
       />
 
       <BaseInput
@@ -46,7 +48,6 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
 // --------------------------------------------------
 // Register Page
@@ -62,18 +63,18 @@
 // - NO CSRF
 // --------------------------------------------------
 
+import axios from 'axios'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { logger } from '@/shared/utils/logger'
 
 import BaseButton from '@/shared/components/BaseButton.vue'
 import BaseInput from '@/shared/components/BaseInput.vue'
 import FormError from '@/shared/components/FormError.vue'
 
-
 import * as authApi from '@/modules/auth/api/auth.api'
+import { useFormErrors } from '@/shared/composables/useFormErrors'
 
 // --------------------------------------------------
 // FORM STATE
@@ -85,11 +86,12 @@ const password = ref('')
 const confirmPassword = ref('')
 const formError = ref<string | null>(null)
 
+const { fieldErrors, setErrors, clearErrors } = useFormErrors()
+
 // --------------------------------------------------
 // DEPENDENCIES
 // --------------------------------------------------
 
-const authStore = useAuthStore()
 const router = useRouter()
 
 // --------------------------------------------------
@@ -100,6 +102,7 @@ const onSubmit = async (): Promise<void> => {
   logger.log('REGISTER submit started', { email: email.value })
 
   formError.value = null
+  clearErrors()
 
   // --------------------------------------------------
   // Client-side validation
@@ -122,7 +125,7 @@ const onSubmit = async (): Promise<void> => {
     await authApi.register({
       email: email.value,
       password: password.value,
-      nickname: nickname.value || undefined,
+      nickname: nickname.value,
     })
 
     logger.log('REGISTER successful, redirecting to login')
@@ -130,6 +133,23 @@ const onSubmit = async (): Promise<void> => {
     await router.push('/login')
   } catch (error) {
     logger.error('REGISTER failed', error)
+
+    if (axios.isAxiosError(error)) {
+      const data = error.response?.data
+
+      // field validation errors (e.g. password < 8, nickname missing)
+      if (data?.fieldErrors) {
+        setErrors(data.fieldErrors)
+        return
+      }
+
+      // fallback business error
+      if (data?.message) {
+        formError.value = data.message
+        return
+      }
+    }
+
     formError.value = 'Registration failed'
   }
 }

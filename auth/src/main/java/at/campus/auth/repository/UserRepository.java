@@ -17,4 +17,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * Used during registration to prevent duplicates
      */
     boolean existsByEmail(String email);
+
+    boolean existsByNickname(String nickname);
+
 }

@@ -136,6 +136,7 @@ class AuthControllerTest {
 
         User user = new User(
                 "admin@test.com",
+                "admin",
                 "hash",
                 UserRole.Moderator
         );
@@ -173,10 +174,10 @@ class AuthControllerTest {
         // GIVEN
         User user = new User(
                 "user@test.com",
+                "tester",
                 "hash",
                 UserRole.STUDENT
         );
-        user.setNickname("tester");
 
         when(authService.getCurrentUser()).thenReturn(user);
 

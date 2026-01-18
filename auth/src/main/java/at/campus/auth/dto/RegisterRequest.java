@@ -13,23 +13,25 @@ public class RegisterRequest {
             description = "User email address",
             example = "newuser@example.com"
     )
-    @Email
-    @NotBlank
+    @Email(message = "Ungueltige E-Mail-Adresse.")
+    @NotBlank(message = "E-Mail ist erforderlich.")
     private String email;
 
     @Schema(
             description = "User password (minimum 8 characters)",
             example = "StrongPassword123!"
     )
-    @NotBlank
-    @Size(min = 8)
+    @NotBlank(message = "Passwort ist erforderlich.")
+    @Size(min = 8, message = "Passwort muss mindestens 8 Zeichen lang sein.")
     private String password;
 
     @Schema(
-            description = "Public user nickname (optional)",
+            description = "Public user nickname",
             example = "johnny"
     )
-    private String nickname; // 👈 NEW
+    @NotBlank(message = "Nickname ist erforderlich.")
+    @Size(min = 3, max = 50, message = "Nickname muss zwischen 3 und 50 Zeichen lang sein.")
+    private String nickname;
 
     // --------------------------------------------------
     // Getters

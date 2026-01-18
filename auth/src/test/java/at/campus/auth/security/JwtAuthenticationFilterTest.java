@@ -144,6 +144,7 @@ class JwtAuthenticationFilterTest {
 
         User user = new User(
                 "test@test.com",
+                "tester",
                 "hashedPassword",
                 UserRole.STUDENT
         );
@@ -203,7 +204,13 @@ class JwtAuthenticationFilterTest {
         when(jwtService.extractUsername(token)).thenReturn("test@test.com");
         when(jwtService.extractTokenVersion(token)).thenReturn(5); // token says 5
 
-        User user = new User("test@test.com", "hash", UserRole.STUDENT); // user tokenVersion starts at 0
+        User user = new User(
+                "test@test.com",
+                "tester",
+                "hashedPassword",
+                UserRole.STUDENT
+        );
+
 
         when(userDetailsService.loadUserByUsername("test@test.com")).thenReturn(user);
 
@@ -229,7 +236,14 @@ class JwtAuthenticationFilterTest {
         when(jwtService.extractUsername(token)).thenReturn("test@test.com");
         when(jwtService.extractTokenVersion(token)).thenReturn(0);
 
-        User user = new User("test@test.com", "hash", UserRole.STUDENT);
+        User user = new User(
+                "test@test.com",
+                "tester",
+                "hashedPassword",
+                UserRole.STUDENT
+        );
+
+
         user.disable(); // enabled=false and tokenVersion++
 
         when(userDetailsService.loadUserByUsername("test@test.com")).thenReturn(user);

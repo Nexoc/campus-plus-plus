@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+# Usage:
+# chmod +x set-host-env.sh   # run once
+# ./set-host-env.sh         # update HOST in .env
+
+
 set -e
 
 ENV_FILE=".env"

@@ -28,6 +28,7 @@ class JwtServiceTest {
         // Create real User instance with role
         user = new User(
                 "test@test.com",
+                "tester",
                 "hashedPassword",
                 UserRole.STUDENT
         );
