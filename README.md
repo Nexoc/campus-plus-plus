@@ -2,11 +2,58 @@
 
 [![CI Pipeline](https://github.com/Nexoc/campus-plus-plus/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Nexoc/campus-plus-plus/actions/workflows/ci.yml)
 
-
 Campus++ is a **containerized web application platform** developed for **Hochschule Campus Wien**.
 The project demonstrates a **modern, production-oriented full-stack architecture** based on **microservices**, **JWT authentication**, and a **central NGINX gateway**.
 
-The system is designed with **security, modularity, and clear responsibility separation** in mind and serves as an educational showcase for real-world DevOps and backend/frontend integration.
+---
+
+## Documentation (direct links)
+
+- **SRS (Software Requirements Specification):** [`docs/SRS.md`](docs/SRS.md)
+- **MoSCoW Requirements (Functional + Non-functional):** [`docs/requirements.md`](docs/requirements.md)
+
+> The README focuses on installation and usage. Formal requirements are maintained in the documents above.
+
+---
+
+## Quick Start
+
+### Prerequisites
+- Docker
+- Docker Compose v2
+- Free port: `80`
+
+### 1) Configure `.env`
+A root `.env` file is used for configuration. Adjust at least:
+- `DB_USERNAME`, `DB_PASSWORD`
+- `JWT_SECRET`
+- `JWT_EXPIRATION`
+- `HOST` (used during frontend build in some host/WSL setups)
+
+### 2) Update `HOST` automatically (Windows / WSL)
+If Docker runs in **WSL** but you access the app from **Windows browser**, the frontend build may require the current Windows host IPv4.
+
+```bash
+# Usage:
+chmod +x set-host-env.sh   # run once
+./set-host-env.sh          # updates HOST in .env
+````
+
+### 3) Build and start
+
+```bash
+docker compose up -d --build
+```
+
+Open:
+
+* Frontend (via gateway): `http://localhost`
+
+### Stop / full cleanup (fresh start)
+
+```bash
+docker compose down -v
+```
 
 ---
 
@@ -24,12 +71,11 @@ The system is designed with **security, modularity, and clear responsibility sep
 ## Architecture Overview
 
 Campus++ consists of several **isolated services**, orchestrated via **Docker Compose**.
-
 Each service has a **single responsibility** and communicates via HTTP.
 
 ### High-Level Architecture
 
-```
+```text
 Client (Browser)
    ↓
 NGINX Gateway
@@ -47,11 +93,9 @@ NGINX Gateway
 ### Frontend
 
 * Vue 3 Single Page Application (SPA)
-* Built once and served as **static files**
-* No authentication logic inside frontend
-* Sends JWT in `Authorization` header
-
----
+* Built once and served as **static files** by NGINX
+* No authentication logic inside the frontend
+* Sends JWT in `Authorization: Bearer <token>` header
 
 ### NGINX Gateway
 
@@ -62,12 +106,10 @@ Responsibilities:
 * Serves frontend static files
 * Routes requests to backend services
 * Performs authentication via `auth_request`
-* Blocks unauthenticated or unauthorized requests
-* Forwards user information via headers
+* Blocks unauthenticated / unauthorized requests
+* Forwards user identity to upstreams via headers (e.g. `X-User-Id`, `X-User-Roles`)
 
-NGINX ensures that **no request reaches backend services without validation**.
-
----
+NGINX ensures that **no protected request reaches backend services without validation**.
 
 ### Auth Service
 
@@ -77,14 +119,12 @@ Spring Boot authentication service responsible for:
 * User login
 * Password hashing
 * JWT issuance
-* JWT validation endpoint for NGINX
+* JWT validation endpoint used by NGINX
 * Role-based authorities
 * Token versioning (server-side token revocation)
 * Flyway database migrations
 
 This service is the **only component that understands JWT structure**.
-
----
 
 ### Backend API
 
@@ -98,8 +138,6 @@ Key principles:
 * Focuses exclusively on business logic
 
 Authentication is treated as an **external concern**.
-
----
 
 ### PostgreSQL
 
@@ -123,14 +161,12 @@ Authentication is treated as an **external concern**.
 * Java 21
 * Spring Boot 3
 * Spring Security (stateless, JWT)
-* Spring Data JPA
-* Hibernate
+* Spring Data JPA / Hibernate
 * Flyway
 
 ### Infrastructure
 
-* Docker
-* Docker Compose
+* Docker / Docker Compose
 * NGINX (reverse proxy + API gateway)
 * PostgreSQL
 
@@ -138,17 +174,16 @@ Authentication is treated as an **external concern**.
 
 ## Authentication Flow (Detailed)
 
-1. Client sends login request to `/auth/login`
+1. Client sends login request to `POST /auth/login`
 2. Auth service validates credentials
 3. Auth service issues JWT
 4. Client stores JWT (e.g. memory / local storage)
-5. Client sends requests with
-   `Authorization: Bearer <token>`
+5. Client sends requests with `Authorization: Bearer <token>`
 6. NGINX:
 
-    * Calls `/auth/validate`
+    * Calls `/auth/validate` internally (`auth_request`)
     * Rejects request if token is invalid
-    * Extracts user info from response
+    * Extracts user info from auth response
     * Forwards request to backend
 7. Backend receives trusted headers:
 
@@ -157,25 +192,45 @@ Authentication is treated as an **external concern**.
 
 ---
 
-## Project Structure
+## Data Pipeline: Scraper vs Importer
 
-```
-campus-plus-plus/
-├── auth/            # Auth service (Spring Boot)
-├── backend/         # Main backend service
-├── frontend/        # Vue frontend
-├── nginx/           # NGINX configuration
-├── docker-compose.yml
-└── README.md
-```
+This repository focuses on **importing** course data into the database (not scraping).
+
+### Scraper repository (required for scraping)
+
+Please include repo for scraper in README:
+
+* [https://github.com/loonaarc/campuswiki_coursescraper](https://github.com/loonaarc/campuswiki_coursescraper)
+
+> Main repo only works for importing not scraping.
+
+---
+
+## API Access
+
+Everything is exposed via the NGINX gateway on port `80`.
+
+### Frontend
+
+* `http://localhost`
+
+### Auth Endpoints
+
+* `POST /auth/register`
+* `POST /auth/login`
+* `GET /auth/validate` (internal)
+
+### Protected Backend
+
+* `/api/**`
 
 ---
 
 ## Environment Profiles
 
-The application uses Spring profiles:
+Spring profiles:
 
-* `dev` – local development
+* `dev`  – local development
 * `test` – CI / unit tests
 * `prod` – Docker / production setup
 
@@ -185,7 +240,7 @@ Docker uses the **prod profile by default**.
 
 ## Continuous Integration (CI)
 
-The project uses **GitHub Actions** with a multi-stage pipeline:
+GitHub Actions pipeline:
 
 * Auth module:
 
@@ -193,10 +248,10 @@ The project uses **GitHub Actions** with a multi-stage pipeline:
     * JaCoCo test coverage
 * Backend:
 
-    * Build only (tests planned)
+    * Build only
 * Docker:
 
-    * Full docker-compose build
+    * Full compose build
     * NGINX config validation
 
 CI ensures:
@@ -207,79 +262,24 @@ CI ensures:
 
 ---
 
-## Running the Project
+## Project Structure
 
-### Prerequisites
-
-* Docker
-* Docker Compose v2
-* Free ports: `80`, `5432`
-
----
-
-### Build and Start (Clean Start)
-
-```bash
-docker compose up -d --build
-```
-
-This will:
-
-* Build all services
-* Start containers
-* Run Flyway migrations automatically
-* Expose the application via NGINX on port 80
-
----
-
-### Verify Running Services
-
-```bash
-docker compose ps
-```
-
-Check logs (example for auth service):
-
-```bash
-docker compose logs -f auth
-```
-
----
-
-### Full Cleanup
-
-```bash
-docker compose down -v
-```
-
-This will:
-
-* Stop all containers
-* Remove volumes
-* Delete all database data
-
-⚠ Use only if you want a **fresh start**.
-
----
-
-## API Access
-
-### Frontend
-
-```
-http://localhost
-```
-
-### Auth Endpoints
-
-* `POST /auth/register`
-* `POST /auth/login`
-* `GET /auth/validate` (internal)
-
-### Protected Backend
-
-```
-/api/**
+```text
+campus-plus-plus/
+├── auth/                 # Auth service (Spring Boot)
+├── backend/              # Main backend service
+├── frontend/             # Vue frontend
+├── importer/             # Importer (one-shot)
+├── nginx/                # NGINX configuration
+├── docs/
+│   ├── SRS.md
+│   ├── requirements.md
+│   └── img.png
+├── docker-compose.yml
+├── docker-compose.dev.yml
+├── .env
+├── set-host-env.sh
+└── README.md
 ```
 
 ---
@@ -292,12 +292,16 @@ http://localhost
 * Token revocation is handled server-side
 * Database schema is versioned and reproducible
 
+---
+
 ## Required GitHub Secrets
 
-- DB_HOST
-- DB_PORT
-- DB_NAME
-- DB_USERNAME
-- DB_PASSWORD
-- JWT_SECRET
-- JWT_EXPIRATION
+* `DB_HOST`
+* `DB_PORT`
+* `DB_NAME`
+* `DB_USERNAME`
+* `DB_PASSWORD`
+* `JWT_SECRET`
+* `JWT_EXPIRATION`
+
+```
