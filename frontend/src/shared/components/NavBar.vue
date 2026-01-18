@@ -18,6 +18,10 @@
       <span></span>
     </button>
 
+    <button class="navbar__settings" :class="{ open: settingsOpen }" @click="toggleSettings">
+      ⚙️
+    </button>
+
     <div class="navbar__main-links" :class="{ open: menuOpen }">
       <router-link to="/" @click="menuOpen = false">Home</router-link>
       <router-link to="/programs" @click="menuOpen = false">Study Programs</router-link>
@@ -28,27 +32,27 @@
       </router-link>
     </div>
 
-    <div class="navbar__right" :class="{ open: menuOpen }">
+    <div class="navbar__account" :class="{ open: settingsOpen }">
       <!-- Guest -->
       <template v-if="!isAuthenticated">
-        <router-link to="/login">Login</router-link>
-        <router-link to="/register">Register</router-link>
+        <router-link to="/login" @click="settingsOpen = false">Login</router-link>
+        <router-link to="/register" @click="settingsOpen = false">Register</router-link>
       </template>
 
       <!-- Authenticated -->
       <template v-else>
         <span class="navbar__user">{{ nickname }}</span>
 
-        <router-link to="/account">Account</router-link>
+        <router-link to="/account" @click="settingsOpen = false">Account</router-link>
 
-        <router-link v-if="isModerator" to="/moderation/reports" class="navbar__moderation">
+        <router-link v-if="isModerator" to="/moderation/reports" class="navbar__moderation" @click="settingsOpen = false">
           Moderation
           <span v-if="pendingReportsCount > 0" class="report-badge">
             {{ pendingReportsCount }}
           </span>
         </router-link>
 
-        <router-link v-if="isModerator" to="/admin/users">
+        <router-link v-if="isModerator" to="/admin/users" @click="settingsOpen = false">
           Admin Users
         </router-link>
 
@@ -115,14 +119,36 @@ function onToggleTheme(): void {
 -------------------------------------------------- */
 
 const menuOpen = ref(false)
+const settingsOpen = ref(false)
 
 function toggleMenu(): void {
   menuOpen.value = !menuOpen.value
+  settingsOpen.value = false
 }
 
-// Close menu when route changes
-watch(() => route.path, () => {
+function toggleSettings(): void {
+  settingsOpen.value = !settingsOpen.value
   menuOpen.value = false
+}
+
+function closeMenus(): void {
+  menuOpen.value = false
+  settingsOpen.value = false
+}
+
+// Close menus when clicking outside
+onMounted(() => {
+  document.addEventListener('click', (event: MouseEvent) => {
+    const navbar = (event.target as HTMLElement).closest('.navbar')
+    if (!navbar && (menuOpen.value || settingsOpen.value)) {
+      closeMenus()
+    }
+  })
+})
+
+// Close menus when route changes
+watch(() => route.path, () => {
+  closeMenus()
 })
 
 /* --------------------------------------------------

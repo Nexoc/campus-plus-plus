@@ -7,7 +7,7 @@
       </div>
 
       <!-- Status Filter -->
-      <div class="filter-section">
+      <div class="filter-section expanded">
         <div class="filter-group">
           <label for="status-filter">Filter by status:</label>
           <select id="status-filter" v-model="selectedStatus" @change="loadReports" class="status-select">
@@ -359,6 +359,22 @@ async function confirmModeration() {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 639px) {
+  .filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-section label {
+    margin: 0;
+  }
+  
+  .status-select {
+    width: 100%;
+  }
 }
 
 .filter-section label {

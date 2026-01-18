@@ -176,9 +176,21 @@ onMounted(() => {
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.static-plan-container:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+@media (max-width: 639px) {
+  .maps-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .map-container {
+    height: 300px;
+    width: 100%;
+  }
+  
+  .static-plan-container {
+    height: 300px;
+    width: 100%;
+  }
 }
 
 .static-plan-container:hover .zoom-hint {
