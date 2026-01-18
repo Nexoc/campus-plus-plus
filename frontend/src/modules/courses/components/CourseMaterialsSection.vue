@@ -246,6 +246,11 @@ onMounted(loadMaterials)
   background: #fafafa;
 }
 
+:root[data-theme='dark'] .material-item {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
 .material-main {
   flex: 1;
   min-width: 0;
@@ -262,6 +267,10 @@ onMounted(loadMaterials)
   font-size: 0.95rem;
 }
 
+:root[data-theme='dark'] .material-main span {
+  color: var(--color-text-muted);
+}
+
 /* edit inputs */
 .material-main input,
 .material-main textarea {
@@ -272,6 +281,15 @@ onMounted(loadMaterials)
   border: 1px solid #d1d5db;
   border-radius: 4px;
   font-size: 0.95rem;
+  background: #fff;
+  color: #000;
+}
+
+:root[data-theme='dark'] .material-main input,
+:root[data-theme='dark'] .material-main textarea {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
 }
 
 /* ===== actions ===== */
@@ -315,6 +333,11 @@ onMounted(loadMaterials)
   gap: 10px;
 }
 
+:root[data-theme='dark'] .upload {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
 .upload input[type="file"],
 .upload input[type="text"],
 .upload textarea {
@@ -323,6 +346,16 @@ onMounted(loadMaterials)
 
   border: 1px solid #d1d5db;
   border-radius: 4px;
+  background: #fff;
+  color: #000;
+}
+
+:root[data-theme='dark'] .upload input[type="file"],
+:root[data-theme='dark'] .upload input[type="text"],
+:root[data-theme='dark'] .upload textarea {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
 }
 
 .upload textarea {

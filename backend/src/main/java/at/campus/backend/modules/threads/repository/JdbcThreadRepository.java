@@ -65,7 +65,7 @@ public class JdbcThreadRepository implements ThreadRepository {
     public void update(Thread thread) {
         String sql = """
             UPDATE app.threads
-            SET title = ?, content = ?, updated_at = now()
+            SET title = ?, content = ?
             WHERE id = ?
         """;
         jdbc.update(sql,

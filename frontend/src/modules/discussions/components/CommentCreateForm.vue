@@ -155,4 +155,14 @@ button {
 .btn-secondary:hover {
   background: #f5f5f5;
 }
+
+:root[data-theme='dark'] .btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+:root[data-theme='dark'] .btn-secondary:hover {
+  background: var(--color-background);
+}
 </style>

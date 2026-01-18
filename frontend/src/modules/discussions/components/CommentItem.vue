@@ -116,6 +116,11 @@ async function confirmDelete() {
   margin-left: 1rem;
 }
 
+:root[data-theme='dark'] .comment-item {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
 .comment-header {
   display: flex;
   justify-content: space-between;
@@ -186,6 +191,7 @@ button {
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
+  color: var(--color-text-primary);
 }
 
 .comment-edit {
@@ -200,6 +206,14 @@ button {
   font-family: inherit;
   font-size: 0.95rem;
   resize: vertical;
+  background: white;
+  color: #000;
+}
+
+:root[data-theme='dark'] .comment-edit textarea {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
 }
 
 .comment-edit textarea:focus {

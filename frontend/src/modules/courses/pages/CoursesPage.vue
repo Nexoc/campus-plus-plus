@@ -468,6 +468,7 @@ onMounted(load)
   border: 1px solid var(--color-border);
   border-radius: 6px;
   background: var(--color-surface);
+  color: var(--color-text-primary);
   font-size: 0.9rem;
   cursor: text;
 }
