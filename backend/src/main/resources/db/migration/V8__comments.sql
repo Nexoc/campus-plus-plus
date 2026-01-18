@@ -1,14 +1,14 @@
 -- =====================================================
--- V7__posts.sql
+-- V8__comments.sql
 -- =====================================================
 -- CREATE TABLE only (plus indexes/comments). No ALTER TABLE.
 -- =====================================================
 
 SET search_path TO app;
 
-CREATE TABLE posts (
+CREATE TABLE comments (
     id          UUID PRIMARY KEY,
-    thread_id   UUID NOT NULL,
+    post_id     UUID NOT NULL,
     user_id     UUID NOT NULL,
 
     user_name   VARCHAR(255),
@@ -17,9 +17,9 @@ CREATE TABLE posts (
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMP NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT fk_posts_thread
-        FOREIGN KEY (thread_id)
-        REFERENCES threads (id)
+    CONSTRAINT fk_comments_post
+        FOREIGN KEY (post_id)
+        REFERENCES posts (id)
         ON DELETE CASCADE
 );
 
@@ -27,11 +27,11 @@ CREATE TABLE posts (
 -- INDEXES
 -- =====================================================
 
-CREATE INDEX idx_posts_thread
-    ON posts (thread_id);
+CREATE INDEX idx_comments_post
+    ON comments (post_id);
 
-CREATE INDEX idx_posts_user
-    ON posts (user_id);
+CREATE INDEX idx_comments_user
+    ON comments (user_id);
 
-CREATE INDEX idx_posts_user_name
-    ON posts (user_name);
+CREATE INDEX idx_comments_user_name
+    ON comments (user_name);

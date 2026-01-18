@@ -1,14 +1,8 @@
 -- =====================================================
--- V1: Initial database schema for Campus++ Backend
+-- V1__init_schema_clean.sql
 -- =====================================================
--- Initializes the application schema and sets search path.
+-- Baseline: create schema and set search_path
 -- =====================================================
 
 CREATE SCHEMA IF NOT EXISTS app;
 SET search_path TO app;
-
--- Optional ownership control (commented)
--- ALTER SCHEMA app OWNER TO campus_backend;
-
--- End of V1
- 

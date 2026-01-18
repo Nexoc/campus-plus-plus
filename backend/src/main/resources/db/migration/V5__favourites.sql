@@ -1,25 +1,22 @@
 -- =====================================================
--- V7__posts.sql
+-- V5__favourites.sql
 -- =====================================================
 -- CREATE TABLE only (plus indexes/comments). No ALTER TABLE.
 -- =====================================================
 
 SET search_path TO app;
 
-CREATE TABLE posts (
-    id          UUID PRIMARY KEY,
-    thread_id   UUID NOT NULL,
+CREATE TABLE favourites (
     user_id     UUID NOT NULL,
-
-    user_name   VARCHAR(255),
-    content     TEXT NOT NULL,
+    course_id   UUID NOT NULL,
 
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMP NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT fk_posts_thread
-        FOREIGN KEY (thread_id)
-        REFERENCES threads (id)
+    PRIMARY KEY (user_id, course_id),
+
+    CONSTRAINT fk_favourites_course
+        FOREIGN KEY (course_id)
+        REFERENCES courses (id)
         ON DELETE CASCADE
 );
 
@@ -27,11 +24,5 @@ CREATE TABLE posts (
 -- INDEXES
 -- =====================================================
 
-CREATE INDEX idx_posts_thread
-    ON posts (thread_id);
-
-CREATE INDEX idx_posts_user
-    ON posts (user_id);
-
-CREATE INDEX idx_posts_user_name
-    ON posts (user_name);
+CREATE INDEX idx_favourites_course
+    ON favourites (course_id);
