@@ -44,24 +44,25 @@
           </button>
         </RouterLink>
       </div>
+
+      <div v-if="host" class="site-info">
+        <p>
+          Site available at:
+          <a :href="`http://${host}`" target="_blank" rel="noopener">
+            {{ host }}
+          </a>
+        </p>
+
+        <!-- QR CODE -->
+        <img
+          v-if="qrDataUrl"
+          :src="qrDataUrl"
+          alt="QR Code"
+          width="220"
+          height="220"
+        />
+      </div>
     </div>
-
-    <p v-if="host">
-        Site available at:
-      <a :href="`http://${host}`" target="_blank" rel="noopener">
-        {{ host }}
-      </a>
-
-    </p>
-
-    <!-- QR CODE -->
-    <img
-      v-if="qrDataUrl"
-      :src="qrDataUrl"
-      alt="QR Code"
-      width="220"
-      height="220"
-    />
 
   </div>
 </template>
@@ -116,5 +117,20 @@ watchEffect(async () => {
 
 .navigation-buttons .base-button {
   min-width: 200px;
+}
+
+.site-info {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.site-info p {
+  margin-bottom: 1rem;
+}
+
+.site-info img {
+  margin-top: 1rem;
 }
 </style>
