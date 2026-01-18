@@ -136,7 +136,11 @@ services:
   # Frontend (Vue / SPA build)
   # ==================================================
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        HOST: ${HOST}
+
     container_name: campus-frontend
 
     # Frontend is served via NGINX

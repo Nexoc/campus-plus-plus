@@ -43,13 +43,48 @@
         </button>
       </RouterLink>
     </div>
+
+    <p v-if="host">
+        Site available at:
+      <a :href="`http://${host}`" target="_blank" rel="noopener">
+        {{ host }}
+      </a>
+
+    </p>
+
+    <!-- QR CODE -->
+    <img
+      v-if="qrDataUrl"
+      :src="qrDataUrl"
+      alt="QR Code"
+      width="220"
+      height="220"
+    />
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/modules/auth/store/auth.store'
+import QRCode from "qrcode";
+import { computed, ref, watchEffect } from "vue";
 
-const auth = useAuthStore()
+const host = import.meta.env.VITE_HOST as string | undefined;
+const siteUrl = computed(() => (host ? `http://${host}` : ""));
+
+const qrDataUrl = ref<string>("");
+
+watchEffect(async () => {
+  if (!siteUrl.value) {
+    qrDataUrl.value = "";
+    return;
+  }
+
+  qrDataUrl.value = await QRCode.toDataURL(siteUrl.value, {
+    width: 220,
+    margin: 1,
+  });
+});
+
 </script>
 
 <style scoped>

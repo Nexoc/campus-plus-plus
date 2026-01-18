@@ -19,6 +19,11 @@
 export const isDev = import.meta.env.DEV
 export const isProd = import.meta.env.PROD
 
+// docker-compose → build.args → ARG → ENV VITE_HOST → Vite build
+export const host = import.meta.env.VITE_HOST ?? "СУКА!!!";
+
+
+
 // --------------------------------------------------
 // Logging feature toggle
 // --------------------------------------------------
