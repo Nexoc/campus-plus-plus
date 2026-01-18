@@ -377,8 +377,7 @@ onMounted(async () => {
 
 .meta-item {
   padding: 6px 12px;
-  background: var(--primary-color, #3b82f6);
-  opacity: 0.15;
+  background: rgba(59, 130, 246, 0.1);
   border: 1px solid var(--primary-color, #3b82f6);
   border-radius: 6px;
   font-size: 12px;
