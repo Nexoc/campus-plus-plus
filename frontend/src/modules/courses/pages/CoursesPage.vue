@@ -365,38 +365,77 @@ onMounted(load)
 </template>
 
 <style scoped>
+.list-page {
+  padding: var(--container-padding);
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+.page-card {
+  width: 100%;
+  max-width: 1400px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+@media (max-width: 639px) {
+  .page-card {
+    padding: var(--space-lg);
+  }
+}
+
+.list-page h1 {
+  margin: 0 0 var(--space-lg) 0;
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
 .title-with-star {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-sm);
 }
 
 .course-star-indicator {
   flex-shrink: 0;
+  color: var(--star-color);
 }
 
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  margin-top: 24px;
-  padding: 16px 0;
+  gap: var(--space-sm);
+  margin-top: var(--space-2xl);
+  padding: var(--space-lg) 0;
+  flex-wrap: wrap;
 }
 
 .page-numbers {
   display: flex;
-  gap: 4px;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .pagination .base-button {
   min-width: 40px;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-sm);
 }
 
 .pagination .base-button.active {
   background-color: var(--color-primary);
   color: white;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .pagination .base-button:disabled {
@@ -406,72 +445,13 @@ onMounted(load)
 
 .results-info {
   color: var(--color-text-muted);
-  font-size: 0.9rem;
-  margin-bottom: 12px;
-}
-.filters-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 8px;
-}
-.th-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  font-size: var(--font-sm);
+  margin-bottom: var(--space-lg);
 }
 
-.th-label {
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-}
-
-.filter-group {
-  position: relative;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.th-filter {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  font-size: 0.9rem;
-  cursor: text;
-}
-
-/* Remove extra padding for number fields since controls are inside */
-.th-filter-number {
-  flex: 1;
-}
-
-.clear-filter {
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  padding: 6px 8px;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  font-size: 18px;
-  height: 32px;
-  width: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.clear-filter:hover {
-  color: var(--color-text);
-}
-
-.clear-filter-number {
-  /* No extra positioning needed for flex layout */
+@media (max-width: 639px) {
+  .results-info {
+    font-size: var(--font-xs);
+  }
 }
 </style>

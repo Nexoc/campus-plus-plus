@@ -261,9 +261,9 @@ onMounted(load)
 
 .action-buttons {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-lg);
   justify-content: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-2xl);
   flex-wrap: wrap;
 }
 

@@ -520,6 +520,64 @@ a.base-button:hover {
 
 
 /* =====================================================
+   PAGE LAYOUT - RESPONSIVE
+   ===================================================== */
+
+.detail-page,
+.create-page,
+.edit-page,
+.list-page {
+  padding: var(--container-padding);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--navbar-height));
+  background: var(--color-bg);
+}
+
+/* Unified page card styling */
+.page-card {
+  width: 100%;
+  max-width: 1400px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+@media (max-width: 639px) {
+  .page-card {
+    padding: var(--space-lg);
+    border-radius: var(--radius-sm);
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .page-card {
+    max-width: 90%;
+  }
+}
+
+.page-card h1 {
+  margin: 0 0 var(--space-lg) 0;
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+}
+
+@media (max-width: 639px) {
+  .page-card h1 {
+    font-size: var(--font-xl);
+    margin-bottom: var(--space-md);
+  }
+}
+
+/* =====================================================
    PAGE CARDS (AUTH) - RESPONSIVE
    ===================================================== */
 
@@ -736,6 +794,59 @@ button.danger:hover {
   gap: var(--space-md);
   align-items: center;
 }
+
+/* Contextual button styling (based on button content/purpose) */
+/* Primary action buttons (create, submit, confirm) use default .base-button style */
+/* Secondary buttons (cancel, skip, back) use .base-button.secondary */
+/* Destructive buttons (delete, remove) use .base-button.danger */
+
+/* Success buttons (complete, save, approve) */
+.base-button.success,
+button.success {
+  background-color: var(--color-success);
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2);
+}
+
+.base-button.success:hover,
+button.success:hover {
+  background-color: #059669;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Warning buttons (caution actions) */
+.base-button.warning,
+button.warning {
+  background-color: var(--color-warning);
+  color: #000;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
+}
+
+.base-button.warning:hover,
+button.warning:hover {
+  background-color: #d97706;
+  color: white;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Ghost/outline buttons (less emphasis) */
+.base-button.ghost,
+button.ghost {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  box-shadow: none;
+  font-weight: 600;
+}
+
+.base-button.ghost:hover,
+button.ghost:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--color-primary-hover);
+  color: var(--color-primary-hover);
+}
+
 /* =====================================================
    FORM / PAGE ERRORS - RESPONSIVE
    ===================================================== */

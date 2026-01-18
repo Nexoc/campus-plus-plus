@@ -1,12 +1,10 @@
 <template>
   <div class="list-page">
     <div class="page-card">
-      <div class="header-row">
-        <h1>My Favourites</h1>
-        <span v-if="!loading" class="count-badge">
-          {{ totalCount }} {{ totalCount === 1 ? 'item' : 'items' }}
-        </span>
-      </div>
+      <h1>My Favourites</h1>
+      <p v-if="!loading" class="results-info">
+        {{ totalCount }} {{ totalCount === 1 ? 'item' : 'items' }}
+      </p>
 
       <!-- Loading State -->
       <div v-if="loading" class="loading-state">
@@ -194,53 +192,66 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.count-badge {
-  padding: 4px 12px;
-  background: var(--primary-color, #3b82f6);
-  color: white;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
+.list-page {
+  background: var(--color-background);
+  min-height: 100vh;
+}
+
+.page-card {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: var(--color-surface);
 }
 
 .section-title {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-color, #333);
-  margin: 30px 0 16px 0;
+  margin: 32px 24px 20px 24px;
   padding-bottom: 12px;
-  border-bottom: 2px solid var(--border-color, #e0e0e0);
+  border-bottom: 3px solid var(--primary-color, #3b82f6);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .section-title:first-of-type {
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 .loading-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   color: var(--text-secondary, #666);
+}
+
+.loading-state p {
+  font-size: 16px;
+  margin: 0;
 }
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
 }
 
 .empty-state :deep(.star-icon) {
-  color: var(--border-color, #e0e0e0);
-  margin-bottom: 20px;
+  color: var(--primary-color, #3b82f6);
+  margin-bottom: 24px;
+  opacity: 0.3;
 }
 
 .empty-state h2 {
-  margin: 20px 0 10px;
+  margin: 24px 0 12px;
   color: var(--text-color, #333);
-  font-size: 24px;
+  font-size: 28px;
+  font-weight: 700;
 }
 
 .empty-state p {
   color: var(--text-secondary, #666);
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+  font-size: 16px;
 }
 
 .favourites-list {
@@ -248,6 +259,8 @@ onMounted(async () => {
   flex-direction: column;
   gap: 16px;
   margin-top: 20px;
+  padding: 0 24px;
+  margin-bottom: 24px;
 }
 
 .favourite-card {
@@ -256,14 +269,37 @@ onMounted(async () => {
   gap: 16px;
   padding: 20px;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.favourite-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color, #3b82f6), var(--star-color, #fbbf24));
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.favourite-card:hover::before {
+  transform: translateX(0);
 }
 
 .favourite-card:hover {
-  border-color: var(--star-color, #fbbf24);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color, #3b82f6);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+:root[data-theme='dark'] .favourite-card:hover {
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.25);
 }
 
 .favourite-card__content {
@@ -275,15 +311,18 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .favourite-card__title {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--primary-color, #3b82f6);
   text-decoration: none;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  flex: 1;
+  min-width: 200px;
 }
 
 .favourite-card__title:hover {
@@ -292,18 +331,25 @@ onMounted(async () => {
 }
 
 .favourite-card__ects {
-  padding: 4px 10px;
-  background: var(--primary-color, #3b82f6);
-  border-radius: 4px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, var(--primary-color, #3b82f6), var(--primary-hover, #2563eb));
+  border-radius: 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: white;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .favourite-card__description {
   color: var(--text-color, #333);
   margin: 0 0 12px 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+:root[data-theme='dark'] .favourite-card__description {
+  color: #d1d5db;
 }
 
 .favourite-card__meta {
@@ -311,55 +357,84 @@ onMounted(async () => {
   gap: 12px;
   font-size: 13px;
   color: var(--text-secondary, #666);
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .favourite-card__date {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary, #666);
   font-weight: 500;
+  padding: 4px 8px;
+  background: var(--color-surface-alt, #f3f4f6);
+  border-radius: 4px;
 }
 
 :root[data-theme='dark'] .favourite-card__date {
-  color: #9ca3af;
+  background: rgba(59, 130, 246, 0.1);
+  color: #93c5fd;
 }
 
 .meta-item {
-  padding: 4px 10px;
-  background: var(--color-surface-alt, #e5e7eb);
-  border-radius: 4px;
+  padding: 6px 12px;
+  background: var(--primary-color, #3b82f6);
+  opacity: 0.15;
+  border: 1px solid var(--primary-color, #3b82f6);
+  border-radius: 6px;
   font-size: 12px;
-  color: var(--color-text-primary);
-  font-weight: 500;
+  color: var(--primary-color, #3b82f6);
+  font-weight: 600;
 }
 
 :root[data-theme='dark'] .meta-item {
-  background: rgba(59, 130, 246, 0.15);
+  background: rgba(59, 130, 246, 0.2);
   color: #93c5fd;
+  border-color: rgba(147, 197, 253, 0.5);
 }
 
 .favourite-card__actions {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .remove-button {
-  padding: 8px;
-  background: none;
-  border: 1px solid var(--border-color, #e0e0e0);
-  border-radius: 6px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--star-color, #fbbf24);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+  font-weight: 600;
 }
 
 .remove-button:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
-  color: #ef4444;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+  transform: scale(1.05);
+}
+
+.remove-button:active {
+  transform: scale(0.98);
 }
 
 .remove-button:hover :deep(.star-icon) {
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(-15deg);
+  animation: twinkle 0.4s ease-in-out;
+}
+
+@keyframes twinkle {
+  0%, 100% { transform: scale(1.15) rotate(-15deg); }
+  50% { transform: scale(1.25) rotate(-15deg); }
+}
+
+:root[data-theme='dark'] .remove-button {
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 </style>
