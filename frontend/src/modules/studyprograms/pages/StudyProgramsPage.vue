@@ -330,21 +330,32 @@ onMounted(load)
 
       <!-- Pagination Controls -->
       <div v-if="totalPages > 1" class="pagination">
-        <button @click="prevPage" :disabled="currentPage === 0" class="page-btn">
+        <button 
+          class="base-button small" 
+          @click="prevPage" 
+          :disabled="currentPage === 0"
+        >
           ← Previous
         </button>
         
-        <button
-          v-for="page in getPaginationRange()"
-          :key="page"
-          @click="page >= 0 ? goToPage(page) : null"
-          :class="['page-btn', { active: page === currentPage, ellipsis: page < 0 }]"
-          :disabled="page < 0"
-        >
-          {{ page < 0 ? '...' : page + 1 }}
-        </button>
+        <div class="page-numbers">
+          <button
+            v-for="page in getPaginationRange()"
+            :key="page"
+            class="base-button small"
+            :class="{ active: page === currentPage }"
+            @click="page >= 0 ? goToPage(page) : null"
+            :disabled="page === -1"
+          >
+            {{ page >= 0 ? page + 1 : '...' }}
+          </button>
+        </div>
         
-        <button @click="nextPage" :disabled="currentPage >= totalPages - 1" class="page-btn">
+        <button 
+          class="base-button small" 
+          @click="nextPage" 
+          :disabled="currentPage >= totalPages - 1"
+        >
           Next →
         </button>
       </div>
@@ -353,15 +364,62 @@ onMounted(load)
 </template>
 
 <style scoped>
-.title-with-star {
+ .title-with-star {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.title-with-star :deep(.star-icon) {
+ .title-with-star :deep(.star-icon) {
   color: var(--star-color, #fbbf24);
   flex-shrink: 0;
+}
+
+.th-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 16px 0;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 4px;
+}
+
+.pagination .base-button {
+  min-width: 40px;
+}
+
+.pagination .base-button.active {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+.pagination .base-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.results-info {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.filters-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
 }
 
 .th-cell {
@@ -378,25 +436,26 @@ onMounted(load)
   user-select: none;
 }
 
+.filter-group {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
 .th-filter {
   width: 100%;
-  padding: 8px 10px 8px 10px;
+  padding: 8px 10px;
   border: 1px solid var(--color-border);
   border-radius: 6px;
   background: var(--color-surface);
+  color: var(--color-text);
   font-size: 0.9rem;
   cursor: text;
 }
 
 .th-filter-number {
   flex: 1;
-}
-
-.filter-group {
-  position: relative;
-  display: flex;
-  gap: 4px;
-  align-items: center;
 }
 
 .clear-filter {
@@ -421,31 +480,5 @@ onMounted(load)
 
 .clear-filter-number {
   /* No extra positioning needed for flex layout */
-}
-
-.filters-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 8px;
-}
-
-.clear-filter {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
 }
 </style>

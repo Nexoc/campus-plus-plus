@@ -71,21 +71,22 @@ function formatDate(value: unknown): string {
 
 
 <template>
-  <section class="admin-page">
-    <h1>Admin · Users</h1>
+  <div class="detail-page">
+    <div class="page-card">
+      <h1>Admin · Users</h1>
 
-    <!-- Error -->
-    <div v-if="adminUserStore.error" class="error">
-      {{ adminUserStore.error }}
-    </div>
+      <!-- Error -->
+      <div v-if="adminUserStore.error" class="error">
+        {{ adminUserStore.error }}
+      </div>
 
-    <!-- Loading -->
-    <div v-else-if="adminUserStore.loading" class="loading">
-      Loading users...
-    </div>
+      <!-- Loading -->
+      <div v-else-if="adminUserStore.loading" class="loading">
+        Loading users...
+      </div>
 
-    <!-- Users table -->
-    <div v-else class="table-wrapper">
+      <!-- Users table -->
+      <div v-else class="table-wrapper">
       <table class="users-table">
         <thead>
           <tr>
@@ -155,6 +156,7 @@ function formatDate(value: unknown): string {
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
-  </section>
+  </div>
 </template>

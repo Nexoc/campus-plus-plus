@@ -1,8 +1,8 @@
 <template>
-  <div class="moderation-page">
+
+  <div class="detail-page">
     <div class="page-card">
       <h1>Moderation - Reviews</h1>
-
       <div class="filters">
         <input
           v-model="filters.courseId"

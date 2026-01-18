@@ -1,6 +1,6 @@
 <template>
   <div class="reviews-section">
-    <h2>Reviews</h2>
+    <h3>Reviews</h3>
 
     <!-- Average Rating Display -->
     <div v-if="summary" class="rating-summary">
@@ -362,14 +362,14 @@ loadSummary()
 
 <style scoped>
 .reviews-section {
-  margin-top: 3rem;
-  padding: 2rem;
-  background: var(--color-background-secondary);
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: var(--color-surface);
   border-radius: 8px;
 }
 
-.reviews-section h2 {
-  margin-bottom: 1rem;
+.reviews-section h3 {
+  margin: 0 0 1rem;
   color: var(--color-text-primary);
 }
 
@@ -501,7 +501,7 @@ loadSummary()
 .reviews-header h3 {
   margin: 0;
   color: var(--color-text-primary);
-  font-size: 1.25rem;
+  font-size: 1.2rem;
 }
 
 .sort-controls {

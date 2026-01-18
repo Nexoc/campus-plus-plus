@@ -1,7 +1,7 @@
 <template>
   <div class="discussions-section">
     <div class="section-header">
-      <h2>Discussions</h2>
+      <h3>Discussions</h3>
       <p v-if="!authStore.isAuthenticated" class="login-hint">
         <a href="/login">Log in</a> to participate in discussions
       </p>

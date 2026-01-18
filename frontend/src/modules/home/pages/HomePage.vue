@@ -10,38 +10,40 @@
 -->
 
 <template>
-  <div class="home-page">
-    <h1>Welcome</h1>
+  <div class="detail-page">
+    <div class="page-card home-page">
+      <h1>Welcome</h1>
 
-    <p class="home-subtitle">
-      You are on <strong>Campus++</strong>.
-    </p>
-
-    <div class="home-content">
-      <p>
-        This platform provides a secure environment for managing users,
-        roles, and access within the system.
+      <p class="home-subtitle">
+        You are on <strong>Campus++</strong>.
       </p>
 
-      <p>
-        Use the navigation bar above to move between sections.
-        Your access level determines which features are available to you.
-      </p>
-    </div>
+      <div class="home-content">
+        <p>
+          This platform provides a secure environment for managing users,
+          roles, and access within the system.
+        </p>
 
-    <!-- MAIN NAVIGATION BUTTONS -->
-    <div class="navigation-buttons">
-      <RouterLink to="/study-programs">
-        <button class="base-button">
-          Study Programs
-        </button>
-      </RouterLink>
+        <p>
+          Use the navigation bar above to move between sections.
+          Your access level determines which features are available to you.
+        </p>
+      </div>
 
-      <RouterLink to="/courses">
-        <button class="base-button">
-          Courses
-        </button>
-      </RouterLink>
+      <!-- MAIN NAVIGATION BUTTONS -->
+      <div class="navigation-buttons">
+        <RouterLink to="/study-programs">
+          <button class="base-button">
+            Study Programs
+          </button>
+        </RouterLink>
+
+        <RouterLink to="/courses">
+          <button class="base-button">
+            Courses
+          </button>
+        </RouterLink>
+      </div>
     </div>
 
     <p v-if="host">
@@ -88,10 +90,7 @@ watchEffect(async () => {
 </script>
 
 <style scoped>
-.home-page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+ .home-page {
   text-align: center;
 }
 

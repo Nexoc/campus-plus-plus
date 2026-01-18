@@ -1,30 +1,32 @@
 <template>
-  <div class="account-page">
-    <h1>Account</h1>
+  <div class="detail-page">
+    <div class="page-card account-page">
+      <h1>Account</h1>
 
-    <!-- User info -->
-    <div class="account-card">
-      <div class="account-row">
-        <span class="account-label">Email</span>
-        <span class="account-value">{{ user.email }}</span>
+      <!-- User info -->
+      <div class="account-card">
+        <div class="account-row">
+          <span class="account-label">Email</span>
+          <span class="account-value">{{ user.email }}</span>
+        </div>
+
+        <div class="account-row">
+          <span class="account-label">Nickname</span>
+          <span class="account-value">
+            {{ user.nickname || '—' }}
+          </span>
+        </div>
       </div>
 
-      <div class="account-row">
-        <span class="account-label">Nickname</span>
-        <span class="account-value">
-          {{ user.nickname || '—' }}
-        </span>
+      <!-- Actions -->
+      <div class="account-actions">
+        <router-link
+          class="base-button"
+          to="/account/change-password"
+        >
+          Change password
+        </router-link>
       </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="account-actions">
-      <router-link
-        class="base-button"
-        to="/account/change-password"
-      >
-        Change password
-      </router-link>
     </div>
   </div>
 </template>

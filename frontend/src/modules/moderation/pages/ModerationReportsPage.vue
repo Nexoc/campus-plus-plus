@@ -1,18 +1,19 @@
 <template>
-  <div class="moderation-reports">
-    <div class="header">
-      <h1>Review Moderation</h1>
-      <p class="subtitle">Manage reported reviews and take moderation actions</p>
-    </div>
+  <div class="detail-page">
+    <div class="page-card">
+      <div class="header">
+        <h1>Review Moderation</h1>
+        <p class="subtitle">Manage reported reviews and take moderation actions</p>
+      </div>
 
-    <!-- Status Filter -->
-    <div class="filter-section">
-      <label for="status-filter">Filter by status:</label>
-      <select id="status-filter" v-model="selectedStatus" @change="loadReports" class="status-select">
-        <option value="PENDING">Pending</option>
-        <option value="EDITED">Edited</option>
-        <option value="RESOLVED">Resolved</option>
-        <option value="REJECTED">Rejected</option>
+      <!-- Status Filter -->
+      <div class="filter-section">
+        <label for="status-filter">Filter by status:</label>
+        <select id="status-filter" v-model="selectedStatus" @change="loadReports" class="status-select">
+          <option value="PENDING">Pending</option>
+          <option value="EDITED">Edited</option>
+          <option value="RESOLVED">Resolved</option>
+          <option value="REJECTED">Rejected</option>
       </select>
     </div>
 
@@ -192,6 +193,7 @@
         {{ successMessage }}
       </div>
     </Teleport>
+    </div>
   </div>
 </template>
 
@@ -330,9 +332,8 @@ async function confirmModeration() {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  background: #1a1a1a;
-  color: #ffffff;
-  min-height: 100vh;
+  background: transparent;
+  color: var(--color-text);
 }
 
 .header {
@@ -342,12 +343,12 @@ async function confirmModeration() {
 .header h1 {
   margin: 0 0 0.5rem 0;
   font-size: 2rem;
-  color: #ffffff;
+  color: var(--color-text);
 }
 
 .subtitle {
   margin: 0;
-  color: #aaaaaa;
+  color: var(--color-text-muted);
   font-size: 1rem;
 }
 
@@ -360,29 +361,29 @@ async function confirmModeration() {
 
 .filter-section label {
   font-weight: 500;
-  color: #ffffff;
+  color: var(--color-text);
 }
 
 .status-select {
   padding: 0.5rem 1rem;
-  background: #2a2a2a;
-  border: 1px solid #333;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
-  color: #ffffff;
+  color: var(--color-text);
   font-size: 1rem;
   cursor: pointer;
 }
 
 .status-select:focus {
   outline: none;
-  border-color: #4a9eff;
+  border-color: var(--color-primary);
 }
 
 .loading,
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: #aaaaaa;
+  color: var(--color-text-muted);
   font-size: 1.1rem;
 }
 
@@ -416,8 +417,8 @@ async function confirmModeration() {
 }
 
 .report-card {
-  background: #2a2a2a;
-  border: 1px solid #333;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 1.5rem;
 }
@@ -428,12 +429,12 @@ async function confirmModeration() {
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .report-id {
   font-family: monospace;
-  color: #aaaaaa;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
@@ -473,18 +474,18 @@ async function confirmModeration() {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
-  color: #ffffff;
+  color: var(--color-text);
 }
 
 .detail-row strong {
   min-width: 120px;
-  color: #aaaaaa;
+  color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
 .user-id {
   font-family: monospace;
-  color: #888;
+  color: var(--color-text-muted);
   font-size: 0.9em;
 }
 
@@ -518,8 +519,8 @@ async function confirmModeration() {
 }
 
 .report-message-section {
-  background: #252525;
-  border: 1px solid #3a3a3a;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 1rem;
   margin-top: 1rem;
@@ -528,12 +529,12 @@ async function confirmModeration() {
 .report-message-section h3 {
   margin: 0 0 0.75rem 0;
   font-size: 1rem;
-  color: #ffffff;
+  color: var(--color-text);
 }
 
 .report-message-content p {
   margin: 0;
-  color: #ffffff;
+  color: var(--color-text);
   line-height: 1.6;
 }
 
@@ -543,8 +544,8 @@ async function confirmModeration() {
 }
 
 .review-summary {
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 1rem;
   margin-top: 1rem;
@@ -552,7 +553,7 @@ async function confirmModeration() {
 
 .review-author {
   margin-bottom: 0.75rem;
-  color: #ffffff;
+  color: var(--color-text);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -560,7 +561,7 @@ async function confirmModeration() {
 }
 
 .review-author strong {
-  color: #aaaaaa;
+  color: var(--color-text-muted);
 }
 
 .edited-badge {

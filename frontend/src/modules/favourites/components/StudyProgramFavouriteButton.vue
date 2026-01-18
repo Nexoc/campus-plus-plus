@@ -78,7 +78,7 @@ async function toggleFavourite() {
   justify-content: center;
   gap: 8px;
   padding: 10px 20px;
-  background: white;
+  background: var(--color-surface);
   border: 2px solid var(--star-color, #fbbf24);
   border-radius: 25px;
   cursor: pointer;
@@ -92,7 +92,7 @@ async function toggleFavourite() {
 
 .favourite-button:hover:not(:disabled) {
   background: var(--star-color, #fbbf24);
-  color: white;
+  color: var(--color-surface);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
 }
@@ -104,7 +104,7 @@ async function toggleFavourite() {
 
 .favourite-button--active {
   background: var(--star-color, #fbbf24);
-  color: white;
+  color: var(--color-surface);
   border-color: var(--star-color, #fbbf24);
 }
 
