@@ -8,14 +8,16 @@
 
       <!-- Status Filter -->
       <div class="filter-section">
-        <label for="status-filter">Filter by status:</label>
-        <select id="status-filter" v-model="selectedStatus" @change="loadReports" class="status-select">
-          <option value="PENDING">Pending</option>
-          <option value="EDITED">Edited</option>
-          <option value="RESOLVED">Resolved</option>
-          <option value="REJECTED">Rejected</option>
-      </select>
-    </div>
+        <div class="filter-group">
+          <label for="status-filter">Filter by status:</label>
+          <select id="status-filter" v-model="selectedStatus" @change="loadReports" class="status-select">
+            <option value="PENDING">Pending</option>
+            <option value="EDITED">Edited</option>
+            <option value="RESOLVED">Resolved</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </div>
+      </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="loading">

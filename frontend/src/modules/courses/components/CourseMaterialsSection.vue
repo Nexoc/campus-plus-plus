@@ -234,9 +234,10 @@ onMounted(loadMaterials)
 
 .material-item {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: stretch;
+  gap: 12px;
 
   padding: 12px 14px;
   margin-bottom: 10px;
@@ -244,6 +245,13 @@ onMounted(loadMaterials)
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   background: #fafafa;
+}
+
+@media (min-width: 640px) {
+  .material-item {
+    flex-direction: row;
+    align-items: flex-start;
+  }
 }
 
 :root[data-theme='dark'] .material-item {
@@ -254,17 +262,26 @@ onMounted(loadMaterials)
 .material-main {
   flex: 1;
   min-width: 0;
+  order: 1;
+}
+
+@media (max-width: 639px) {
+  .material-main {
+    order: 2;
+  }
 }
 
 .material-main strong {
-  display: block;
+  display: inline;
   font-weight: 600;
   word-break: break-word;
+  margin-right: 8px;
 }
 
 .material-main span {
   color: #555;
   font-size: 0.95rem;
+  display: inline;
 }
 
 :root[data-theme='dark'] .material-main span {
@@ -298,6 +315,15 @@ onMounted(loadMaterials)
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+  order: 1;
+  justify-content: flex-start;
+}
+
+@media (min-width: 640px) {
+  .material-actions {
+    order: 2;
+    justify-content: flex-end;
+  }
 }
 
 .material-actions button {

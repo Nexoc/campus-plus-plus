@@ -10,19 +10,25 @@
           />
         </router-link>
       </div>
-
-      <div class="navbar__main-links">
-        <router-link to="/">Home</router-link>
-        <router-link to="/programs">Study Programs</router-link>
-        <router-link to="/courses">Courses</router-link>
-        <router-link v-if="isAuthenticated" to="/favourites" class="navbar__favourites">
-          <StarIcon :size="18" :filled="false" />
-          <span>Favourites</span>
-        </router-link>
-      </div>
     </div>
 
-    <div class="navbar__right">
+    <button class="navbar__burger" :class="{ open: menuOpen }" @click="toggleMenu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div class="navbar__main-links" :class="{ open: menuOpen }">
+      <router-link to="/" @click="menuOpen = false">Home</router-link>
+      <router-link to="/programs" @click="menuOpen = false">Study Programs</router-link>
+      <router-link to="/courses" @click="menuOpen = false">Courses</router-link>
+      <router-link v-if="isAuthenticated" to="/favourites" @click="menuOpen = false">
+        <StarIcon :size="18" :filled="false" />
+        <span>Favourites</span>
+      </router-link>
+    </div>
+
+    <div class="navbar__right" :class="{ open: menuOpen }">
       <!-- Guest -->
       <template v-if="!isAuthenticated">
         <router-link to="/login">Login</router-link>
@@ -103,6 +109,21 @@ const theme = ref(getTheme())
 function onToggleTheme(): void {
   theme.value = toggleTheme()
 }
+
+/* --------------------------------------------------
+   MOBILE MENU
+-------------------------------------------------- */
+
+const menuOpen = ref(false)
+
+function toggleMenu(): void {
+  menuOpen.value = !menuOpen.value
+}
+
+// Close menu when route changes
+watch(() => route.path, () => {
+  menuOpen.value = false
+})
 
 /* --------------------------------------------------
    PENDING REPORTS COUNT (FR-S-4)

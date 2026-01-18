@@ -32,7 +32,7 @@
 
       <!-- MAIN NAVIGATION BUTTONS -->
       <div class="navigation-buttons">
-        <RouterLink to="/study-programs">
+        <RouterLink to="/programs">
           <button class="base-button">
             Study Programs
           </button>

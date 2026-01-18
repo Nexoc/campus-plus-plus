@@ -22,6 +22,9 @@ const filterTotalEcts = ref('')
 const filterMode = ref('')
 const filterLanguage = ref('')
 
+// Collapsible filters for mobile
+const filtersExpanded = ref(false)
+
 // Template refs for input fields
 const nameInputRef = ref<HTMLInputElement | null>(null)
 const degreeInputRef = ref<HTMLInputElement | null>(null)
@@ -199,8 +202,110 @@ onMounted(load)
         </button>
       </div>
 
-      <div class="filters-actions">
-        <button class="base-button small" @click="clearAllFilters">Clear all filters</button>
+      <button 
+        class="filters-toggle" 
+        :class="{ collapsed: !filtersExpanded }"
+        @click="filtersExpanded = !filtersExpanded"
+      >
+        Filters
+      </button>
+
+      <div class="filter-section" :class="{ expanded: filtersExpanded }">
+        <div class="filters-row">
+          <div class="filter-group">
+            <label for="filter-name">Name</label>
+            <input
+              id="filter-name"
+              ref="nameInputRef"
+              v-model="filterName"
+              type="text"
+              placeholder="Filter name"
+              list="names-list"
+            />
+            <datalist id="names-list">
+              <option v-for="name in uniqueNames" :key="name" :value="name" />
+            </datalist>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-degree">Degree</label>
+            <input
+              id="filter-degree"
+              ref="degreeInputRef"
+              v-model="filterDegree"
+              type="text"
+              placeholder="Filter degree"
+              list="degrees-list"
+            />
+            <datalist id="degrees-list">
+              <option v-for="deg in uniqueDegrees" :key="deg" :value="deg" />
+            </datalist>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-semesters">Semesters</label>
+            <input
+              id="filter-semesters"
+              ref="semestersInputRef"
+              v-model="filterSemesters"
+              type="number"
+              min="0"
+              placeholder="Semesters"
+              list="semesters-list"
+            />
+            <datalist id="semesters-list">
+              <option v-for="sem in uniqueSemesterCounts" :key="sem" :value="sem" />
+            </datalist>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-total-ects">Total ECTS</label>
+            <input
+              id="filter-total-ects"
+              ref="totalEctsInputRef"
+              v-model="filterTotalEcts"
+              type="number"
+              min="0"
+              placeholder="Total ECTS"
+              list="total-ects-list"
+            />
+            <datalist id="total-ects-list">
+              <option v-for="ect in uniqueTotalEcts" :key="ect" :value="ect" />
+            </datalist>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-mode">Mode</label>
+            <input
+              id="filter-mode"
+              ref="modeInputRef"
+              v-model="filterMode"
+              type="text"
+              placeholder="Mode"
+              list="modes-list"
+            />
+            <datalist id="modes-list">
+              <option v-for="m in uniqueModes" :key="m" :value="m" />
+            </datalist>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-language">Language</label>
+            <input
+              id="filter-language"
+              ref="languageInputRef"
+              v-model="filterLanguage"
+              type="text"
+              placeholder="Language"
+              list="language-list"
+            />
+            <datalist id="language-list">
+              <option v-for="lang in uniqueLanguages" :key="lang" :value="lang" />
+            </datalist>
+          </div>
+
+          <button class="base-button small clear-filters-btn" @click="clearAllFilters">Clear all filters</button>
+        </div>
       </div>
 
       <div class="results-info">
@@ -216,96 +321,6 @@ onMounted(load)
         :sortOrder="sortOrder"
         @sort="toggleSort"
       >
-        <template #th-name>
-          <div class="th-cell">
-            <div class="th-label">
-              Name
-              <span v-if="sortBy === 'name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-            </div>
-            <div class="filter-group">
-              <input ref="nameInputRef" v-model="filterName" type="text" placeholder="Filter name" class="th-filter" list="names-list" @click.stop />
-              <datalist id="names-list">
-                <option v-for="name in uniqueNames" :key="name" :value="name" />
-              </datalist>
-              <button v-if="filterName" class="clear-filter" @click.stop="filterName=''; onFiltersChange()">×</button>
-            </div>
-          </div>
-        </template>
-        <template #th-degree>
-          <div class="th-cell">
-            <div class="th-label">
-              Degree
-              <span v-if="sortBy === 'degree'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-            </div>
-            <div class="filter-group">
-              <input ref="degreeInputRef" v-model="filterDegree" type="text" placeholder="Degree" class="th-filter" list="degrees-list" @click.stop />
-              <datalist id="degrees-list">
-                <option v-for="deg in uniqueDegrees" :key="deg" :value="deg" />
-              </datalist>
-              <button v-if="filterDegree" class="clear-filter" @click.stop="filterDegree=''; onFiltersChange()">×</button>
-            </div>
-          </div>
-        </template>
-        <template #th-semesters>
-          <div class="th-cell">
-            <div class="th-label">
-              Semesters
-              <span v-if="sortBy === 'semesters'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-            </div>
-            <div class="filter-group">
-              <input ref="semestersInputRef" v-model="filterSemesters" type="number" min="0" placeholder="Semesters" class="th-filter th-filter-number" list="semesters-list" @click.stop />
-              <datalist id="semesters-list">
-                <option v-for="sem in uniqueSemesterCounts" :key="sem" :value="sem" />
-              </datalist>
-              <button v-if="filterSemesters" class="clear-filter clear-filter-number" @click.stop="filterSemesters=''; onFiltersChange()">×</button>
-            </div>
-          </div>
-        </template>
-        <template #th-totalEcts>
-          <div class="th-cell">
-            <div class="th-label">
-              Total ECTS
-              <span v-if="sortBy === 'totalEcts'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-            </div>
-            <div class="filter-group">
-              <input ref="totalEctsInputRef" v-model="filterTotalEcts" type="number" min="0" placeholder="ECTS" class="th-filter th-filter-number" list="total-ects-list" @click.stop />
-              <datalist id="total-ects-list">
-                <option v-for="ect in uniqueTotalEcts" :key="ect" :value="ect" />
-              </datalist>
-              <button v-if="filterTotalEcts" class="clear-filter clear-filter-number" @click.stop="filterTotalEcts=''; onFiltersChange()">×</button>
-            </div>
-          </div>
-        </template>
-        <template #th-mode>
-          <div class="th-cell">
-            <div class="th-label">
-              Mode
-              <span v-if="sortBy === 'mode'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-            </div>
-            <div class="filter-group">
-              <input ref="modeInputRef" v-model="filterMode" type="text" placeholder="Mode" class="th-filter" list="modes-list" @click.stop />
-              <datalist id="modes-list">
-                <option v-for="m in uniqueModes" :key="m" :value="m" />
-              </datalist>
-              <button v-if="filterMode" class="clear-filter" @click.stop="filterMode=''; onFiltersChange()">×</button>
-            </div>
-          </div>
-        </template>
-        <template #th-language>
-          <div class="th-cell">
-            <div class="th-label">
-              Language
-              <span v-if="sortBy === 'language'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-            </div>
-            <div class="filter-group">
-              <input ref="languageInputRef" v-model="filterLanguage" type="text" placeholder="Language" class="th-filter" list="language-list" @click.stop />
-              <datalist id="language-list">
-                <option v-for="lang in uniqueLanguages" :key="lang" :value="lang" />
-              </datalist>
-              <button v-if="filterLanguage" class="clear-filter" @click.stop="filterLanguage=''; onFiltersChange()">×</button>
-            </div>
-          </div>
-        </template>
         <template #name="{ row }">
           <div class="title-with-star">
             <StarIcon 
